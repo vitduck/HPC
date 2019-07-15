@@ -12,10 +12,10 @@ has 'select' => (
 has 'ncpus' => ( 
     is      => 'rw',
     isa     => 'Int', 
-    default => 64,
+    default => 1,
     trigger => sub { 
         my $self = shift; 
-        $self->clear_mpiprocs; 
+        $self->_reset_mpiprocs; 
         $self->mpiprocs; 
     } 
 ); 
@@ -28,7 +28,7 @@ has 'mpiprocs' => (
         my $self = shift; 
         return $self->ncpus / $self->ompthreads
     }, 
-    clearer => 'clear_mpiprocs'
+    clearer => '_reset_mpiprocs'
 ); 
 
 has 'ompthreads' => (
@@ -37,7 +37,7 @@ has 'ompthreads' => (
     default => 1,
     trigger => sub { 
         my $self = shift; 
-        $self->clear_mpiprocs; 
+        $self->_reset_mpiprocs; 
         $self->mpiprocs; 
     }
 );

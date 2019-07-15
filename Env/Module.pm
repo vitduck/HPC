@@ -24,7 +24,10 @@ sub load {
     for my $module (@modules) { 
         $self->_add_module ($module); 
         $self->_load_module($module); 
-        $self->_load_mpi($module) if $module =~ /(impi|openmpi|mvapich2)/; 
+        if ( $module =~ /(impi|openmpi|mvapich2)/ ) {  
+            my $method = "_load_$1"; 
+            $self->$method($module)
+        }
     }
 }
 
@@ -37,7 +40,11 @@ sub unload {
         if ($index) { 
             $self->_delete_module($index); 
             $self->_unload_module($module); 
-            $self->_unload_mpi if $module =~ /(impi|openmpi|mvapich2)/; 
+            $self->_unload_impi($module) if $module =~ /impi/; 
+            if ( $module =~ /(impi|openmpi|mvapich2)/ ) {  
+                my $method = "_unload_$1"; 
+                $self->$method($module)
+            }
         }
     }
 }

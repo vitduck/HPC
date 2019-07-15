@@ -18,7 +18,7 @@ has 'pbs' => (
     init_arg => undef,
     trigger  => sub { 
         my $self = shift; 
-        $self->clear_io; 
+        $self->_clear_io; 
         $self->io($self->pbs); 
         $self->_write_pbs; 
     }
@@ -29,7 +29,7 @@ has 'io' => (
     isa      => 'IO',
     init_arg => undef,
     coerce   => 1, 
-    clearer  => 'clear_io', 
+    clearer  => '_clear_io', 
     handles  => [qw(print printf)], 
 ); 
 

@@ -4,11 +4,21 @@ use Moose;
 use Moose::Util::TypeConstraints; 
 use namespace::autoclean;
 
-with qw( 
-    HPC::Env::Module
-    HPC::PBS::MPI 
-    HPC::PBS::Qsub
+with 'HPC::Env::Module'; 
+with 'HPC::PBS::Qsub'; 
+with 'HPC::MPI::Types'; 
+with 'HPC::MPI::Parameterized' => { mpi => 'impi'     };  
+with 'HPC::MPI::Parameterized' => { mpi => 'openmpi'  };  
+with 'HPC::MPI::Parameterized' => { mpi => 'mvapich2' };  
+
+has '+impi' => ( 
+    handles => [qw(enable_debug)]
 ); 
+
+has '+openmpi' => ( 
+    handles => [qw(affinity)]
+); 
+
 
 sub BUILD {  
     my $self = shift; 

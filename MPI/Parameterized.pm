@@ -14,16 +14,16 @@ parameter 'mpi' => (
 
 role { 
     my $mpi   = shift->mpi; 
-    my $class = "HPC::MPI::" . uc($mpi); 
+    my $type  = uc($mpi); 
 
     has $mpi => ( 
         is        => 'rw',
-        isa       => $class,
+        isa       => $type,
         init_arg  => undef,
-        lazy      => 1, 
-        reader    => "_load_$mpi", 
+        predicate => "has_$mpi", 
+        writer    => "_load_$mpi", 
         clearer   => "_unload_$mpi", 
-        default   => sub ( $self ) { $class->new }
+        coerce    => 1,
     ) 
 }; 
 

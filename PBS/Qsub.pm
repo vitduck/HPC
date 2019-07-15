@@ -2,8 +2,8 @@ package HPC::PBS::Qsub;
 
 use Moose::Role; 
 
-with 'HPC::PBS::Resource'; 
 with 'HPC::PBS::IO'; 
+with 'HPC::PBS::Resource'; 
 
 has 'shell' => ( 
     is       => 'rw', 
