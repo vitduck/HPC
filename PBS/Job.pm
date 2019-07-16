@@ -18,10 +18,24 @@ with 'HPC::PBS::MPI'=> { mpi => 'impi' };
 with 'HPC::PBS::MPI'=> { mpi => 'openmpi' };  
 with 'HPC::PBS::MPI'=> { mpi => 'mvapich2' };  
 
+has 'cmd' => (
+    is      => 'rw',
+    traits  => ['Array'],
+    isa     => 'ArrayRef[Str]',
+    lazy    => 1, 
+    default => sub {['cd $PBS_O_WORKDIR']},
+    handles => {
+         add_cmd => 'push',
+        list_cmd => 'elements', 
+    }, 
+    clearer => 'new_cmd', 
+);
+
 sub BUILD {
     my $self = shift; 
 
     $self->initialize; 
+    $self->cmd; 
 } 
 
 sub qsub {

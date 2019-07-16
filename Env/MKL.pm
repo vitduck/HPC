@@ -5,7 +5,7 @@ use Capture::Tiny 'capture_stderr';
 use Env::Modify 'source'; 
 use IO::String; 
 
-sub load_mkl { 
+sub source_mkl { 
     my ( $self, $intel) = @_; 
 
     my $io = IO::String->new(
@@ -16,13 +16,13 @@ sub load_mkl {
         if (/MKLROOT/) { 
             my $mklroot = (split)[-1];
             source("$mklroot/bin/mklvars.sh", 'intel64'); 
-            return
+            last; 
         } 
     }
 }
 
-sub unload_mkl { 
-    my $self = shift; 
+sub unsource_mkl { 
+    my ($self,$module) = @_; 
 
     $ENV{LD_LIBRARY_PATH} = 
         join ":", 

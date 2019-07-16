@@ -15,6 +15,7 @@ has 'modules' => (
     builder  => '_build_modules', 
     handles  => { 
         list_module    => 'elements', 
+        find_module    => 'first',
         _add_module    => 'push', 
         _index_module  => 'first_index', 
         _delete_module => 'delete'
@@ -57,7 +58,6 @@ sub unload {
         if ($index) { 
             $self->_delete_module($index); 
             $self->_unload_module($module); 
-            $self->_unload_impi($module) if $module =~ /impi/; 
             if ( $module =~ /(impi|openmpi|mvapich2)/ ) {  
                 my $method = "_unload_$1"; 
                 $self->$method($module); 
@@ -113,11 +113,12 @@ sub _unload_module {
 }
 
 # rebuild cached ld_library_path
-after [qw(load load_mkl load_impi unload unload_mkl unload_impi)] => sub { 
+after [qw(load unload source_mkl unsource_mkl source_impi unsource_impi)] => sub { 
     my $self = shift; 
 
     $self->_clear_ld_library_path; 
     $self->_ld_library_path; 
 }; 
 
-1; 
+
+1

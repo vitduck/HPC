@@ -102,17 +102,6 @@ has 'bin' => (
     }
 ); 
 
-has 'cmd' => (
-    is       => 'rw',
-    traits   => ['Array'],
-    isa      => 'ArrayRef[Str]',
-    default  => sub {[]},
-    handles  => {
-         add_cmd => 'push',
-        list_cmd => 'elements', 
-         new_cmd => 'clear'
-    }, 
-);
 
 has 'mpirun' => ( 
     is       => 'rw', 
@@ -122,12 +111,6 @@ has 'mpirun' => (
     builder  => '_build_mpirun', 
     clearer  => '_reset_mpirun', 
 ); 
-
-after new_cmd => sub { 
-    my $self = shift; 
-    
-    $self->add_cmd('cd $PBS_O_WORKDIR'); 
-}; 
 
 sub _build_mpirun { 
     my $self = shift; 
