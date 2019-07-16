@@ -1,9 +1,7 @@
 package HPC::PBS::Qsub; 
 
 use Moose::Role; 
-
-with 'HPC::PBS::IO'; 
-with 'HPC::PBS::Resource'; 
+use feature 'switch'; 
 
 has 'shell' => ( 
     is       => 'rw', 
@@ -26,69 +24,116 @@ has 'project' => (
 ); 
 
 has 'account' => ( 
-    is       => 'ro', 
+    is       => 'rw', 
     isa      => 'Str',
     default  => 'etc',
 ); 
 
 has 'queue' => ( 
-    is       => 'ro', 
+    is       => 'rw', 
     isa      => 'Str',
     default  => 'normal'
 ); 
 
 has 'name' => ( 
-    is       => 'ro', 
+    is       => 'rw', 
     isa      => 'Str',
     default  => 'jobname'
+); 
+
+has 'select' => (
+    is       => 'rw',
+    isa      => 'Int',
+    default  => 1,
+);
+
+has 'ncpus' => (
+    is      => 'rw',
+    isa     => 'Int',
+    default => 1,
+    trigger => sub {
+        my $self = shift;
+        $self->_reset_mpiprocs;
+        $self->mpiprocs;
+    }
+);
+
+has 'mpiprocs' => (
+    is      => 'rw',
+    isa     => 'Int',
+    lazy    => 1,
+    default => sub {
+        my $self = shift;
+        return $self->ncpus / $self->ompthreads
+    },
+    clearer => '_reset_mpiprocs'
+);
+
+has 'ompthreads' => (
+    is      => 'rw',
+    isa     => 'Int',
+    default => 1,
+    trigger => sub {
+        my $self = shift;
+
+        # recalculate mpiprocs 
+        $self->_reset_mpiprocs;
+        $self->mpiprocs;
+
+        # rebuild mpirun 
+        $self->_reset_mpirun; 
+    }
+);
+
+has 'walltime' => (
+    is      => 'rw',
+    isa     => 'Str',
+    default => '48:00:00',
+);
+
+has 'bin' => (
+    is      => 'rw',
+    isa     => 'Str',
+    trigger => sub { 
+        my $self= shift; 
+
+        $self->_reset_mpirun; 
+        $self->_reset_cmd; 
+    }
 ); 
 
 has 'cmd' => (
     is       => 'rw',
     traits   => ['Array'],
     isa      => 'ArrayRef[Str]',
-    default  => sub {[]},   
-    handles  => { 
-        add_cmd  => 'push', 
-        list_cmd => 'elements'
+    default  => sub {[]},
+    handles  => {
+           add_cmd => 'push',
+          list_cmd => 'elements', 
+        _reset_cmd => 'clear'
     }
 );
 
-sub _write_pbs { 
+has 'mpirun' => ( 
+    is       => 'rw', 
+    isa      => 'Str',
+    lazy     => 1, 
+    init_arg => undef, 
+    builder  => '_build_mpirun', 
+    clearer  => '_reset_mpirun', 
+); 
+
+sub _build_mpirun { 
     my $self = shift; 
 
-    # shell 
-    $self->printf("%s\n", $self->shell); 
-    $self->printf("\n"); 
+    my $mpirun = 
+        $self->has_impi      ? 'mpirun' : 
+        $self->has_openmpi   ? $self->openmpi->mpirun ($self->ompthreads) : 
+        $self->has_mvapich2  ? $self->mvapich2->mpirun($self->select, $self->ncpus, $self->ompthreads) : 
+        undef; 
 
-    #  pbs header
-    $self->printf("#PBS -V\n"); 
-    $self->printf("#PBS -A %s\n", $self->account); 
-    $self->printf("#PBS -P %s\n", $self->project); 
-    $self->printf("#PBS -q %s\n", $self->queue); 
-    $self->printf("#PBS -N %s\n", $self->name); 
-
-    # resource 
-    $self->printf(
-        "#PBS -l select=%d:ncpus=%d:mpiprocs=%d:ompthreads=%d\n", 
-        $self->select, 
-        $self->ncpus, 
-        $self->mpiprocs,
-        $self->ompthreads
-    ); 
-    $self->printf("#PBS -l walltime=%s\n", $self->walltime); 
-    $self->printf("\n"); 
-
-    # command 
-    for my $cmd ($self->list_cmd) { 
-        $self->printf("$cmd\n"); 
-    } 
-} 
-
-sub qsub { 
-    my $self = shift; 
-
-    system 'qsub', $self->pbs; 
+    return 
+        $mpirun ? join ' ', $mpirun, $self->bin : $self->bin
 } 
 
 1

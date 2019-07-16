@@ -26,7 +26,8 @@ sub load {
         $self->_load_module($module); 
         if ( $module =~ /(impi|openmpi|mvapich2)/ ) {  
             my $method = "_load_$1"; 
-            $self->$method($module)
+            $self->$method($module); 
+            $self->mpirun; 
         }
     }
 }
@@ -43,7 +44,8 @@ sub unload {
             $self->_unload_impi($module) if $module =~ /impi/; 
             if ( $module =~ /(impi|openmpi|mvapich2)/ ) {  
                 my $method = "_unload_$1"; 
-                $self->$method($module)
+                $self->$method($module); 
+                $self->_reset_mpirun; 
             }
         }
     }

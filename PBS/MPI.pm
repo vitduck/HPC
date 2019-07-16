@@ -1,11 +1,7 @@
-package HPC::MPI::Parameterized; 
+package HPC::PBS::MPI; 
 
 use MooseX::Role::Parameterized; 
 use signatures; 
-
-use HPC::MPI::IMPI; 
-use HPC::MPI::OPENMPI; 
-use HPC::MPI::MVAPICH2; 
 
 parameter 'mpi' => ( 
     isa      => 'Str',  
@@ -24,6 +20,11 @@ role {
         writer    => "_load_$mpi", 
         clearer   => "_unload_$mpi", 
         coerce    => 1,
+        handles   => (
+            $mpi eq 'impi'    ? [ qw(impi_debug) ] : 
+            $mpi eq 'openmpi' ? [] : 
+            []
+        ), 
     ) 
 }; 
 
