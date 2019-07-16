@@ -9,13 +9,6 @@ has 'shell' => (
     default  => '#!/usr/bin/env bash', 
 ); 
 
-has 'exported' => ( 
-    is       => 'ro', 
-    isa      => 'Bool',
-    init_arg => undef, 
-    default  => 1, 
-); 
-
 has 'project' => ( 
     is       => 'ro', 
     isa      => 'Str',

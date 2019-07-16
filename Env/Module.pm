@@ -4,10 +4,13 @@ use Moose::Role;
 use Capture::Tiny 'capture_stderr';
 use Env::Modulecmd; 
 
+with 'HPC::Env::MKL'; 
+with 'HPC::Env::IMPI'; 
+
 has 'modules' => (   
     is       => 'rw',
-    traits   => ['Array'], 
     isa      => 'ArrayRef[Str]', 
+    traits   => ['Array'], 
     init_arg => undef, 
     builder  => '_build_modules', 
     handles  => { 
@@ -16,6 +19,19 @@ has 'modules' => (
         _index_module  => 'first_index', 
         _delete_module => 'delete'
     }
+); 
+
+has '_ld_library_path' => ( 
+    is       => 'rw',
+    isa      => 'ArrayRef[Str]', 
+    traits   => ['Array'], 
+    init_arg => undef, 
+    lazy     => 1, 
+    clearer  => '_clear_ld_library_path', 
+    builder  => '_build_ld_library_path',
+    handles  => { 
+        list_ld_library_path => 'elements'
+    } 
 ); 
 
 sub load { 
@@ -67,17 +83,21 @@ sub initialize {
 
         $self->unload($module); 
     }
+
+    $self->_ld_library_path; 
 } 
 
 sub _build_modules { 
-    my $self = shift; 
-
     return [ 
         grep !/\d+\)/, 
         grep !/Currently|Loaded|Modulefiles:/,
         split ' ',  
         capture_stderr { system 'modulecmd', 'perl', 'list' } 
     ]
+}
+
+sub _build_ld_library_path { 
+    return [ split /:/, $ENV{LD_LIBRARY_PATH} ] 
 }
 
 sub _load_module { 
@@ -91,5 +111,13 @@ sub _unload_module {
     
     Env::Modulecmd::unload($module); 
 }
+
+# rebuild cached ld_library_path
+after [qw(load load_mkl load_impi unload unload_mkl unload_impi)] => sub { 
+    my $self = shift; 
+
+    $self->_clear_ld_library_path; 
+    $self->_ld_library_path; 
+}; 
 
 1; 
