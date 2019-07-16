@@ -53,10 +53,21 @@ has 'ncpus' => (
     default => 1,
     trigger => sub {
         my $self = shift;
+
         $self->_reset_mpiprocs;
-        $self->mpiprocs;
+        $self->_reset_mpirun; 
     }
 );
+
+has 'stderr' => ( 
+    is       => 'rw', 
+    isa      => 'Str',
+); 
+
+has 'stdout' => ( 
+    is       => 'rw', 
+    isa      => 'Str',
+); 
 
 has 'mpiprocs' => (
     is      => 'rw',
@@ -64,6 +75,7 @@ has 'mpiprocs' => (
     lazy    => 1,
     default => sub {
         my $self = shift;
+
         return $self->ncpus / $self->ompthreads
     },
     clearer => '_reset_mpiprocs'
@@ -76,11 +88,7 @@ has 'ompthreads' => (
     trigger => sub {
         my $self = shift;
 
-        # recalculate mpiprocs 
         $self->_reset_mpiprocs;
-        $self->mpiprocs;
-
-        # rebuild mpirun 
         $self->_reset_mpirun; 
     }
 );
@@ -98,7 +106,6 @@ has 'bin' => (
         my $self= shift; 
 
         $self->_reset_mpirun; 
-        $self->_reset_cmd; 
     }
 ); 
 
@@ -108,10 +115,10 @@ has 'cmd' => (
     isa      => 'ArrayRef[Str]',
     default  => sub {[]},
     handles  => {
-           add_cmd => 'push',
-          list_cmd => 'elements', 
-        _reset_cmd => 'clear'
-    }
+         add_cmd => 'push',
+        list_cmd => 'elements', 
+         new_cmd => 'clear'
+    }, 
 );
 
 has 'mpirun' => ( 
@@ -122,6 +129,12 @@ has 'mpirun' => (
     builder  => '_build_mpirun', 
     clearer  => '_reset_mpirun', 
 ); 
+
+after new_cmd => sub { 
+    my $self = shift; 
+    
+    $self->add_cmd('cd $PBS_O_WORKDIR'); 
+}; 
 
 sub _build_mpirun { 
     my $self = shift; 

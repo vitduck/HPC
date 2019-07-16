@@ -8,8 +8,10 @@ use HPC::MPI::IMPI;
 use HPC::MPI::OPENMPI; 
 use HPC::MPI::MVAPICH2; 
 
+with 'MooseX::Traits'; 
 with 'HPC::Env::Module'; 
 with 'HPC::MPI::Types'; 
+with 'HPC::PBS::Debug';  
 with 'HPC::PBS::IO';  
 with 'HPC::PBS::Qsub'; 
 with 'HPC::PBS::MPI'=> { mpi => 'impi' };  
@@ -41,6 +43,10 @@ sub _write_pbs {
     $self->printf("#PBS -P %s\n", $self->project); 
     $self->printf("#PBS -q %s\n", $self->queue); 
     $self->printf("#PBS -N %s\n", $self->name); 
+
+    # optional 
+    $self->printf("#PBS -e %s\n", $self->name) if $self->stderr;  
+    $self->printf("#PBS -o %s\n", $self->name) if $self->stdout; 
 
     # resource 
     $self->printf(
