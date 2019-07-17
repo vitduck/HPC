@@ -3,7 +3,6 @@ package HPC::PBS::Debug;
 use Moose::Role; 
 
 use Data::Printer { 
-    scalar_quotes => '',
     class         => {     
         internals    => 1,  
         parents      => 0, 
