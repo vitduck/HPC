@@ -7,18 +7,9 @@ use IO::String;
 
 sub source_mkl { 
     my ( $self, $intel) = @_; 
-
-    my $io = IO::String->new(
-        capture_stderr {system 'modulecmd', 'perl', 'show', $intel}
-    ); 
-
-    for ($io->getlines) { 
-        if (/MKLROOT/) { 
-            my $mklroot = (split)[-1];
-            source("$mklroot/bin/mklvars.sh", 'intel64'); 
-            last; 
-        } 
-    }
+    
+    my $mklroot = $self->_find_mklroot($intel); 
+    source("$mklroot/bin/mklvars.sh", 'intel64'); 
 }
 
 sub unsource_mkl { 
@@ -27,6 +18,16 @@ sub unsource_mkl {
     $ENV{LD_LIBRARY_PATH} = 
         join ":", 
         grep !/linux\/(tbb|compiler|mkl)/, $self->list_ld_library_path;      
+}
+
+sub _find_mklroot { 
+    my ($self, $intel) = @_; 
+
+    my $io = IO::String->new(capture_stderr {system 'modulecmd', 'perl', 'show', $intel}); 
+    
+    for ($io->getlines) { 
+        return (split)[-1] if /MKLROOT/; 
+    }
 }
 
 1 

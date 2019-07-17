@@ -8,33 +8,9 @@ use IO::String;
 sub source_impi { 
     my ( $self, $impi ) = @_; 
 
-    my $gcc   = $self->find_module(sub {/gcc/}); 
-    my $intel = $impi =~ s/impi/intel/r; 
-    
-    # unload pre-loaded gcc module 
-    $self->unload($gcc) if $gcc;  
-    
-    # load intel and impi module 
-    $self->load($intel); 
-    $self->load($impi);  
+    my $mpihome = $self->_find_mpihome($impi); 
 
-    # find Intel MPI path 
-    my $io = IO::String->new(capture_stderr {system 'modulecmd', 'perl', 'show', $impi}); 
-    for ($io->getlines) { 
-        if (/MPIHOME/) { 
-            my $mpihome = (split)[-1];
-            source("$mpihome/bin64/mpivars.sh");  
-            last; 
-        } 
-    }
-         
-    # unload intel modules
-    $self->unload($impi); 
-    $self->unload($intel); 
-
-    # load gcc again
-    $self->load($gcc) if $gcc; 
-
+    source("$mpihome/bin64/mpivars.sh");  
    
     # manual load IMPI
     $self->_load_impi($impi); 
@@ -52,5 +28,35 @@ sub unsource_impi {
     $self->_unload_impi($impi); 
     $self->_reset_mpirun; 
 }
+
+sub _find_mpihome { 
+    my ($self, $impi) = @_; 
+    
+    # corresponding impi module
+    my $intel = $impi =~ s/impi/intel/r; 
+
+    # find currently loaded gcc 
+    my $gcc = $self->find_module(sub {/gcc/}); 
+    $self->unload($gcc); 
+
+    # load intel and impi module 
+    $self->load($intel); 
+    $self->load($impi);  
+
+    my $mpihome; 
+    my $io = IO::String->new(capture_stderr {system 'modulecmd', 'perl', 'show', $impi}); 
+    for ($io->getlines) { 
+        if (/MPIHOME/) { 
+            $mpihome =  (split)[-1]; 
+            last; 
+        }
+    }
+
+    $self->unload($impi);     
+    $self->unload($intel); 
+    $self->load($gcc); 
+
+    return $mpihome; 
+} 
 
 1 

@@ -18,8 +18,9 @@ has 'pbs' => (
     init_arg => undef,
     trigger  => sub { 
         my $self = shift; 
+
         $self->_clear_io; 
-        $self->io($self->pbs); 
+        $self->io($self->pbs);
         $self->_write_pbs; 
     }
 ); 
