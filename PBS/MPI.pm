@@ -1,31 +1,10 @@
 package HPC::PBS::MPI; 
 
-use MooseX::Role::Parameterized; 
-use signatures; 
+use Moose::Role; 
 
-parameter 'mpi' => ( 
-    isa      => 'Str',  
-    required => 1, 
-);
+with 'HPC::MPI::Parameterized' => { mpi => 'crayimpi' };  
+with 'HPC::MPI::Parameterized' => { mpi => 'impi'     };  
+with 'HPC::MPI::Parameterized' => { mpi => 'openmpi'  };  
+with 'HPC::MPI::Parameterized' => { mpi => 'mvapich2' };  
 
-role { 
-    my $mpi   = shift->mpi; 
-    my $type  = uc($mpi); 
-
-    has $mpi => ( 
-        is        => 'rw',
-        isa       => $type,
-        init_arg  => undef,
-        predicate => "has_$mpi", 
-        writer    => "_load_$mpi", 
-        clearer   => "_unload_$mpi", 
-        coerce    => 1,
-        handles   => (
-            $mpi eq 'impi'    ? [ qw(impi_debug) ] : 
-            $mpi eq 'openmpi' ? [] : 
-            []
-        ), 
-    ) 
-}; 
-
-1; 
+1 

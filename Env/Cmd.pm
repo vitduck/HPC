@@ -8,8 +8,10 @@ sub load {
     for my $module (@modules) { 
         $self->_add_module ($module); 
         $self->_load_module($module); 
-        if ( $module =~ /(impi|openmpi|mvapich2)/ ) {  
-            my $method = "_load_$1"; 
+        if ( $module =~ /(cray-impi|impi|openmpi|mvapich2)/ ) {  
+            my $method = $1 =~ s/-//r;  
+
+            $method = "_load_$method"; 
             $self->$method($module); 
             $self->mpirun; 
         }
@@ -26,7 +28,9 @@ sub unload {
             $self->_delete_module($index); 
             $self->_unload_module($module); 
             if ( $module =~ /(impi|openmpi|mvapich2)/ ) {  
-                my $method = "_unload_$1"; 
+                my $method = $1 =~ s/-//r;  
+                
+                $method = "_unload_$method"; 
                 $self->$method($module); 
                 $self->_reset_mpirun; 
             }

@@ -1,4 +1,4 @@
-package HPC::MPI::Version; 
+package HPC::MPI::Module; 
 
 use Moose::Role;  
 

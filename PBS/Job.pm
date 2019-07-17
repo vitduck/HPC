@@ -7,6 +7,7 @@ use namespace::autoclean;
 use HPC::MPI::IMPI; 
 use HPC::MPI::OPENMPI; 
 use HPC::MPI::MVAPICH2; 
+use HPC::MPI::CRAYIMPI; 
 
 with 'MooseX::Traits'; 
 with 'HPC::Env::Module'; 
@@ -14,9 +15,7 @@ with 'HPC::MPI::Types';
 with 'HPC::PBS::Debug';  
 with 'HPC::PBS::IO';  
 with 'HPC::PBS::Qsub'; 
-with 'HPC::PBS::MPI'=> { mpi => 'impi' };  
-with 'HPC::PBS::MPI'=> { mpi => 'openmpi' };  
-with 'HPC::PBS::MPI'=> { mpi => 'mvapich2' };  
+with 'HPC::PBS::MPI'; 
 
 has 'cmd' => (
     is      => 'rw',

@@ -3,7 +3,7 @@ package HPC::MPI::MVAPICH2;
 use Moose; 
 use namespace::autoclean; 
 
-with 'HPC::MPI::Version'; 
+with 'HPC::MPI::Module'; 
 
 sub mpirun { 
     my ($self, $select, $ncpus, $ompthreads) = @_; 
