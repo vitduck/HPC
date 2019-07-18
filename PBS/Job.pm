@@ -4,11 +4,13 @@ use Moose;
 use namespace::autoclean;
 
 with qw( 
+    MooseX::Traits
     HPC::Env::Module
-    HPC::PBS::Debug  
-    HPC::PBS::IO 
+    HPC::PBS::Debug 
+    HPC::PBS::FH 
     HPC::PBS::MPI 
     HPC::PBS::Qsub
+    HPC::PBS::App
 ); 
 
 has 'cmd' => (
@@ -17,17 +19,27 @@ has 'cmd' => (
     isa     => 'ArrayRef[Str]',
     lazy    => 1, 
     default => sub {['cd $PBS_O_WORKDIR']},
-    handles => {
-         add_cmd => 'push',
-        list_cmd => 'elements', 
+    handles => { 
+        _add_cmd  => 'push',
+        _list_cmd => 'elements' 
     }, 
     clearer => '_reset_cmd', 
 );
 
+sub add_cmd { 
+    my ($self, @args) = @_; 
+
+    $self->_add_cmd(
+        @args == 1 ? 
+        @args : 
+        join ' ', @args
+    )
+} 
+
 sub qsub {
     my $self = shift; 
 
-    system 'qsub', $self->pbs; 
+    system 'qsub', $self->script;  
 } 
 
 sub BUILD {

@@ -1,17 +1,17 @@
 package HPC::MPI::MVAPICH2;  
 
-use Moose; 
+use Moose::Role; 
 
 sub mpirun { 
-    my ($self, $select, $ncpus, $ompthreads) = @_; 
+    my ($self, $select, $ncpus, $omp) = @_; 
 
     my $nprocs = $select * $ncpus; 
     my $mpirun = "mpirun_rsh -np $nprocs -hostfile \$PBS_NODEFILE"; 
     
     return 
-        $ompthreads == 1 ? 
+        $omp == 1 ? 
         $mpirun:
-        "$mpirun OMP_NUM_THREADS=$ompthreads"
+        "$mpirun OMP_NUM_THREADS=$omp"
 } 
 
 1; 

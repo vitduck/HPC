@@ -1,4 +1,4 @@
-package HPC::PBS::IO; 
+package HPC::PBS::FH; 
 
 use Moose::Role; 
 use Moose::Util::TypeConstraints;
@@ -12,17 +12,32 @@ coerce 'HPC::PBS::Types::IO'
     => from 'Str'
     => via { return IO::File->new($_, 'w') }; 
 
-has 'pbs' => (
+has 'script' => (
+    is       => 'rw',
+    isa      => 'Str',
+    init_arg => undef,
+    writer   => 'write_script',
+    trigger  => sub { 
+        my $self = shift; 
+
+        $self->fh($self->script); 
+    } 
+); 
+
+has 'fh' => (
     is       => 'rw',
     isa      => 'HPC::PBS::Types::IO',
     init_arg => undef,
     coerce   => 1, 
-    writer   => 'set_pbs',
     handles  => [qw(print printf)], 
-    trigger  => sub { shift->_write_pbs }
+    trigger  => sub { 
+        my $self = shift; 
+
+        $self->_write_script; 
+    }
 ); 
 
-sub _write_pbs { 
+sub _write_script { 
     my $self = shift; 
 
     # shell 
@@ -37,8 +52,8 @@ sub _write_pbs {
     $self->printf("#PBS -N %s\n", $self->name); 
 
     # optional 
-    $self->printf("#PBS -e %s\n", $self->name) if $self->stderr;  
-    $self->printf("#PBS -o %s\n", $self->name) if $self->stdout; 
+    $self->printf("#PBS -e %s\n", $self->stderr) if $self->has_stderr;  
+    $self->printf("#PBS -o %s\n", $self->stdout) if $self->has_stdout; 
 
     # resource 
     $self->printf(
@@ -46,13 +61,13 @@ sub _write_pbs {
         $self->select, 
         $self->ncpus, 
         $self->mpiprocs,
-        $self->ompthreads
+        $self->omp
     ); 
     $self->printf("#PBS -l walltime=%s\n", $self->walltime); 
     $self->printf("\n"); 
 
     # command 
-    for my $cmd ($self->list_cmd) { 
+    for my $cmd ($self->_list_cmd) { 
         $self->print("$cmd\n"); 
     } 
 } 

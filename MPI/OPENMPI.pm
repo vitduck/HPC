@@ -3,12 +3,12 @@ package HPC::MPI::OPENMPI;
 use Moose::Role; 
 
 sub mpirun { 
-    my ($self, $ompthreads) = @_; 
+    my ($self, $omp) = @_; 
     
     return 
-        $ompthreads == 1 ? 
+        $omp == 1 ? 
         "mpirun" : 
-        "mpriun --map-by NUMA:PE=$ompthreads" 
+        "mpriun --map-by NUMA:PE=$omp" 
 } 
 
 1

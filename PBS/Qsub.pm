@@ -44,16 +44,24 @@ has 'ncpus' => (
     is      => 'rw',
     isa     => 'Int',
     default => 1,
+    trigger => sub { 
+        my $self = shift; 
+        
+        $self->_reset_mpiprocs;
+        $self->_reset_mpirun; 
+    }
 );
 
 has 'stderr' => ( 
-    is       => 'rw', 
-    isa      => 'Str',
+    is        => 'rw', 
+    isa       => 'Str',
+    predicate => 'has_stderr'
 ); 
 
 has 'stdout' => ( 
-    is       => 'rw', 
-    isa      => 'Str',
+    is        => 'rw', 
+    isa       => 'Str',
+    predicate => 'has_stdout'
 ); 
 
 has 'mpiprocs' => (
@@ -63,15 +71,21 @@ has 'mpiprocs' => (
     default => sub {
         my $self = shift;
 
-        return $self->ncpus / $self->ompthreads
+        return $self->ncpus / $self->omp
     },
     clearer => '_reset_mpiprocs'
 );
 
-has 'ompthreads' => (
+has 'omp' => (
     is      => 'rw',
     isa     => 'Int',
     default => 1,
+    trigger => sub { 
+        my $self = shift; 
+        
+        $self->_reset_mpiprocs;
+        $self->_reset_mpirun; 
+    }
 );
 
 has 'walltime' => (
@@ -79,12 +93,5 @@ has 'walltime' => (
     isa     => 'Str',
     default => '48:00:00',
 );
-
-after [qw(ncpus ompthreads)] => sub { 
-    my $self = shift; 
-
-    $self->_reset_mpiprocs;
-    $self->_reset_mpirun; 
-};  
 
 1

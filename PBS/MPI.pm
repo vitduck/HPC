@@ -62,8 +62,8 @@ sub _build_mpirun {
 
     if ($self->has_mpi) { 
         given ($self->mpi->module) { 
-            when ('openmpi' ) {$mpirun = $self->mpi->mpirun($self->ompthreads)}
-            when ('mvapich2') {$mpirun = $self->mvapich2->mpirun($self->select, $self->ncpus, $self->ompthreads)}
+            when ('openmpi' ) {$mpirun = $self->mpi->mpirun($self->omp)}
+            when ('mvapich2') {$mpirun = $self->mpi->mpirun($self->select, $self->ncpus, $self->omp)}
             default           {$mpirun = 'mpirun'} 
         }
     }
