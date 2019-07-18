@@ -13,8 +13,7 @@ sub source_impi {
     source("$mpihome/bin64/mpivars.sh");  
    
     # manual load IMPI
-    $self->_load_impi($impi); 
-    $self->mpirun; 
+    $self->_load_mpi($impi); 
 }
 
 sub unsource_impi { 
@@ -25,8 +24,7 @@ sub unsource_impi {
         grep !/linux\/mpi/, $self->list_ld_library_path;      
     
     # manual load IMPI
-    $self->_unload_impi($impi); 
-    $self->_reset_mpirun; 
+    $self->_unload_mpi($impi); 
 }
 
 sub _find_mpihome { 
@@ -37,14 +35,15 @@ sub _find_mpihome {
 
     # find currently loaded gcc 
     my $gcc = $self->find_module(sub {/gcc/}); 
-    $self->unload($gcc); 
+    $self->unload($gcc) if $gcc;  
 
     # load intel and impi module 
     $self->load($intel); 
     $self->load($impi);  
 
-    my $mpihome; 
     my $io = IO::String->new(capture_stderr {system 'modulecmd', 'perl', 'show', $impi}); 
+
+    my $mpihome; 
     for ($io->getlines) { 
         if (/MPIHOME/) { 
             $mpihome =  (split)[-1]; 
@@ -52,9 +51,12 @@ sub _find_mpihome {
         }
     }
 
+    # now unload intel module 
     $self->unload($impi);     
     $self->unload($intel); 
-    $self->load($gcc); 
+
+    # reload gcc 
+    $self->load($gcc) if $gcc;  
 
     return $mpihome; 
 } 

@@ -1,10 +1,7 @@
 package HPC::MPI::CRAYIMPI; 
 
-use Moose;  
-use namespace::autoclean; 
+use Moose::Role;  
 
-with 'HPC::MPI::Module'; 
-
-__PACKAGE__->meta->make_immutable;
+sub mpirun { return 'mpirun' }
 
 1; 

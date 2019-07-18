@@ -44,12 +44,6 @@ has 'ncpus' => (
     is      => 'rw',
     isa     => 'Int',
     default => 1,
-    trigger => sub {
-        my $self = shift;
-
-        $self->_reset_mpiprocs;
-        $self->_reset_mpirun; 
-    }
 );
 
 has 'stderr' => ( 
@@ -78,12 +72,6 @@ has 'ompthreads' => (
     is      => 'rw',
     isa     => 'Int',
     default => 1,
-    trigger => sub {
-        my $self = shift;
-
-        $self->_reset_mpiprocs;
-        $self->_reset_mpirun; 
-    }
 );
 
 has 'walltime' => (
@@ -92,37 +80,11 @@ has 'walltime' => (
     default => '48:00:00',
 );
 
-has 'bin' => (
-    is      => 'rw',
-    isa     => 'Str',
-    trigger => sub { 
-        my $self= shift; 
-
-        $self->_reset_mpirun; 
-    }
-); 
-
-
-has 'mpirun' => ( 
-    is       => 'rw', 
-    isa      => 'Str',
-    lazy     => 1, 
-    init_arg => undef, 
-    builder  => '_build_mpirun', 
-    clearer  => '_reset_mpirun', 
-); 
-
-sub _build_mpirun { 
+after [qw(ncpus ompthreads)] => sub { 
     my $self = shift; 
 
-    my $mpirun = 
-        $self->has_impi      ? 'mpirun' : 
-        $self->has_openmpi   ? $self->openmpi->mpirun ($self->ompthreads) : 
-        $self->has_mvapich2  ? $self->mvapich2->mpirun($self->select, $self->ncpus, $self->ompthreads) : 
-        undef; 
-
-    return 
-        $mpirun ? join ' ', $mpirun, $self->bin : $self->bin
-} 
+    $self->_reset_mpiprocs;
+    $self->_reset_mpirun; 
+};  
 
 1

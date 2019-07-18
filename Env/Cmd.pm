@@ -8,12 +8,10 @@ sub load {
     for my $module (@modules) { 
         $self->_add_module ($module); 
         $self->_load_module($module); 
-        if ( $module =~ /(cray-impi|impi|openmpi|mvapich2)/ ) {  
-            my $method = $1 =~ s/-//r;  
 
-            $method = "_load_$method"; 
-            $self->$method($module); 
-            $self->mpirun; 
+        # coerce MPI
+        if ($module =~ /^(cray-impi|impi|openmpi|mvapich2)/) { 
+            $self->_load_mpi($module) 
         }
     }
 }
@@ -27,12 +25,10 @@ sub unload {
         if ($index) { 
             $self->_delete_module($index); 
             $self->_unload_module($module); 
-            if ( $module =~ /(impi|openmpi|mvapich2)/ ) {  
-                my $method = $1 =~ s/-//r;  
-                
-                $method = "_unload_$method"; 
-                $self->$method($module); 
-                $self->_reset_mpirun; 
+
+            # unload MPI 
+            if ($module =~ /^(cray-impi|impi|openmpi|mvapich2)/) { 
+                $self->_unload_mpi; 
             }
         }
     }
@@ -48,22 +44,25 @@ sub switch {
 sub initialize { 
     my $self = shift; 
 
+    # unload all modules except opa
     for my $module ($self->list_module) { 
-        # do not remove opa module
         next if $module =~ /craype-network-opa/; 
 
         $self->unload($module); 
     }
 
+    # cache LD_LIBRARY_PATH
     $self->_ld_library_path; 
 } 
 
+# emulate 'module load'
 sub _load_module { 
     my ($self, $module) = @_; 
 
     Env::Modulecmd::load($module); 
 } 
 
+# emulate 'module unload'
 sub _unload_module { 
     my ($self, $module) = @_; 
     

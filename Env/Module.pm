@@ -42,12 +42,12 @@ sub _build_modules {
         grep !/\d+\)/, 
         grep !/Currently|Loaded|Modulefiles:/,
         split ' ',  
-        capture_stderr { system 'modulecmd', 'perl', 'list' } 
+        capture_stderr {system 'modulecmd', 'perl', 'list'}
     ]
 }
 
 sub _build_ld_library_path { 
-    return [ split /:/, $ENV{LD_LIBRARY_PATH} ] 
+    return [split /:/, $ENV{LD_LIBRARY_PATH}] 
 }
 
 # rebuild cached ld_library_path
