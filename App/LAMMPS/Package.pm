@@ -22,6 +22,17 @@ has 'package' => (
     clearer  => '_reset_package'
 );  
 
+sub set_opt { 
+    my ($self, @opts) = @_; 
+
+    while ( my ($attr, $value) = splice @opts, 0, 2) { 
+        #kokkos
+        $attr =~ s/\//_/; 
+
+        $self->$attr($value); 
+    } 
+} 
+
 sub cmd { 
     my $self = shift; 
 

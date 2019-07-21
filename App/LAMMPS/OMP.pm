@@ -15,7 +15,6 @@ has '+suffix' => (
 has 'nthreads' => ( 
     is      => 'rw', 
     isa     => Int,
-    writer  => 'set_omp_nthreads', 
     default => 0, 
     trigger => sub { shift->_reset_package }
 ); 
@@ -23,7 +22,6 @@ has 'nthreads' => (
 has 'neigh' => ( 
     is      => 'rw', 
     isa     => enum([qw/yes no/]), 
-    writer  => 'set_omp_neigh', 
     default => 'yes', 
     trigger => sub { shift->_reset_package }
 ); 
