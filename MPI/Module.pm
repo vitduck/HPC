@@ -1,4 +1,4 @@
-package HPC::MPI::Lib;  
+package HPC::MPI::Module; 
 
 use Moose; 
 use namespace::autoclean; 

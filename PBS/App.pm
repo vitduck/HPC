@@ -1,8 +1,8 @@
 package HPC::PBS::App; 
 
 use Moose::Role; 
-use HPC::Benchmark::LAMMPS; 
+use HPC::App::LAMMPS; 
 
-with 'HPC::Benchmark::App' => { app => 'lammps' }; 
+with 'HPC::App::Parameterized' => { app => 'lammps' }; 
 
 1

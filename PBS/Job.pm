@@ -4,13 +4,11 @@ use Moose;
 use namespace::autoclean;
 
 with qw( 
-    MooseX::Traits
     HPC::Env::Module
     HPC::PBS::Debug 
-    HPC::PBS::FH 
+    HPC::PBS::IO
     HPC::PBS::MPI 
     HPC::PBS::Qsub
-    HPC::PBS::App
 ); 
 
 has 'cmd' => (
