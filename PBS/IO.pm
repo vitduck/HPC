@@ -1,20 +1,12 @@
 package HPC::PBS::IO; 
 
 use Moose::Role; 
-use Moose::Util::TypeConstraints;
-
-use IO::File; 
-
-subtype 'HPC::PBS::Types::IO' 
-    => as 'Object';  
-
-coerce 'HPC::PBS::Types::IO'
-    => from 'Str'
-    => via { return IO::File->new($_, 'w') }; 
+use HPC::PBS::Types qw/FH/; 
+use MooseX::Types::Moose qw/Str/;
 
 has 'script' => (
     is       => 'rw',
-    isa      => 'Str',
+    isa      => Str,
     init_arg => undef,
     writer   => 'write_script',
     trigger  => sub { 
@@ -26,7 +18,7 @@ has 'script' => (
 
 has 'fh' => (
     is       => 'rw',
-    isa      => 'HPC::PBS::Types::IO',
+    isa      => FH,
     init_arg => undef,
     coerce   => 1, 
     handles  => [qw(print printf)], 

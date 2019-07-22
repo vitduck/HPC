@@ -9,9 +9,10 @@ sub load {
         $self->_add_module ($module); 
         $self->_load_module($module); 
 
-        # coerce MPI
         if ($module =~ /^(cray-impi|impi|openmpi|mvapich2)/) { 
-            $self->_load_mpi($module) 
+            # cray-impi -> crayimpi
+            my $loader = "_load_".($1 =~ s/\-//r);  
+            $self->$loader; 
         }
     }
 }
@@ -26,9 +27,9 @@ sub unload {
             $self->_delete_module($index); 
             $self->_unload_module($module); 
 
-            # unload MPI 
             if ($module =~ /^(cray-impi|impi|openmpi|mvapich2)/) { 
-                $self->_unload_mpi; 
+                my $unloader = "_unload_".($1 =~ s/\-//r);  
+                $self->$unloader; 
             }
         }
     }

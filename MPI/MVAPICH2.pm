@@ -1,6 +1,6 @@
 package HPC::MPI::MVAPICH2;  
 
-use Moose::Role; 
+use Moose; 
 
 sub mpirun { 
     my ($self, $select, $ncpus, $omp) = @_; 

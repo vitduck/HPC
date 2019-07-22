@@ -1,4 +1,4 @@
-package HPC::PBS::Debug; 
+package HPC::Debug::Data;  
 
 use Moose::Role; 
 

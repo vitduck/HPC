@@ -1,20 +1,19 @@
 package HPC::PBS::Job; 
 
 use Moose;
+use MooseX::Types::Moose qw/ArrayRef Str/; 
 use namespace::autoclean;
 
-with qw( 
-    HPC::Env::Module
-    HPC::PBS::Debug 
-    HPC::PBS::IO
-    HPC::PBS::MPI 
-    HPC::PBS::Qsub
-); 
+with 'HPC::Env::Module',
+     'HPC::Debug::Data', 
+     'HPC::PBS::IO',
+     'HPC::PBS::MPI',
+     'HPC::PBS::Qsub'; 
 
 has 'cmd' => (
     is      => 'rw',
     traits  => ['Array'],
-    isa     => 'ArrayRef[Str]',
+    isa     => ArrayRef[Str],
     lazy    => 1, 
     default => sub {['cd $PBS_O_WORKDIR']},
     handles => { 
@@ -23,6 +22,12 @@ has 'cmd' => (
     }, 
     clearer => '_reset_cmd', 
 );
+
+after qr/_(unload|load)_(impi|openmpi|mvapich2|crayimpi)/ => sub { 
+    my $self = shift; 
+
+    $self->_reset_cmd
+}; 
 
 sub add_cmd { 
     my ($self, @args) = @_; 

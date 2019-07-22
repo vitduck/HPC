@@ -1,21 +1,19 @@
 package HPC::MPI::IMPI; 
 
-use Moose::Role; 
+use Moose; 
+use MooseX::Types::Moose qw/Int/; 
 
-has 'I_MPI_DEBUG' => ( 
+with 'HPC::MPI::Module'; 
+
+has 'mpi_debug' => ( 
     is      => 'rw', 
-    traits  => ['Bool'],
-    isa     => 'Bool',
+    isa     => Int,
     default => 0, 
-    handles => { 
-         enable_mpi_debug => 'set', , 
-        disable_mpi_debug => 'unset' 
-    }
+    trigger => sub { $ENV{I_MPI_DEBUG} = shift->mpi_debug }
 );
 
-after  'enable_mpi_debug' => sub { $ENV{I_MPI_DEBUG} = 5 }; 
-after 'disable_mpi_debug' => sub { $ENV{I_MPI_DEBUG} = 0 }; 
-
 sub mpirun { return 'mpirun' }
+
+__PACKAGE__->meta->make_immutable;
 
 1

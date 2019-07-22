@@ -1,20 +1,15 @@
 package HPC::MPI::Module; 
 
-use Moose; 
-use namespace::autoclean; 
+use Moose::Role;  
 
-with 'MooseX::Traits'; 
+requires 'mpirun'; 
 
-has 'module' => (
-    is       => 'ro', 
-    isa      => 'Str', 
-); 
+sub set_opt { 
+    my ($self, @opts) = @_; 
 
-has 'version' => (
-    is       => 'ro', 
-    isa      => 'Str', 
-); 
-
-__PACKAGE__->meta->make_immutable;
+    while ( my ($attr, $value) = splice @opts, 0, 2) { 
+        $self->$attr($value); 
+    } 
+} 
 
 1 

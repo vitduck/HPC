@@ -1,72 +1,86 @@
 package HPC::PBS::Qsub; 
 
 use Moose::Role; 
-use feature 'switch'; 
+use Moose::Util::TypeConstraints;
+use MooseX::Types::Moose qw/Str Int/; 
 
 has 'shell' => ( 
     is       => 'rw', 
-    isa      => 'Str',
+    isa      =>  Str,
     default  => '#!/usr/bin/env bash', 
 ); 
 
 has 'project' => ( 
     is       => 'ro', 
-    isa      => 'Str',
+    isa      => Str,
     init_arg => undef,
     default  => 'burst_buffer'
 ); 
 
 has 'account' => ( 
     is       => 'rw', 
-    isa      => 'Str',
+    isa      => enum([qw(
+        ansys abaqus lsdyna nastran gaussian
+        openfoam wrf cesm mpas roms grims mom vasp gromacs charmm
+        amber lammps namd qe qmc bwa cam inhouse tf caffe pytorch etc)
+    ]), 
     default  => 'etc',
 ); 
 
 has 'queue' => ( 
     is       => 'rw', 
-    isa      => 'Str',
+    isa      => enum([qw(
+        exclusive khoa rokaf_knl normal long flat debug
+        commercial norm_skl) 
+    ]), 
     default  => 'normal'
 ); 
 
 has 'name' => ( 
     is       => 'rw', 
-    isa      => 'Str',
+    isa      => Str, 
     default  => 'jobname'
 ); 
 
 has 'select' => (
     is       => 'rw',
-    isa      => 'Int',
+    isa      => Int,
     default  => 1,
+    trigger => sub { 
+        my $self = shift; 
+
+        $self->_reset_mpiprocs; 
+        $self->_reset_cmd
+    }
 );
 
 has 'ncpus' => (
     is      => 'rw',
-    isa     => 'Int',
+    isa     => Int,
     default => 1,
     trigger => sub { 
         my $self = shift; 
-        
-        $self->_reset_mpiprocs;
-        $self->_reset_mpirun; 
+
+        $self->_reset_mpiprocs ; 
+        $self->_reset_cmd; 
     }
 );
 
 has 'stderr' => ( 
     is        => 'rw', 
-    isa       => 'Str',
+    isa       => Str,
     predicate => 'has_stderr'
 ); 
 
 has 'stdout' => ( 
     is        => 'rw', 
-    isa       => 'Str',
+    isa       => Str,
     predicate => 'has_stdout'
 ); 
 
 has 'mpiprocs' => (
     is      => 'rw',
-    isa     => 'Int',
+    isa     => Int,
     lazy    => 1,
     default => sub {
         my $self = shift;
@@ -78,19 +92,19 @@ has 'mpiprocs' => (
 
 has 'omp' => (
     is      => 'rw',
-    isa     => 'Int',
+    isa     => Int,
     default => 1,
     trigger => sub { 
         my $self = shift; 
         
-        $self->_reset_mpiprocs;
-        $self->_reset_mpirun; 
+        $self->_reset_mpiprocs ; 
+        $self->_reset_cmd; 
     }
 );
 
 has 'walltime' => (
     is      => 'rw',
-    isa     => 'Str',
+    isa     => Str,
     default => '48:00:00',
 );
 

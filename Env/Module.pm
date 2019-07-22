@@ -4,16 +4,15 @@ use Moose::Role;
 use Capture::Tiny 'capture_stderr';
 use Env::Modulecmd; 
 
-with 'HPC::Env::MKL'; 
-with 'HPC::Env::IMPI'; 
-with 'HPC::Env::Cmd'; 
-with 'HPC::Env::Preset'; 
+with 'HPC::Env::MKL', 
+     'HPC::Env::IMPI',
+     'HPC::Env::Cmd', 
+     'HPC::Env::Preset'; 
 
 has 'modules' => (   
     is       => 'rw',
     isa      => 'ArrayRef[Str]', 
     traits   => ['Array'], 
-    init_arg => undef, 
     builder  => '_build_modules', 
     handles  => { 
         list_module    => 'elements', 

@@ -9,7 +9,8 @@ use HPC::App::LAMMPS::INTEL;
 use HPC::App::LAMMPS::KOKKOS; 
 use HPC::App::LAMMPS::Types qw/Inp Log Var/; 
 
-with 'HPC::App::Base'; 
+with 'HPC::Debug::Data', 
+     'HPC::App::Base'; 
 
 has 'inp' => ( 
     is     => 'rw',

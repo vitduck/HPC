@@ -1,25 +1,14 @@
 package HPC::PBS::Types; 
 
-use Moose::Role; 
-use Moose::Util::TypeConstraints; 
-use HPC::MPI::Module; 
+use MooseX::Types -declare => [qw/FH/];  
+use MooseX::Types::Moose qw/Str FileHandle/;  
+use IO::File; 
 
-subtype 'HPC::PBS::Types::MPI' 
-    => as 'Object'
-    => where { $_->isa("HPC::MPI::Module") }; 
+subtype FH, 
+    as FileHandle; 
 
-coerce 'HPC::PBS::Types::MPI' 
-    => from 'Str', 
-    => via { 
-        my ($mpi, $version) = split /\//, $_; 
-
-        # for cray-impi/*
-        $mpi  =~ s/-//; 
-        
-        my $role = join '::', 'HPC', 'MPI', uc($mpi);  
-        HPC::MPI::Module
-            ->with_traits($role)
-            ->new(module => $mpi, version => $version)
-    }; 
+coerce FH, 
+    from Str, 
+    via { return IO::File->new($_, 'w') }; 
 
 1
