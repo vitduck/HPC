@@ -46,24 +46,14 @@ has 'select' => (
     is       => 'rw',
     isa      => Int,
     default  => 1,
-    trigger => sub { 
-        my $self = shift; 
-
-        $self->_reset_mpiprocs; 
-        $self->_reset_cmd
-    }
+    trigger => sub { shift->_reset_mpiprocs } 
 );
 
 has 'ncpus' => (
     is      => 'rw',
     isa     => Int,
     default => 1,
-    trigger => sub { 
-        my $self = shift; 
-
-        $self->_reset_mpiprocs ; 
-        $self->_reset_cmd; 
-    }
+    trigger => sub { shift->_reset_mpiprocs } 
 );
 
 has 'stderr' => ( 
@@ -94,12 +84,7 @@ has 'omp' => (
     is      => 'rw',
     isa     => Int,
     default => 1,
-    trigger => sub { 
-        my $self = shift; 
-        
-        $self->_reset_mpiprocs ; 
-        $self->_reset_cmd; 
-    }
+    trigger => sub { shift->_reset_mpiprocs } 
 );
 
 has 'walltime' => (

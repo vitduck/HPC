@@ -46,7 +46,15 @@ subtype Var,
 
 coerce  Var,  
     from ArrayRef, 
-    via { join ' ', map {'-v ' .$_} $_->@* }; 
+    via { 
+        my @vars = ();  
+        
+        while ( my ($key, $value) = splice $_->@*, 0, 2 ) { 
+            push @vars, '-v', $key, $value; 
+        } 
+
+        join ' ', @vars
+    }; 
 
 # package
 subtype Pkg, 

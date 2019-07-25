@@ -16,7 +16,10 @@ for my $mpi (qw/impi openmpi mvapich2 crayimpi/) {
         clearer   => "_unload_$mpi", 
         predicate => "has_$mpi",
         default   => sub { ('HPC::MPI::'.uc($mpi))->new },
-        handles   => { "set_$mpi" => 'set_opt' }
+        handles   => { 
+            "set_$mpi"         => 'set_opt',  
+            "reset_${mpi}_env" => 'reset_mpi_env', 
+        }
     ); 
 }
 

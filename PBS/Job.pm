@@ -20,14 +20,8 @@ has 'cmd' => (
         _add_cmd  => 'push',
         _list_cmd => 'elements' 
     }, 
-    clearer => '_reset_cmd', 
+    clearer => 'new_cmd', 
 );
-
-after qr/_(unload|load)_(impi|openmpi|mvapich2|crayimpi)/ => sub { 
-    my $self = shift; 
-
-    $self->_reset_cmd
-}; 
 
 sub add_cmd { 
     my ($self, @args) = @_; 
@@ -38,6 +32,10 @@ sub add_cmd {
         join ' ', @args
     )
 } 
+
+before qr/_unload_impi/     => sub { shift->reset_impi_env }; 
+before qr/_unload_crayimpi/ => sub { shift->reset_crayimpi_env }; 
+before qr/_unload_mvapich2/ => sub { shift->reset_mvapich2_env }; 
 
 sub qsub {
     my $self = shift; 

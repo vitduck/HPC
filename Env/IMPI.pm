@@ -17,12 +17,15 @@ sub source_impi {
 }
 
 sub unsource_impi { 
-    my ($self, $impi) = @_;  
-
-    $ENV{LD_LIBRARY_PATH} = 
-        join ":", 
-        grep !/linux\/mpi/, $self->list_ld_library_path;      
+    my ($self, $module) = @_;  
     
+    my ($impi, $version) = split /\//, $module;  
+    
+    for my $dir (qw/intel64 mic/) { 
+        my $index = $self->index_ld_library_path(sub {/intel\/$version\/.+?mpi\/$dir/}); 
+        $self->delete_ld_library_path($index);  
+    }
+
     # manual load IMPI
     $self->_unload_impi; 
 }

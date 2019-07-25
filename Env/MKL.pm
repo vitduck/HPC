@@ -16,10 +16,12 @@ sub source_mkl {
 sub unsource_mkl { 
     my ($self,$module) = @_; 
 
-    $ENV{LD_LIBRARY_PATH} = 
-        join ":", 
-        grep !/linux\/(tbb|compiler|mkl)/, 
-        $self->list_ld_library_path;      
+    my $version = (split /\//, $module)[1]; 
+
+    for my $dir (qw/tbb compiler mkl/) { 
+        my $index = $self->index_ld_library_path(sub {/intel\/$version\/.+?$dir/}); 
+        $self->delete_ld_library_path($index);  
+    }
 }
 
 sub _find_mklroot { 

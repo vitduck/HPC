@@ -1,10 +1,11 @@
 package HPC::Env::Preset; 
 
 use Moose::Role; 
+use MooseX::Types::Moose qw/HashRef/; 
 
 has '_preset' => (
     is       => 'ro', 
-    isa      => 'HashRef', 
+    isa      => HashRef, 
     traits   => ['Hash'], 
     init_arg => undef, 
     lazy     => 1, 
