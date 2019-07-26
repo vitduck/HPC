@@ -85,12 +85,11 @@ sub _build_package {
 
     push @opts, 'kokkos'; 
 
-    for (qw( 
-        neigh neigh_qeq neigh_thread 
-        newton binsize
-        comm comm_exchange comm_forward comm_reverse
-        gpu_direct)) { 
-        
+    for (qw/
+        neigh neigh_qeq neigh_thread newton binsize 
+        comm comm_exchange comm_forward comm_reverse 
+        gpu_direct/
+    ) { 
         push @opts, s/_/\//r, $self->$_ if $self->$_; 
     }
 

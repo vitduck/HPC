@@ -1,6 +1,6 @@
 package HPC::App::LAMMPS::Types; 
 
-use MooseX::Types -declare => [qw/Inp Log Suffix Kokkos Var Pkg ACC OPT OMP INTEL KOKKOS/]; 
+use MooseX::Types -declare => [qw/Inp Log Suffix Kokkos Var Pkg ACC GPU OPT OMP INTEL KOKKOS/]; 
 use MooseX::Types::Moose qw/Str ArrayRef Object/;
 
 # input
@@ -65,6 +65,7 @@ coerce Pkg,
     from Str,
     via { '-pk '.$_ }; 
 
+class_type GPU,    { class => 'HPC::App::LAMMPS::GPU'    }; 
 class_type OPT,    { class => 'HPC::App::LAMMPS::OPT'    }; 
 class_type OMP,    { class => 'HPC::App::LAMMPS::OMP'    }; 
 class_type INTEL,  { class => 'HPC::App::LAMMPS::INTEL'  }; 
@@ -72,7 +73,7 @@ class_type KOKKOS, { class => 'HPC::App::LAMMPS::KOKKOS' };
 
 # accelerator package 
 subtype ACC, 
-    as OPT|OMP|INTEL|KOKKOS;  
+    as GPU|OPT|OMP|INTEL|KOKKOS;  
 
 coerce  ACC, 
     from Str, 

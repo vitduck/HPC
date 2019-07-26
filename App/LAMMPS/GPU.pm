@@ -1,93 +1,86 @@
-package HPC::App::LAMMPS::INTEL; 
+package HPC::App::LAMMPS::GPU; 
 
 use Moose; 
-use MooseX::Types::Moose qw/Int Num Bool/; 
 use Moose::Util::TypeConstraints; 
-
-use HPC::App::LAMMPS::Types qw/Suffix/; 
+use MooseX::Types::Moose qw/Num Int Str/; 
 
 with 'HPC::App::LAMMPS::Package'; 
 
 has '+suffix' => ( 
-    default => 'intel',
+    default => 'gpu'
 ); 
 
-has 'suffix' => ( 
-    is      => 'rw',
-    isa     => Suffix,
-    coerce  => 1, 
-    default => 'intel',
-); 
-
-has 'Nphi' => ( 
+has 'Ngpu' => ( 
     is      => 'rw', 
     isa     => Int, 
     default => 0,
     trigger => sub { shift->_reset_package }
 ); 
 
-has 'mode' => ( 
+has 'neigh' => ( 
     is      => 'rw', 
-    isa     => enum([qw/single mixed double/]),
+    isa     => enum([qw/full half/]), 
     trigger => sub { shift->_reset_package }
 ); 
 
-has 'omp' => ( 
+has 'newton' => ( 
     is      => 'rw', 
-    isa     => Int,
+    isa     => enum([qw/off on/]), 
     trigger => sub { shift->_reset_package }
 ); 
 
-has 'lrt' => ( 
-    is      => 'rw', 
-    isa     => enum([qw/yes no/]),
-    trigger => sub { shift->_reset_package }
-); 
-
-has 'balance' => ( 
+has 'binsize' => ( 
     is      => 'rw', 
     isa     => Num,
     trigger => sub { shift->_reset_package }
 ); 
 
-has 'ghost' => ( 
+has 'split' => ( 
     is      => 'rw', 
-    isa     => enum([qw/yes no/]),
+    isa     => Num,
+    default => 1.0,
     trigger => sub { shift->_reset_package }
 ); 
 
-has 'tpc' => ( 
+has 'gpuID' => ( 
     is      => 'rw', 
-    isa     => Int,
+    isa     => Str, 
+    default => 0,
     trigger => sub { shift->_reset_package }
 ); 
 
-has 'tptask' => ( 
+has 'tpa' => ( 
     is      => 'rw', 
-    isa     => Int,
+    isa     => Int, 
+    default => 0,
     trigger => sub { shift->_reset_package }
 ); 
 
-has 'no_affinity' => ( 
+has 'device' => ( 
     is      => 'rw', 
-    isa     => Bool,
+    isa     => Str, 
+    default => 0,
+    trigger => sub { shift->_reset_package }
+); 
+
+has 'blocksize' => ( 
+    is      => 'rw', 
+    isa     => Str, 
+    default => 0,
     trigger => sub { shift->_reset_package }
 ); 
 
 sub _build_package { 
     my $self = shift; 
-    my @opts = (); 
+    my @opts = ();  
 
-    # required 
-    push @opts, 'intel', $self->Nphi; 
-    for (qw/mode omp lrt balance ghost tpc tptask/) { 
-        push @opts, $_, $self->$_ if $self->$_; 
+    push @opts, 'gpu', $self->Ngpu; 
+
+    for (qw/neigh newton binsize split gpuID tpa device blocksize/) { 
+        push @opts, s/_/\//r, $self->$_ if $self->$_; 
     }
 
-    # single keyowrd
-    push @opts, 'no_afinity' if $self->no_affinity; 
-
-    return join(' ', @opts) 
+    return join(' ', @opts); 
 } 
 
 __PACKAGE__->meta->make_immutable;
