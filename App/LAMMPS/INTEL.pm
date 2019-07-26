@@ -22,6 +22,7 @@ has 'suffix' => (
 has 'nphi' => ( 
     is      => 'rw', 
     isa     => Int, 
+    default => 0,
     trigger => sub { shift->_reset_package }
 ); 
 
@@ -55,12 +56,6 @@ sub _build_package {
     }
 
     return join(' ', @opts) 
-} 
-
-sub cmd { 
-    my $self = shift; 
-
-    return join ' ', $self->suffix, $self->package; 
 } 
 
 __PACKAGE__->meta->make_immutable;

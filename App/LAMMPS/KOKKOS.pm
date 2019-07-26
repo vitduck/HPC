@@ -79,8 +79,6 @@ has 'gpu_direct' => (
     trigger => sub { shift->_reset_package }
 ); 
 
-
-
 sub _build_package { 
     my $self = shift; 
     my @opts = ();  

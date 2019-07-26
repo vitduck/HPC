@@ -22,6 +22,7 @@ has 'package' => (
     clearer  => '_reset_package'
 );  
 
+# emulate hash delegation
 sub set_opt { 
     my ($self, @opts) = @_; 
 

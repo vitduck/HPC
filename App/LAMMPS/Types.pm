@@ -71,11 +71,5 @@ subtype Acc,
 
 coerce  Acc, 
     from Str, 
-        via { ('HPC::App::LAMMPS::'.uc($_))->new }, 
-    from ArrayRef, 
-        via { 
-            my ($pkg, @opts) = $_->@*;  
-            ('HPC::App::LAMMPS::'.uc($pkg))->new(@opts) 
-        };  
-
+    via { ('HPC::App::LAMMPS::'.uc($_))->new };  
 1
