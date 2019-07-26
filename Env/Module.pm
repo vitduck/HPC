@@ -1,17 +1,16 @@
 package HPC::Env::Module; 
 
-use Moose::Role; 
-use MooseX::Types::Moose qw/ArrayRef Str/;
 use Capture::Tiny 'capture_stderr';
 use Env::Modulecmd; 
+use Moose::Role; 
+use MooseX::Types::Moose qw/ArrayRef Str/;
+
+use HPC::Env::Types qw/SRC_MKL SRC_IMPI/; 
 
 with 'HPC::Env::Cmd', 
-     'HPC::Env::Path', 
-     'HPC::Env::Preset', 
-     'HPC::Env::IMPI',
-     'HPC::Env::MKL'; 
+     'HPC::Env::Preset'; 
 
-has 'modules' => (   
+has 'modules' => ( 
     is       => 'rw',
     isa      => ArrayRef[Str], 
     traits   => ['Array'], 
@@ -23,6 +22,22 @@ has 'modules' => (
         _index_module  => 'first_index', 
         _delete_module => 'delete'
     }
+); 
+
+has 'source_mkl' => ( 
+    is       => 'rw', 
+    isa      => SRC_MKL, 
+    init_arg => undef, 
+    coerce   => 1, 
+    clearer  => '_unsource_mkl'
+); 
+
+has 'source_impi' => ( 
+    is       => 'rw', 
+    isa      => SRC_IMPI, 
+    init_arg => undef, 
+    coerce   => 1, 
+    clearer  => '_unsource_impi'
 ); 
 
 sub _build_modules { 

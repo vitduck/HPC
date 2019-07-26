@@ -13,7 +13,7 @@ sub source_impi {
     source("$mpihome/bin64/mpivars.sh");  
    
     # manual load IMPI
-    $self->_load_impi
+    $self->_load_mpi($impi); 
 }
 
 sub unsource_impi { 
@@ -27,7 +27,7 @@ sub unsource_impi {
     }
 
     # manual load IMPI
-    $self->_unload_impi; 
+    $self->_unload_mpi 
 }
 
 sub _find_mpihome { 

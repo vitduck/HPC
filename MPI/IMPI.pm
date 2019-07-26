@@ -1,23 +1,29 @@
 package HPC::MPI::IMPI; 
 
 use Moose; 
-use MooseX::Types::Moose qw/Int/; 
-use Env qw/I_MPI_DEBUG/; 
+use namespace::autoclean; 
 
-with 'HPC::MPI::Module'; 
+with 'HPC::MPI::MPI'; 
 
-has 'I_MPI_DEBUG' => ( 
-    is      => 'rw', 
-    isa     => Int,
-    trigger => sub { $I_MPI_DEBUG = shift->I_MPI_DEBUG }
-);
+sub _build_env_opt { 
+    my $self = shift; 
 
-sub reset_mpi_env { 
-    undef $I_MPI_DEBUG
+    return 
+        $self->has_env 
+        ? join ' ', map { ('-env', join('=',$_, $self->get_env($_))) } $self->list_env 
+        : undef
+}
+
+sub _build_omp_opt { 
+    return undef
 } 
 
-sub mpirun { return 'mpirun' }
-
-__PACKAGE__->meta->make_immutable;
+sub cmd { 
+    my $self = shift; 
+    
+    return 
+        join ' ', 
+        grep $_, ($self->mpirun, $self->omp_opt, $self->env_opt)
+}
 
 1

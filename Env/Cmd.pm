@@ -7,12 +7,11 @@ sub load {
 
     for my $module (@modules) { 
         $self->_add_module ($module); 
-        $self->_load_module($module); 
+        # $self->_load_module($module); 
 
         if ($module =~ /^(cray-impi|impi|openmpi|mvapich2)/) { 
-            # cray-impi -> crayimpi
-            my $loader = "_load_".($1 =~ s/\-//r);  
-            $self->$loader; 
+            $self->_load_mpi($module); 
+            
         }
     }
 }
@@ -25,11 +24,10 @@ sub unload {
 
         if ($index) { 
             $self->_delete_module($index); 
-            $self->_unload_module($module); 
+            # $self->_unload_module($module); 
 
-            if ($module =~ /^(cray-impi|impi|openmpi|mvapich2)/) { 
-                my $unloader = "_unload_".($1 =~ s/\-//r);  
-                $self->$unloader; 
+            if ($module =~ /^(cray-impi|impi|openmpi|mvapich2)/) {  
+                $self->_unload_mpi 
             }
         }
     }
@@ -53,7 +51,7 @@ sub initialize {
     }
 
     # cache LD_LIBRARY_PATH
-    $self->_ld_library_path; 
+    # $self->_ld_library_path; 
 } 
 
 # emulate 'module load'

@@ -1,34 +1,41 @@
 package HPC::MPI::MVAPICH2;  
 
 use Moose; 
-use MooseX::Types::Moose qw/Int/; 
-use Env qw/MV2_SMP_EAGERSIZE/; 
+use namespace::autoclean; 
 
-with 'HPC::MPI::Module'; 
+with 'HPC::MPI::MPI'; 
 
-has 'MV2_SMP_EAGERSIZE' => ( 
-    is       => 'rw', 
-    isa      => Int,
-    init_arg => undef, 
-    trigger  => sub { $MV2_SMP_EAGERSIZE = shift->MV2_SMP_EAGERSIZE }
-);  
+has '+mpirun' => ( 
+    default => sub { 
+        join ' ', qw/mpirun_rsh -np ${TOTAL_CPUS} -hostfile $PBS_NODEFILE/
+    }
+); 
 
-sub reset_mpi_env { 
+sub _build_env_opt { 
     my $self = shift; 
 
-    undef $MV2_SMP_EAGERSIZE 
-} 
-
-sub mpirun { 
-    my ($self, $select, $ncpus, $omp) = @_; 
-
-    my $nprocs = $select * $ncpus; 
-    my $mpirun = "mpirun_rsh -np $nprocs -hostfile \$PBS_NODEFILE"; 
-    
     return 
-        $omp == 1 ? 
-        $mpirun:
-        "$mpirun OMP_NUM_THREADS=$omp"
+        $self->has_env 
+        ? join ' ', map { join('=',$_, $self->get_env($_)) } $self->list_env 
+        : undef
+}
+
+sub _build_omp_opt { 
+    my $self = shift; 
+
+    return 
+        $self->omp != 1 
+        ? join '=',"OMP_NUM_THREADS", $self->omp 
+        : undef
 } 
 
-1; 
+around 'cmd' => sub { 
+    my ($cmd, $self) = @_; 
+
+    return 
+        "TOTAL_CPUS=\$(wc -l \$PBS_NODEFILE | awk '{print \$1}')\n\n". $self->$cmd
+};  
+
+__PACKAGE__->meta->make_immutable;
+
+1

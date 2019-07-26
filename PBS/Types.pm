@@ -1,14 +1,13 @@
 package HPC::PBS::Types; 
 
+use IO::File; 
 use MooseX::Types -declare => [qw/FH/];  
 use MooseX::Types::Moose qw/Str FileHandle/;  
-use IO::File; 
 
 subtype FH, 
     as FileHandle; 
-
-coerce FH, 
+coerce  FH, 
     from Str, 
-    via { return IO::File->new($_, 'w') }; 
+    via { IO::File->new($_, 'w') }; 
 
 1
