@@ -40,7 +40,7 @@ has 'mode' => (
 
 has 'lrt' => ( 
     is      => 'rw', 
-    isa     => enum([qw/ues no/]),
+    isa     => enum([qw/yes no/]),
     trigger => sub { shift->_reset_package }
 ); 
 

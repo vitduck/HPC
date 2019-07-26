@@ -7,7 +7,7 @@ use HPC::App::LAMMPS::OPT;
 use HPC::App::LAMMPS::OMP; 
 use HPC::App::LAMMPS::INTEL; 
 use HPC::App::LAMMPS::KOKKOS; 
-use HPC::App::LAMMPS::Types qw/Inp Log Var Acc/; 
+use HPC::App::LAMMPS::Types qw/Inp Log Var ACC/; 
 
 with 'HPC::Debug::Data', 
      'HPC::Benchmark::Base'; 
@@ -35,11 +35,14 @@ has 'var' => (
 
 has 'pkg' => ( 
     is        => 'rw',
-    isa       => Acc,
+    isa       => ACC,
     init_arg  => undef,
     coerce    => 1, 
     writer    => 'enable_pkg', 
     clearer   => 'disable_pkg', 
+    handles   => { 
+        set_pkg_opt => 'set_opt'
+    }
 );  
 
 sub cmd { 

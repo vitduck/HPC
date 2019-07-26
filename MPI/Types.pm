@@ -1,11 +1,16 @@
 package HPC::MPI::Types; 
 
 use IO::File; 
-use MooseX::Types -declare => [qw/MPI/];  
+use MooseX::Types -declare => [qw/MPI IMPI OPENMPI MVAPICH2/];  
 use MooseX::Types::Moose qw/Str Int Object/;  
 
+class_type IMPI,     { class => 'HPC::MPI::IMPI'     }; 
+class_type OPENMPI,  { class => 'HPC::MPI::OPENMPI'  }; 
+class_type MVAPICH2, { class => 'HPC::MPI::MVAPICH2' }; 
+
 subtype MPI, 
-    as Object; 
+    as IMPI|OPENMPI|MVAPICH2;  
+
 coerce  MPI, 
     from Str, 
     via {  

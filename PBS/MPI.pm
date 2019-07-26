@@ -19,7 +19,11 @@ has mpi => (
         my $self = shift; 
 
         $self->mpi->omp($self->omp); 
-    }
+    }, 
+    handles  => { 
+        set_mpi_env => 'set_env', 
+             mpirun => 'cmd'
+    } 
 ); 
 
 1 
