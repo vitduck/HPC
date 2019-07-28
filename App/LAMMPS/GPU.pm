@@ -6,6 +6,18 @@ use MooseX::Types::Moose qw/Num Int Str/;
 
 with 'HPC::App::LAMMPS::Package'; 
 
+has '+name' => ( 
+    default => 'gpu'
+); 
+
+has '+arg' => ( 
+    default => 'Ngpu'
+); 
+
+has '+opts' => ( 
+    default => sub {[qw/neigh newton binsize split gpuID tpa device blocksize/]}
+); 
+
 has '+suffix' => ( 
     default => 'gpu'
 ); 
@@ -69,19 +81,6 @@ has 'blocksize' => (
     default => 0,
     trigger => sub { shift->_reset_package }
 ); 
-
-sub _build_package { 
-    my $self = shift; 
-    my @opts = ();  
-
-    push @opts, 'gpu', $self->Ngpu; 
-
-    for (qw/neigh newton binsize split gpuID tpa device blocksize/) { 
-        push @opts, s/_/\//r, $self->$_ if $self->$_; 
-    }
-
-    return join(' ', @opts); 
-} 
 
 __PACKAGE__->meta->make_immutable;
 

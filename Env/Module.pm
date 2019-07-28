@@ -14,7 +14,6 @@ has 'modules' => (
     is       => 'rw',
     isa      => ArrayRef[Str], 
     traits   => ['Array'], 
-    builder  => '_build_modules', 
     handles  => { 
         list_module    => 'elements', 
         find_module    => 'first',

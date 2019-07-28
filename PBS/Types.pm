@@ -6,6 +6,7 @@ use MooseX::Types::Moose qw/Str FileHandle/;
 
 subtype FH, 
     as FileHandle; 
+
 coerce  FH, 
     from Str, 
     via { IO::File->new($_, 'w') }; 

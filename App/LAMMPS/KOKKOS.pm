@@ -8,6 +8,19 @@ use HPC::App::LAMMPS::Types qw/Kokkos/;
 
 with 'HPC::App::LAMMPS::Package'; 
 
+has '+name' => ( 
+    default => 'kokkos'
+); 
+
+has '+opts' => ( 
+    default => sub {[qw/
+        neigh neigh_qeq neigh_thread 
+        newton binsize 
+        comm comm_exchange comm_forward comm_reverse 
+        gpu_direct/
+    ]}
+); 
+
 has '+suffix' => ( 
     default => 'kk'
 ); 
@@ -22,6 +35,7 @@ has 'kokkos' => (
 has 'neigh' => ( 
     is      => 'rw', 
     isa     => enum([qw/full half/]), 
+    default => 'half',
     trigger => sub { shift->_reset_package }
 ); 
 
@@ -40,6 +54,7 @@ has 'neigh_thread' => (
 has 'newton' => ( 
     is      => 'rw', 
     isa     => enum([qw/off on/]), 
+    default => 'on',
     trigger => sub { shift->_reset_package }
 ); 
 
@@ -79,28 +94,14 @@ has 'gpu_direct' => (
     trigger => sub { shift->_reset_package }
 ); 
 
-sub _build_package { 
-    my $self = shift; 
-    my @opts = ();  
-
-    push @opts, 'kokkos'; 
-
-    for (qw/
-        neigh neigh_qeq neigh_thread newton binsize 
-        comm comm_exchange comm_forward comm_reverse 
-        gpu_direct/
-    ) { 
-        push @opts, s/_/\//r, $self->$_ if $self->$_; 
-    }
-
-    return join(' ', @opts); 
-} 
-
 around 'cmd' => sub { 
     my $orig = shift; 
     my $self = shift; 
+    
+    # for neight/* comm/* and gpu/direct
+    my $cmd = $self->$orig =~ s/_/\//r; 
 
-    return join(' ', $self->kokkos, $self->$orig)
+    return join(' ', $self->kokkos, $cmd)
 };  
 
 __PACKAGE__->meta->make_immutable;

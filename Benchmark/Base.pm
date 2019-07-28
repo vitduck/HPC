@@ -4,8 +4,9 @@ use Moose::Role;
 use MooseX::Types::Moose qw/Str Bool/; 
 
 has 'bin' => ( 
-    is  => 'rw',
-    isa => Str,
+    is     => 'rw',
+    isa    => Str,
+    writer => 'set_bin'
 ); 
 
 has 'aps' => ( 

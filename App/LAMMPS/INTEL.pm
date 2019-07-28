@@ -8,6 +8,18 @@ use HPC::App::LAMMPS::Types qw/Suffix/;
 
 with 'HPC::App::LAMMPS::Package'; 
 
+has '+name' => ( 
+    default => 'intel'
+); 
+
+has '+arg' => ( 
+    default => 'Nphi'
+); 
+
+has '+opts' => ( 
+    default => sub {[qw/omp mode lrt balance ghost tpc tptask/]}
+); 
+
 has '+suffix' => ( 
     default => 'intel',
 ); 
@@ -29,6 +41,7 @@ has 'Nphi' => (
 has 'mode' => ( 
     is      => 'rw', 
     isa     => enum([qw/single mixed double/]),
+    default => 'mixed',
     trigger => sub { shift->_reset_package }
 ); 
 
@@ -73,22 +86,6 @@ has 'no_affinity' => (
     isa     => Bool,
     trigger => sub { shift->_reset_package }
 ); 
-
-sub _build_package { 
-    my $self = shift; 
-    my @opts = (); 
-
-    # required 
-    push @opts, 'intel', $self->Nphi; 
-    for (qw/mode omp lrt balance ghost tpc tptask/) { 
-        push @opts, $_, $self->$_ if $self->$_; 
-    }
-
-    # single keyowrd
-    push @opts, 'no_afinity' if $self->no_affinity; 
-
-    return join(' ', @opts) 
-} 
 
 __PACKAGE__->meta->make_immutable;
 

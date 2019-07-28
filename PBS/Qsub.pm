@@ -22,6 +22,12 @@ has 'pbs' => (
     }
 ); 
 
+sub qsub { 
+    my ($self, $pbs) = @_; 
+    
+    system 'qsub', $pbs; 
+} 
+
 sub _write_pbs_opt { 
     my $self = shift; 
 
@@ -37,8 +43,8 @@ sub _write_pbs_opt {
     $self->printf("#PBS -N %s\n", $self->name); 
 
     # optional 
-    $self->printf("#PBS -e %s\n", $self->stderr) if $self->has_stderr;  
-    $self->printf("#PBS -o %s\n", $self->stdout) if $self->has_stdout; 
+    $self->printf("#PBS -e %s\n", $self->stderr) if $self->stderr; 
+    $self->printf("#PBS -o %s\n", $self->stdout) if $self->stdout; 
 
     # resource 
     $self->printf(
@@ -56,13 +62,13 @@ sub _write_pbs_opt {
 sub _write_pbs_module { 
     my $self = shift; 
 
-    $self->printf("module load %s\n", $_) for $self->list_module; 
-    $self->printf("# mkl\n%s\n",  $self->source_mkl ) if $self->source_mkl; 
-    $self->printf("# impi\n%s\n", $self->source_impi) if $self->source_impi; 
+    $self->printf("module load %s\n", $_) for $self->list_module;
+    $self->printf("%s\n", $self->source_mkl ) if $self->source_mkl; 
+    $self->printf("%s\n", $self->source_impi) if $self->source_impi; 
     $self->printf("\n"); 
 } 
 
-sub _write_pbs_cmd { 
+sub _write_pbs_cmd {
     my $self = shift; 
     
     # command 

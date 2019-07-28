@@ -10,20 +10,10 @@ has 'cmd' => (
     lazy    => 1, 
     default => sub {["cd \$PBS_O_WORKDIR\n"]},
     handles => { 
-        _add_cmd  => 'push',
+         add_cmd  => 'push',
          list_cmd => 'elements' 
     }, 
     clearer => 'new_cmd', 
 );
 
-sub add_cmd { 
-    my ($self, @args) = @_; 
-
-    $self->_add_cmd(
-        @args == 1 ? 
-        @args : 
-        join ' ', @args
-    )
-} 
-
-1; 
+1

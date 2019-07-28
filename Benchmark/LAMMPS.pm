@@ -36,7 +36,6 @@ has 'var' => (
 has 'pkg' => ( 
     is        => 'rw',
     isa       => ACC,
-    init_arg  => undef,
     coerce    => 1, 
     writer    => 'enable_pkg', 
     clearer   => 'disable_pkg', 
