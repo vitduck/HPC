@@ -1,8 +1,8 @@
 package HPC::MPI::Lib; 
 
-use Moose; 
+use Moose::Role;  
 use Moose::Util::TypeConstraints; 
-use MooseX::Types::Moose qw/Undef Str Int HashRef/; 
+use MooseX::Types::Moose qw/Str HashRef/; 
 
 has 'module' => ( 
     is       => 'ro', 
@@ -16,11 +16,11 @@ has 'version' => (
     required => 1
 ); 
 
-has 'mpirun' => (
-    is       => 'rw', 
+has 'mpirun' => ( 
+    is       => 'ro', 
     isa      => Str, 
     init_arg => undef, 
-    default  => sub { shift->module eq  'mvapich2' ? 'mpirun_rsh' : 'mpirun' }, 
+    default  => 'mpirun', 
 ); 
 
 has 'env' => (
@@ -38,19 +38,25 @@ has 'env' => (
     } 
 ); 
 
-sub env_opt {
-    my $self = shift; 
+has 'env_opt' => ( 
+    is      => 'ro', 
+    isa     => Str, 
+    default => ''
+); 
 
-    # env=value pari 
-    my @opts = map join('=', $_, $self->get_env($_)), $self->list_env; 
+sub cmd {
+    my ($self, $select, $ncpus, $omp) = @_; 
 
-    # environement options 
-    return  
-        $self->module eq 'impi'    ? map { ('-env', $_) } @opts : 
-        $self->module eq 'openmpi' ? map { ('-x'  , $_) } @opts : 
-        @opts; 
+    # for example: I_IMPI_DEBUG=5
+    my @envs = map { join('=', $_, $self->get_env($_)) } $self->list_env; 
+
+    # IMPI:-env/OPENMPI:-x/MVAPICH2:null 
+    @envs = map { ($self->env_opt, $_) } @envs if $self->env_opt; 
+
+    return 
+        $self->has_env 
+        ? ($self->mpirun, join(' ', @envs)) 
+        : ($self->mpirun)
 }
-
-__PACKAGE__->meta->make_immutable;
 
 1 

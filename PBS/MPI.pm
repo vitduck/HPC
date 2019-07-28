@@ -2,7 +2,9 @@ package HPC::PBS::MPI;
 
 use Moose::Role; 
 
-use HPC::MPI::Lib; 
+use HPC::MPI::IMPI;  
+use HPC::MPI::OPENMPI; 
+use HPC::MPI::MVAPICH2; 
 use HPC::MPI::Types qw/MPI/; 
 
 has mpi => (
@@ -22,23 +24,10 @@ has mpi => (
 
 sub mpirun { 
     my $self = shift; 
-    my @cmd  = (); 
 
-    # mpirun 
-    my $mpirun =
-        $self->mpi->module eq 'mvapich2'
-        ? join (' ', $self->mpi->mpirun, '-np', $self->select*$self->ncpus, '-hostfile', '$PBS_NODEFILE')
-        : $self->mpi->mpirun;
-
-    push @cmd, $mpirun, $self->mpi->env_opt; 
-
-    # with openmp
-    if ($self->omp > 1) {
-        push @cmd, '--map-by NUMA:PE='.$self->omp if $self->mpi->module eq 'openmpi'; 
-        push @cmd,  'OMP_NUM_THREADS='.$self->omp if $self->mpi->module eq 'mvapich2'; 
-    } 
-
-    return join ' ', @cmd; 
+    return 
+        join ' ', 
+        $self->mpi->cmd($self->select, $self->ncpus, $self->omp) 
 }
 
 1 

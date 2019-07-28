@@ -10,10 +10,21 @@ has 'cmd' => (
     lazy    => 1, 
     default => sub {["cd \$PBS_O_WORKDIR\n"]},
     handles => { 
-         add_cmd  => 'push',
+         _add_cmd  => 'push',
          list_cmd => 'elements' 
     }, 
     clearer => 'new_cmd', 
 );
+
+sub add_cmd { 
+    my ($self, @opts) = @_; 
+
+    if ( grep /\\/, @opts ) { 
+        pop @opts; 
+        $self->_add_cmd(join("\\\n", @opts));  
+    } else { 
+        $self->_add_cmd(join(' ', @opts)); 
+    }
+} 
 
 1

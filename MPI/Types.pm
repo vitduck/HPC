@@ -1,23 +1,24 @@
 package HPC::MPI::Types; 
 
 use IO::File; 
-use MooseX::Types -declare => [qw/MPI MPILIB/]; 
-use MooseX::Types::Moose qw/Str Int Object HashRef/;  
+use MooseX::Types -declare => [qw/MPI IMPI OPENMPI MVAPICH2/];  
+use MooseX::Types::Moose qw/Str Int Object/;  
 
-class_type MPILIB, { class => 'HPC::MPI::Lib' }; 
+class_type IMPI,     { class => 'HPC::MPI::IMPI'     }; 
+class_type OPENMPI,  { class => 'HPC::MPI::OPENMPI'  }; 
+class_type MVAPICH2, { class => 'HPC::MPI::MVAPICH2' }; 
 
 subtype MPI, 
-    as MPILIB; 
+    as IMPI|OPENMPI|MVAPICH2;  
 
 coerce  MPI, 
     from Str, 
     via {  
-        my ($module, $version) = split /\//, $_; 
+        my ($module, $version)  = split /\//, $_; 
+        my $mpi = $1 if $module =~ /(impi|openmpi|mvapich2)/; 
 
-        my $lib = $1 if $module =~ /(impi|openmpi|mvapich2)/;
-
-        'HPC::MPI::Lib'->new( 
-            module  => $module, 
+        return ('HPC::MPI::'.uc($mpi))->new( 
+            module  => $mpi, 
             version => $version
         ); 
     }; 
