@@ -24,10 +24,17 @@ has mpi => (
 
 sub mpirun { 
     my $self = shift; 
+    my @opts = ( $self->mpi->cmd(
+        $self->select, 
+        $self->ncpus, 
+        $self->omp)
+    );  
 
-    return 
-        join ' ', 
-        $self->mpi->cmd($self->select, $self->ncpus, $self->omp) 
+    # flat mode
+    splice @opts, 1, 0, $self->mcdram if $self->mcdram; 
+    splice @opts, 1, 0, $self->ddr4   if $self->ddr4; 
+
+    return join ' ', @opts 
 }
 
 1 

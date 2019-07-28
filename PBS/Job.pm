@@ -8,7 +8,8 @@ with 'HPC::Debug::Data',
      'HPC::PBS::MPI',
      'HPC::PBS::Cmd',
      'HPC::PBS::Resource',
-     'HPC::PBS::Qsub'; 
+     'HPC::PBS::Qsub', 
+     'HPC::PBS::Numa'; 
 
 __PACKAGE__->meta->make_immutable;
 

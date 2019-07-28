@@ -21,7 +21,7 @@ sub add_cmd {
 
     if ( grep /\\/, @opts ) { 
         pop @opts; 
-        $self->_add_cmd(join("\\\n", @opts));  
+        $self->_add_cmd(join(" \\\n", @opts));  
     } else { 
         $self->_add_cmd(join(' ', @opts)); 
     }
