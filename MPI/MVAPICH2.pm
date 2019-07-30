@@ -5,24 +5,27 @@ use namespace::autoclean;
 
 with 'HPC::MPI::Lib'; 
 
-has '+mpirun' => (
+has '+mpirun' => ( 
     default => 'mpirun_rsh'
-);
+); 
 
-around cmd => sub {
-    my ($cmd, $self, $select, $ncpus, $omp) = @_; 
+after qr/^(set|unset|reset)_env/ => sub { shift->_reset_env_opt };
 
-    # original cmd 
-    my @cmd = $self->$cmd; 
+sub _build_env_opt { 
+    my $self = shift; 
 
-    # add after mpirun_rsh
-    splice @cmd, 1, 0, ('-np', $select * $ncpus, '-hostfile', '$PBS_NODEFILE'); 
+    return 
+        join(' ', map { $_.'='.$self->get_env($_) } $self->list_env)
+} 
 
-    # add after mpi environment
-    push   @cmd, 'OMP_NUM_THREADS='.$omp if $omp > 1; 
+around 'cmd' => sub { 
+    my ($cmd,$self,$omp) = @_; 
 
-    return @cmd; 
-};
+    my @opts = $self->$cmd; 
+    push @opts, 'OMP_NUM_THREADS='.$omp if $omp > 1; 
+
+    return @opts; 
+}; 
 
 __PACKAGE__->meta->make_immutable;
 

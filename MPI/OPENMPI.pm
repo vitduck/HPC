@@ -5,20 +5,23 @@ use namespace::autoclean;
 
 with 'HPC::MPI::Lib'; 
 
-has '+env_opt' => ( 
-    default => '-x'
-); 
+after qr/^(set|unset|reset)_env/ => sub { shift->_reset_env_opt };
 
-around cmd => sub { 
-    my ($cmd, $self, undef, undef, $omp) = @_; 
+sub _build_env_opt { 
+    my $self = shift; 
 
-    # original cmd 
-    my @cmd = $self->$cmd; 
+    return 
+        join(' ', map { ('-x', $_.'='.$self->get_env($_)) } $self->list_env)
+} 
 
-    push @cmd, '--map-by NUMA:PE='.$omp if $omp > 1; 
+around 'cmd' => sub { 
+    my ($cmd,$self,$omp) = @_; 
+   
+    my @opts = $self->$cmd; 
+    push @opts, '--map-by NUMA:PE='.$omp; 
 
-    return @cmd; 
-};
+    return @opts; 
+}; 
 
 __PACKAGE__->meta->make_immutable;
 

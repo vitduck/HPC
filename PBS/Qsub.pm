@@ -12,20 +12,21 @@ has 'pbs' => (
     coerce   => 1, 
     writer   => 'write_pbs',
     handles  => [qw(print printf)], 
-    trigger  => sub { 
-        my $self = shift; 
-        
-        $self->_write_pbs_opt; 
-        $self->_write_pbs_module; 
-        $self->_write_pbs_cmd; 
-
-    }
+    trigger  => sub { $_[0]->_write_pbs }
 ); 
 
 sub qsub { 
     my ($self, $pbs) = @_; 
     
     system 'qsub', $pbs; 
+} 
+
+sub _write_pbs { 
+    my $self = shift; 
+    
+    $self->_write_pbs_opt; 
+    $self->_write_pbs_module; 
+    $self->_write_pbs_cmd; 
 } 
 
 sub _write_pbs_opt { 

@@ -16,20 +16,22 @@ has mpi => (
     clearer   => '_unload_mpi', 
     predicate => 'has_mpi',
     handles  => { 
-          set_mpi_env => 'set_env', 
-        unset_mpi_env => 'unset_env', 
-        reset_mpi_env => 'reset_env'
+          set_mpi_env    => 'set_env', 
+        unset_mpi_env    => 'unset_env', 
+        reset_mpi_env    => 'reset_env', 
     } 
 ); 
 
-sub mpirun { 
+sub mpirun {
     my $self = shift; 
-    my @opts = ( $self->mpi->cmd(
-        $self->select, 
-        $self->ncpus, 
-        $self->omp)
-    );  
 
+    my @opts = $self->mpi->cmd($self->omp); 
+
+    # mvapich2
+    if ($self->mpi->module eq 'mvapich2' ) { 
+        splice @opts, 1, 0, '-np', $self->select * $self->ncpus, '-hostfile', '$PBS_NODEFILE'; 
+    } 
+    
     # flat mode
     splice @opts, 1, 0, $self->mcdram if $self->mcdram; 
     splice @opts, 1, 0, $self->ddr4   if $self->ddr4; 

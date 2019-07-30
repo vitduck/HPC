@@ -2,7 +2,10 @@ package HPC::MPI::Lib;
 
 use Moose::Role;  
 use Moose::Util::TypeConstraints; 
-use MooseX::Types::Moose qw/Str HashRef/; 
+use MooseX::Types::Moose qw/Str Int HashRef/; 
+
+requires 
+    '_build_env_opt'; 
 
 has 'module' => ( 
     is       => 'ro', 
@@ -39,24 +42,22 @@ has 'env' => (
 ); 
 
 has 'env_opt' => ( 
-    is      => 'ro', 
-    isa     => Str, 
-    default => ''
+    is       => 'rw', 
+    isa      => Str, 
+    init_arg => undef,
+    lazy     => 1,
+    builder  => '_build_env_opt',  
+    clearer  => '_reset_env_opt'
 ); 
 
-sub cmd {
-    my ($self, $select, $ncpus, $omp) = @_; 
+sub cmd { 
+    my ($self, $omp) = @_; 
 
-    # for example: I_IMPI_DEBUG=5
-    my @envs = map { join('=', $_, $self->get_env($_)) } $self->list_env; 
+    my @opts = ($self->mpirun); 
 
-    # IMPI:-env/OPENMPI:-x/MVAPICH2:null 
-    @envs = map { ($self->env_opt, $_) } @envs if $self->env_opt; 
+    push @opts, $self->env_opt if $self->env_opt; 
 
-    return 
-        $self->has_env 
-        ? ($self->mpirun, join(' ', @envs)) 
-        : ($self->mpirun)
-}
+    return @opts; 
+} 
 
 1 
