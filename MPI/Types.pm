@@ -9,7 +9,7 @@ class_type OPENMPI,  { class => 'HPC::MPI::OPENMPI'  };
 class_type MVAPICH2, { class => 'HPC::MPI::MVAPICH2' }; 
 
 subtype MPI, 
-    as IMPI|OPENMPI|MVAPICH2;  
+    as IMPI|OPENMPI|MVAPICH2; 
 
 coerce  MPI, 
     from Str, 

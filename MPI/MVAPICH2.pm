@@ -3,29 +3,35 @@ package HPC::MPI::MVAPICH2;
 use Moose; 
 use namespace::autoclean; 
 
-with 'HPC::MPI::Lib'; 
+with 'HPC::MPI::MPI'; 
 
 has '+mpirun' => ( 
     default => 'mpirun_rsh'
 ); 
 
-after qr/^(set|unset|reset)_env/ => sub { shift->_reset_env_opt };
-
-sub _build_env_opt { 
+sub omp_opt { 
     my $self = shift; 
 
-    return 
-        join(' ', map { $_.'='.$self->get_env($_) } $self->list_env)
+    return join('=', 'OMP_NUM_THREADS', $self->omp ); 
 } 
 
-around 'cmd' => sub { 
-    my ($cmd,$self,$omp) = @_; 
+sub env_opt { 
+    my $self = shift; 
 
-    my @opts = $self->$cmd; 
-    push @opts, 'OMP_NUM_THREADS='.$omp if $omp > 1; 
+    return
+        join ' ',
+        map { $_.'='.$self->get_env($_) } $self->list_env; 
+} 
 
-    return @opts; 
-}; 
+around 'opt' => sub { 
+    my ($opt, $self) = @_; 
+    
+    return (
+        $self->nprocs, 
+        $self->hostfile, 
+        $self->$opt
+    )
+};  
 
 __PACKAGE__->meta->make_immutable;
 

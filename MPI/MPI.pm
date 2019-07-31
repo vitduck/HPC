@@ -1,11 +1,9 @@
-package HPC::MPI::Lib; 
+package HPC::MPI::MPI; 
 
 use Moose::Role;  
 use Moose::Util::TypeConstraints; 
-use MooseX::Types::Moose qw/Str Int HashRef/; 
-
-requires 
-    '_build_env_opt'; 
+use MooseX::Types::Moose qw(Str Int ArrayRef HashRef); 
+use HPC::MPI::Options    qw(NPROCS HOSTFILE); 
 
 has 'module' => ( 
     is       => 'ro', 
@@ -26,6 +24,25 @@ has 'mpirun' => (
     default  => 'mpirun', 
 ); 
 
+has 'omp' => ( 
+    is       => 'rw', 
+    lazy     => 1,
+    default  => 1, 
+); 
+
+has 'nprocs' => (
+    is       => 'rw', 
+    isa      => NPROCS, 
+    coerce   => 1, 
+); 
+
+has 'hostfile' => ( 
+    is       => 'ro', 
+    isa      => HOSTFILE, 
+    coerce   => 1, 
+    default  => '$PBS_HOSTFILE', 
+); 
+
 has 'env' => (
     is        => 'rw', 
     isa       => HashRef,
@@ -41,23 +58,13 @@ has 'env' => (
     } 
 ); 
 
-has 'env_opt' => ( 
-    is       => 'rw', 
-    isa      => Str, 
-    init_arg => undef,
-    lazy     => 1,
-    builder  => '_build_env_opt',  
-    clearer  => '_reset_env_opt'
-); 
+sub opt { 
+    my $self = shift; 
+    my @opts = (); 
 
-sub cmd { 
-    my ($self, $omp) = @_; 
-
-    my @opts = ($self->mpirun); 
-
-    push @opts, $self->env_opt if $self->env_opt; 
-
-    return @opts; 
+    push @opts, $self->env_opt, $self->omp_opt; 
+    
+    return grep $_, @opts
 } 
 
 1 

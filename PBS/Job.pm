@@ -11,6 +11,12 @@ with 'HPC::Debug::Data',
      'HPC::PBS::Qsub', 
      'HPC::PBS::Numa'; 
 
+sub BUILD { 
+    my $self = shift; 
+
+    $self->initialize(); 
+}
+
 __PACKAGE__->meta->make_immutable;
 
 1

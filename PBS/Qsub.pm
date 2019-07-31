@@ -63,9 +63,9 @@ sub _write_pbs_opt {
 sub _write_pbs_module { 
     my $self = shift; 
 
-    $self->printf("module load %s\n", $_) for $self->list_module;
-    $self->printf("%s\n", $self->source_mkl ) if $self->source_mkl; 
-    $self->printf("%s\n", $self->source_impi) if $self->source_impi; 
+    $self->printf("module load %s\n", $_)     for $self->list_module;
+    $self->printf("%s\n", $self->source_mkl ) if  $self->source_mkl; 
+    $self->printf("%s\n", $self->source_impi) if  $self->source_impi; 
     $self->printf("\n"); 
 } 
 

@@ -23,18 +23,17 @@ has mpi => (
 ); 
 
 sub mpirun {
-    my $self = shift; 
+    my $self  = shift; 
+    my $ncpus = $self->select * $self->ncpus; 
+    my @opts  = ($self->mpi->mpirun); 
 
-    my @opts = $self->mpi->cmd($self->omp); 
+    # propagte pbs resources to MPI: 
+    $self->mpi->nprocs($self->ncpus); 
+    $self->mpi->omp($self->omp); 
 
-    # mvapich2
-    if ($self->mpi->module eq 'mvapich2' ) { 
-        splice @opts, 1, 0, '-np', $self->select * $self->ncpus, '-hostfile', '$PBS_NODEFILE'; 
-    } 
-    
-    # flat mode
-    splice @opts, 1, 0, $self->mcdram if $self->mcdram; 
-    splice @opts, 1, 0, $self->ddr4   if $self->ddr4; 
+    # flat/mcdram/ddr4 mode
+    push @opts, $self->numa if $self->numa;  
+    push @opts, $self->mpi->opt;  
 
     return join ' ', @opts 
 }

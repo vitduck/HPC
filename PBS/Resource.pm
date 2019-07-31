@@ -20,7 +20,7 @@ has 'project' => (
 
 has 'account' => ( 
     is       => 'rw', 
-    isa      => enum([ qw( 
+    isa      => enum([qw( 
         ansys abaqus lsdyna nastran gaussian
         openfoam wrf cesm mpas roms grims mom vasp gromacs charmm
         amber lammps namd qe qmc bwa cam inhouse tf caffe pytorch etc )
@@ -31,7 +31,7 @@ has 'account' => (
 
 has 'queue' => ( 
     is       => 'rw', 
-    isa      => enum([ qw( 
+    isa      => enum([qw( 
         exclusive khoa rokaf_knl normal long flat debug
         commercial norm_skl )
     ]), 

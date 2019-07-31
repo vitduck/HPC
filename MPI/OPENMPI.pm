@@ -3,25 +3,22 @@ package HPC::MPI::OPENMPI;
 use Moose; 
 use namespace::autoclean; 
 
-with 'HPC::MPI::Lib'; 
+with 'HPC::MPI::MPI'; 
 
-after qr/^(set|unset|reset)_env/ => sub { shift->_reset_env_opt };
-
-sub _build_env_opt { 
+sub omp_opt { 
     my $self = shift; 
 
-    return 
-        join(' ', map { ('-x', $_.'='.$self->get_env($_)) } $self->list_env)
+    return (join '=', '--map-by NUMA:PE', $self->omp)
 } 
 
-around 'cmd' => sub { 
-    my ($cmd,$self,$omp) = @_; 
-   
-    my @opts = $self->$cmd; 
-    push @opts, '--map-by NUMA:PE='.$omp; 
+sub env_opt { 
+    my $self = shift; 
 
-    return @opts; 
-}; 
+    return
+        join ' ',
+        map { ('-x', $_) }
+        map { $_.'='.$self->get_env($_) } $self->list_env; 
+} 
 
 __PACKAGE__->meta->make_immutable;
 
