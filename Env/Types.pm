@@ -5,16 +5,14 @@ use MooseX::Types::Moose qw/Str/;
 
 subtype SRC_MKL, 
     as Str, 
-    where { $_ =~ /^\./ }; 
+    where { /^\./ }; 
 
 coerce SRC_MKL, 
     from Str, 
     via { 
         my ($version) = (split /\//, $_)[1]; 
 
-        return 
-            join ' ',  
-            '.', "/apps/compiler/intel/$version/mkl/bin/mklvars.sh intel64"
+        return ". /apps/compiler/intel/$version/mkl/bin/mklvars.sh intel64"
     };  
 
 subtype SRC_IMPI, 
@@ -26,9 +24,7 @@ coerce SRC_IMPI,
     via { 
         my ($version) = (split /\//, $_)[1]; 
 
-        return 
-            join ' ', 
-            '.', "/apps/compiler/intel/$version/impi/2018.3.222/intel64/bin/mpivars.sh" 
+        return ". /apps/compiler/intel/$version/impi/2018.3.222/intel64/bin/mpivars.sh" 
     }; 
 
 1

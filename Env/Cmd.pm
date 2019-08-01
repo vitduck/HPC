@@ -6,21 +6,19 @@ sub load {
     my ($self, @modules) = @_; 
 
     for my $module (@modules) { 
-        $self->_add_module($module); 
-        $self->_load_mpi($module) if $module =~ /^(cray-impi|impi|openmpi|mvapich2)/; 
+        my $index = $self->_index_module(sub {/$module/}); 
+
+        $self->_add_module($module) unless $index;  
     }
 }
 
 sub unload { 
     my ($self, @modules) = @_; 
 
-    for my $module (@modules) { 
+    for my $module (@modules) {
         my $index = $self->_index_module(sub {/$module/}); 
 
-        if ($index) { 
-            $self->_delete_module($index); 
-            $self->_unload_mpi if $module =~ /^(cray-impi|impi|openmpi|mvapich2)/; 
-        }
+        $self->_delete_module($index) if $index;  
     }
 }
 

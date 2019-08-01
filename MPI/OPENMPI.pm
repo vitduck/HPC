@@ -1,24 +1,27 @@
 package HPC::MPI::OPENMPI; 
 
 use Moose; 
+use HPC::MPI::Options qw(OMP_OPENMPI ENV_OPENMPI); 
 use namespace::autoclean; 
 
 with 'HPC::MPI::MPI'; 
 
-sub omp_opt { 
+has '+omp' => ( 
+    isa    => OMP_OPENMPI, 
+    coerce => 1
+); 
+
+has '+env' => ( 
+    isa    => ENV_OPENMPI, 
+    coerce => 1
+); 
+
+after qr/^(set|unset|reset)_env/ => sub { 
     my $self = shift; 
 
-    return (join '=', '--map-by NUMA:PE', $self->omp)
-} 
-
-sub env_opt { 
-    my $self = shift; 
-
-    return
-        join ' ',
-        map { ('-x', $_) }
-        map { $_.'='.$self->get_env($_) } $self->list_env; 
-} 
+    # update env
+    $self->env($self->_env)
+};  
 
 __PACKAGE__->meta->make_immutable;
 

@@ -10,7 +10,7 @@ use HPC::Env::Types qw/SRC_MKL SRC_IMPI/;
 with 'HPC::Env::Cmd', 
      'HPC::Env::Preset'; 
 
-has 'modules' => ( 
+has 'modules' => (
     is       => 'rw',
     isa      => ArrayRef[Str], 
     traits   => ['Array'], 
@@ -25,7 +25,7 @@ has 'modules' => (
     }
 ); 
 
-has 'source_mkl' => ( 
+has 'source_mkl' => (
     is       => 'rw', 
     isa      => SRC_MKL, 
     init_arg => undef, 
@@ -33,7 +33,7 @@ has 'source_mkl' => (
     clearer  => '_unsource_mkl'
 ); 
 
-has 'source_impi' => ( 
+has 'source_impi' => (
     is       => 'rw', 
     isa      => SRC_IMPI, 
     init_arg => undef, 
@@ -41,7 +41,7 @@ has 'source_impi' => (
     clearer  => '_unsource_impi'
 ); 
 
-sub _build_modules { 
+sub _build_modules {
     return [ 
         grep !/\d+\)/, 
         grep !/Currently|Loaded|Modulefiles:/,

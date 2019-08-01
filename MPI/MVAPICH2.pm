@@ -1,6 +1,7 @@
 package HPC::MPI::MVAPICH2; 
 
 use Moose; 
+use HPC::MPI::Options qw(OMP_MVAPICH2 ENV_MVAPICH2); 
 use namespace::autoclean; 
 
 with 'HPC::MPI::MPI'; 
@@ -9,19 +10,22 @@ has '+mpirun' => (
     default => 'mpirun_rsh'
 ); 
 
-sub omp_opt { 
+has '+omp' => ( 
+    isa    => OMP_MVAPICH2, 
+    coerce => 1
+); 
+
+has '+env' => ( 
+    isa    => ENV_MVAPICH2, 
+    coerce => 1
+); 
+
+after qr/^(set|unset|reset)_env/ => sub { 
     my $self = shift; 
 
-    return join('=', 'OMP_NUM_THREADS', $self->omp ); 
-} 
-
-sub env_opt { 
-    my $self = shift; 
-
-    return
-        join ' ',
-        map { $_.'='.$self->get_env($_) } $self->list_env; 
-} 
+    # update env
+    $self->env($self->_env)
+};  
 
 around 'opt' => sub { 
     my ($opt, $self) = @_; 

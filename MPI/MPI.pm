@@ -7,7 +7,7 @@ use HPC::MPI::Options    qw(NPROCS HOSTFILE);
 
 has 'module' => ( 
     is       => 'ro', 
-    isa      => enum([qw/impi openmpi mvapich2/]), 
+    isa      => enum([qw/cray-impi impi openmpi mvapich2/]), 
     required => 1
 ); 
 
@@ -26,7 +26,7 @@ has 'mpirun' => (
 
 has 'omp' => ( 
     is       => 'rw', 
-    lazy     => 1,
+    init_arg => undef, 
     default  => 1, 
 ); 
 
@@ -43,12 +43,13 @@ has 'hostfile' => (
     default  => '$PBS_HOSTFILE', 
 ); 
 
-has 'env' => (
-    is        => 'rw', 
-    isa       => HashRef,
-    traits    => ['Hash'],
-    init_arg  => undef,
-    handles   => { 
+has '_env' => (
+    is       => 'rw', 
+    isa      => HashRef,
+    traits   => ['Hash'],
+    init_arg => undef,
+    default  => sub {{}}, 
+    handles  => { 
         has_env   => 'count', 
         get_env   => 'get', 
         set_env   => 'set',
@@ -58,11 +59,17 @@ has 'env' => (
     } 
 ); 
 
+has 'env' => ( 
+    is       => 'rw', 
+    init_arg => undef,
+    default  => sub {{}}
+); 
+
 sub opt { 
     my $self = shift; 
     my @opts = (); 
 
-    push @opts, $self->env_opt, $self->omp_opt; 
+    push @opts, $self->env, $self->omp; 
     
     return grep $_, @opts
 } 
