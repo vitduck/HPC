@@ -40,7 +40,7 @@ has 'hostfile' => (
     is       => 'ro', 
     isa      => HOSTFILE, 
     coerce   => 1, 
-    default  => '$PBS_HOSTFILE', 
+    default  => '$PBS_NODEFILE', 
 ); 
 
 has '_env' => (
