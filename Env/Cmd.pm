@@ -8,7 +8,7 @@ sub load {
     for my $module (@modules) { 
         my $index = $self->_index_module(sub {/$module/}); 
 
-        $self->_add_module($module) unless $index;  
+        $self->_add_module($module) if $index == -1
     }
 }
 

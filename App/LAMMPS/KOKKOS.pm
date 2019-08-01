@@ -8,11 +8,7 @@ use HPC::App::LAMMPS::Types qw/Kokkos/;
 
 with 'HPC::App::LAMMPS::Package'; 
 
-has '+name' => ( 
-    default => 'kokkos'
-); 
-
-has '+opts' => ( 
+has '+_opt' => ( 
     default => sub {[qw/
         neigh neigh_qeq neigh_thread 
         newton binsize 
@@ -29,80 +25,86 @@ has 'kokkos' => (
     is      => 'rw', 
     isa     => Kokkos, 
     coerce  => 1, 
-    default => 'on'
+    default => 1, 
+    writer  => 'set_kokkos',   
 ); 
 
 has 'neigh' => ( 
-    is      => 'rw', 
-    isa     => enum([qw/full half/]), 
-    default => 'half',
-    trigger => sub { shift->_reset_package }
+    is        => 'rw', 
+    isa       => enum([qw/full half/]), 
+    default   => 'half',
+    predicate => 'has_neigh'
 ); 
 
 has 'neigh_qeq' => ( 
     is      => 'rw', 
     isa     => enum([qw/full half/]), 
-    trigger => sub { shift->_reset_package }
+    predicate => 'has_neigh_qeq'
 ); 
 
 has 'neigh_thread' => ( 
     is      => 'rw', 
     isa     => enum([qw/off on/]), 
-    trigger => sub { shift->_reset_package }
+    predicate => 'has_neigh_thread'
 ); 
 
 has 'newton' => ( 
     is      => 'rw', 
     isa     => enum([qw/off on/]), 
     default => 'on',
-    trigger => sub { shift->_reset_package }
+    predicate => 'has_newton'
 ); 
 
 has 'binsize' => ( 
     is      => 'rw', 
     isa     => Num,
-    trigger => sub { shift->_reset_package }
+    predicate => 'has_binsize'
 ); 
 
 has 'comm' => ( 
     is      => 'rw', 
     isa     => enum([qw/no host device/]), 
-    trigger => sub { shift->_reset_package }
+    predicate => 'has_comm'
 ); 
 
 has 'comm_exchange' => ( 
-    is      => 'rw', 
-    isa     => enum([qw/no host device/]), 
-    trigger => sub { shift->_reset_package }
+    is        => 'rw', 
+    isa       => enum([qw/no host device/]), 
+    predicate => 'has_comm_exchange'
 ); 
 
 has 'comm_forward' => ( 
     is      => 'rw', 
     isa     => enum([qw/no host device/]), 
-    trigger => sub { shift->_reset_package }
+    predicate => 'has_comm_forward'
 ); 
 
 has 'comm_reverse' => ( 
     is      => 'rw', 
     isa     => enum([qw/no host device/]), 
-    trigger => sub { shift->_reset_package }
+    predicate => 'has_comm_reverse'
 ); 
 
 has 'gpu_direct' => ( 
     is      => 'rw', 
     isa     => enum([qw/off on/]), 
-    trigger => sub { shift->_reset_package }
+    predicate => 'has_gpu_direct'
 ); 
 
-around 'cmd' => sub { 
-    my $orig = shift; 
-    my $self = shift; 
+around 'opt' => sub {
+    my ($opt, $self) = @_; 
     
     # for neight/* comm/* and gpu/direct
-    my $cmd = $self->$orig =~ s/_/\//r; 
+    my @opts = map { s/_/\//; $_ } $self->$opt->@*; 
 
-    return join(' ', $self->kokkos, $cmd)
-};  
+    return ['kokkos', @opts]
+}; 
+
+around 'cmd' => sub { 
+    my ($cmd, $self) = @_; 
+
+    return ($self->kokkos, $self->$cmd)
+}; 
 
 __PACKAGE__->meta->make_immutable;
 

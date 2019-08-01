@@ -71,9 +71,9 @@ sub _write_pbs_module {
 
 sub _write_pbs_cmd {
     my $self = shift; 
-    
-    # command 
-    $self->print("$_\n") for $self->list_cmd; 
+
+    my $cmd = join "\n\n", $self->list_cmd; 
+    $self->print("$cmd\n"); 
 } 
 
 1

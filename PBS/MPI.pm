@@ -73,8 +73,6 @@ sub _load_mpi {
     # coercion module to MPI class
     my $load = "_load_$mpi"; 
     $self->$load($module); 
-    
-    # _mpi for conflict checking 
     $self->_set_mpi($mpi); 
 }
 
@@ -84,12 +82,10 @@ sub _unload_mpi {
     # cray-impi module
     my $mpi = $1 if $module =~ /(impi|openmpi|mvapich2)/;  
 
-    # remove MPI using cleaer
+    # remove MPI using clearer
     if ( $mpi eq $self->_mpi ) { 
         my $unload = "_unload_$mpi"; 
-        $self->$unload if $self->$mpi;  
-
-        # _mpi for conflict checking 
+        $self->$unload; 
         $self->_unset_mpi; 
     }
 }

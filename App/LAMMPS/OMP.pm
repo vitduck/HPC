@@ -6,15 +6,7 @@ use Moose::Util::TypeConstraints;
 
 with 'HPC::App::LAMMPS::Package'; 
 
-has '+name' => ( 
-    default => 'omp'
-); 
-
-has '+arg' => ( 
-    default => 'nthreads'
-); 
-
-has '+opts' => ( 
+has '+_opt' => ( 
     default => sub {['neigh']}  
 ); 
 
@@ -26,14 +18,19 @@ has 'nthreads' => (
     is      => 'rw', 
     isa     => Int,
     default => 0, 
-    trigger => sub { shift->_reset_package }
 ); 
 
 has 'neigh' => ( 
-    is      => 'rw', 
-    isa     => enum([qw/yes no/]), 
-    trigger => sub { shift->_reset_package }
+    is        => 'rw', 
+    isa       => enum([qw/yes no/]), 
+    predicate => 'has_neigh'
 ); 
+
+around 'opt' => sub {
+    my ($opt, $self) = @_; 
+    
+    return ['omp', $self->nthreads, $self->$opt->@*]
+}; 
 
 __PACKAGE__->meta->make_immutable;
 

@@ -1,7 +1,10 @@
 package HPC::App::LAMMPS::Types; 
 
-use MooseX::Types -declare => [qw/Inp Log Suffix Kokkos Var Pkg ACC GPU OPT OMP INTEL KOKKOS/]; 
-use MooseX::Types::Moose qw/Str ArrayRef Object/;
+use MooseX::Types -declare => [qw(
+    Inp Log Suffix Kokkos Var Pkg 
+    OPT OMP KOKKOS INTEL GPU )]; 
+
+use MooseX::Types::Moose qw/Str Int ArrayRef Object/;
 
 # input
 subtype Inp,
@@ -36,8 +39,8 @@ subtype Kokkos,
     where { $_ =~/^\-k/ }; 
 
 coerce  Kokkos, 
-    from Str,     , 
-    via { '-k '.$_ }; 
+    from Int,      
+    via { '-k on t '.$_ }; 
 
 # var
 subtype Var, 
@@ -58,24 +61,18 @@ coerce  Var,
 
 # package
 subtype Pkg, 
-    as Str, 
-    where { $_ =~/^\-pk/ }; 
+    as Str;  
+    # where { $_ =~/^\-pk/ }; 
 
 coerce Pkg, 
-    from Str,
-    via { '-pk '.$_ }; 
+    from ArrayRef,
+    via { join ' ', '-pk', $_->@* }; 
 
-class_type GPU,    { class => 'HPC::App::LAMMPS::GPU'    }; 
+# accelerator package 
 class_type OPT,    { class => 'HPC::App::LAMMPS::OPT'    }; 
 class_type OMP,    { class => 'HPC::App::LAMMPS::OMP'    }; 
+class_type GPU,    { class => 'HPC::App::LAMMPS::GPU'    }; 
 class_type INTEL,  { class => 'HPC::App::LAMMPS::INTEL'  }; 
 class_type KOKKOS, { class => 'HPC::App::LAMMPS::KOKKOS' }; 
 
-# accelerator package 
-subtype ACC, 
-    as GPU|OPT|OMP|INTEL|KOKKOS;  
-
-coerce  ACC, 
-    from Str, 
-    via { ('HPC::App::LAMMPS::'.uc($_))->new };  
 1
