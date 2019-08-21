@@ -2,16 +2,14 @@ package HPC::App::LAMMPS::OPT;
 
 use Moose; 
 
-with 'HPC::App::LAMMPS::Package' => { -excludes => ['cmd'] }; 
+with 'HPC::App::LAMMPS::Package'; 
 
 has '+suffix' => (
     default => 'opt',
 );
 
-sub cmd { 
-    my $self = shift; 
-
-    return $self->suffix
+sub options { 
+    return ''
 } 
 
 __PACKAGE__->meta->make_immutable;

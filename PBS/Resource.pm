@@ -51,7 +51,7 @@ has 'select' => (
     isa     => Int,
     default => 1,
     writer  => 'set_select',
-    trigger => sub { $_[0]->_reset_mpiprocs }
+    trigger => sub { shift->_reset_mpiprocs }
 );
 
 has 'ncpus' => (
@@ -59,7 +59,7 @@ has 'ncpus' => (
     isa     => Int,
     default => 1,
     writer  => 'set_ncpus',
-    trigger => sub { $_[0]->_reset_mpiprocs }
+    trigger => sub { shift->_reset_mpiprocs }
 );
 
 has 'stderr' => ( 
@@ -78,17 +78,27 @@ has 'mpiprocs' => (
     is      => 'rw',
     isa     => Int,
     lazy    => 1,
-    default => sub { $_[0]->ncpus / $_[0]->omp }, 
     writer  => 'set_mpiprocs',
-    clearer => '_reset_mpiprocs'
+    clearer => '_reset_mpiprocs', 
+    default => sub { 
+        my $self = shift; 
+
+        return 
+            $self->has_omp 
+            ? $self->ncpus / $self->omp
+            : $self->ncpus
+    }
 );
 
 has 'omp' => (
-    is      => 'rw',
-    isa     => Int,
-    default => 1,
-    writer  => 'set_omp',
-    trigger => sub { $_[0]->_reset_mpiprocs }
+    is        => 'rw',
+    isa       => Int,
+    lazy      => 1, 
+    default   => 1,
+    predicate => 'has_omp',
+    writer    => 'set_omp',
+    clearer   => '_reset_omp', 
+    trigger   => sub { shift->_reset_mpiprocs }
 );
 
 has 'walltime' => (

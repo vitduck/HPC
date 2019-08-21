@@ -31,22 +31,38 @@ after '_load_mpi' => sub {
     my $self = shift; 
     my $mpi  = $self->_mpi; 
 
-    $self->$mpi->nprocs($self->select * $self->ncpus); 
-    $self->$mpi->omp   ($self->omp); 
+    $self->$mpi
+         ->set_nprocs($self->select*$self->mpiprocs); 
+
+    $self->$mpi
+         ->set_omp($self->omp) if $self->has_omp; 
 };
+
+after '_unload_mpi' => sub { 
+    my $self = shift; 
+
+    $self->_reset_omp
+}; 
 
 after 'set_omp' => sub { 
     my $self  = shift; 
     my $mpi  = $self->_mpi; 
 
-    $self->$mpi->omp($self->omp) if $mpi;  
+    if ($mpi) { 
+        $self->$mpi
+             ->set_nprocs($self->select*$self->mpiprocs); 
+
+        $self->$mpi
+             ->set_omp($self->omp)
+    }
 };  
 
 after [qw(set_select set_ncpus)] => sub {  
     my $self  = shift; 
     my $mpi  = $self->_mpi; 
     
-    $self->$mpi->nprocs($self->select*$self->ncpus) if $mpi; 
+    $self->$mpi
+         ->nprocs($self->select*$self->mpiprocs) if $mpi;
 }; 
 
 sub BUILD { 

@@ -3,9 +3,9 @@ package HPC::PBS::MPI;
 use Moose::Role; 
 use MooseX::Types::Moose qw(Str); 
 
-use HPC::MPI::IMPI;  
-use HPC::MPI::OPENMPI; 
-use HPC::MPI::MVAPICH2; 
+use HPC::MPI::IMPI::Module;  
+use HPC::MPI::OPENMPI::Module; 
+use HPC::MPI::MVAPICH2::Module; 
 use HPC::MPI::Types qw(IMPI OPENMPI MVAPICH2); 
 
 has '_mpi' => ( 
@@ -24,7 +24,8 @@ has 'impi' => (
     writer   => '_load_impi',
     clearer  => '_unload_impi', 
     handles  => { 
-          set_impi_env =>   'set_env', 
+        set_impi_env   => 'set_env', 
+        set_impi_eager => 'set_eagersize',
         unset_impi_env => 'unset_env', 
         reset_impi_env => 'reset_env', 
     }
@@ -38,9 +39,13 @@ has 'openmpi' => (
     writer   => '_load_openmpi',
     clearer  => '_unload_openmpi', 
     handles  => { 
-          set_openmpi_env =>   'set_env', 
-        unset_openmpi_env => 'unset_env', 
+        set_openmpi_env   => 'set_env', 
+        set_openmpi_mca   => 'set_mca',
+        set_openmpi_eager => 'set_eagersize',
         reset_openmpi_env => 'reset_env', 
+        reset_openmpi_mca => 'reset_mca', 
+        unset_openmpi_env => 'unset_env', 
+        unset_openmpi_mca => 'unset_mca', 
     }
 ); 
 
@@ -52,7 +57,8 @@ has 'mvapich2' => (
     writer   => '_load_mvapich2',
     clearer  => '_unload_mvapich2', 
     handles  => { 
-          set_mvapich2_env =>   'set_env', 
+        set_mvapich2_env   => 'set_env', 
+        set_mvapich2_eager => 'set_eagersize',
         unset_mvapich2_env => 'unset_env', 
         reset_mvapich2_env => 'reset_env', 
     }

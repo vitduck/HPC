@@ -10,7 +10,7 @@ has 'cmd' => (
     lazy    => 1, 
     default => sub {["cd \$PBS_O_WORKDIR"]},
     handles => { 
-         _add_cmd  => 'push',
+         _add_cmd => 'push',
          list_cmd => 'elements' 
     }, 
     clearer => 'new_cmd', 

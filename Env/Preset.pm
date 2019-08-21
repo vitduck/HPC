@@ -8,7 +8,6 @@ has '_preset' => (
     isa      => HashRef, 
     traits   => ['Hash'], 
     init_arg => undef, 
-    lazy     => 1, 
     default  => sub {{ 
         knl   => 'craype-mic-knl',
         skl   => 'craype-x86-skylake', 
