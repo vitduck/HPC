@@ -22,19 +22,20 @@ coerce ENV_OPENMPI,
 
         join(' ', 
             map { ('-x', $_) }
-            map { $_.'='.$env->{$_} } keys $env->%* ) 
+            map { $_.'='.$env->{$_} } sort keys $env->%* ) 
     }; 
 
 subtype MCA_OPENMPI,
-    as Str, 
-    where { /\-\-mca/ }; 
+    as Str; 
 
 coerce MCA_OPENMPI, 
     from HashRef, 
     via { 
         my $mca = $_;  
-
-        '--mca '.join(' ', map { $_.' '.$mca->{$_} } sort keys $mca->%*)    
+    
+        join(' ', 
+            map { ('--mca', $_) }
+            map { $_.' '.$mca->{$_} } sort keys $mca->%* ) 
     }; 
 
 1

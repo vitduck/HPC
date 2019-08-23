@@ -16,7 +16,11 @@ has '+eagersize' => (
     trigger => sub { 
         my $self = shift; 
 
-        $self->set_mca(btl_openib_eager_limit => $self->eagersize); 
+        $self->set_env(
+            PSM2_MQ_RNDV_HFI_THRESH => $self->eagersize, 
+            PSM2_MQ_RNDV_HFI_WINDOW => $self->eagersize,
+            PSM2_MG_RNDV_SHM_THRESH => $self->eagersize, 
+        ); 
     }
 ); 
 
@@ -30,7 +34,7 @@ sub opt {
     my @opts = (); 
 
     push @opts, $self->mca($self->_mca) if $self->has_mca; 
-    push @opts, $self->env($self->_mca) if $self->has_env; 
+    push @opts, $self->env($self->_env) if $self->has_env; 
     push @opts, $self->omp              if $self->has_omp; 
 
     return @opts; 

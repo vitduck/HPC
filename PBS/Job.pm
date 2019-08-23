@@ -62,7 +62,7 @@ after [qw(set_select set_ncpus)] => sub {
     my $mpi  = $self->_mpi; 
     
     $self->$mpi
-         ->nprocs($self->select*$self->mpiprocs) if $mpi;
+         ->set_nprocs($self->select*$self->mpiprocs) if $mpi;
 }; 
 
 sub BUILD { 
