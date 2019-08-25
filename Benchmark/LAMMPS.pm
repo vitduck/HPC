@@ -2,6 +2,7 @@ package HPC::Benchmark::LAMMPS;
 
 use Moose; 
 use MooseX::Types::Moose qw/Object Str Undef/; 
+use namespace::autoclean; 
 
 use HPC::App::LAMMPS::OPT; 
 use HPC::App::LAMMPS::OMP; 
@@ -10,8 +11,7 @@ use HPC::App::LAMMPS::INTEL;
 use HPC::App::LAMMPS::KOKKOS; 
 use HPC::App::LAMMPS::Types qw/Inp Log Var/; 
 
-with 'HPC::Debug::Data', 
-     'HPC::Benchmark::Base'; 
+with qw(HPC::Debug::Data HPC::Benchmark::Base);  
 
 has 'inp' => ( 
     is     => 'rw',

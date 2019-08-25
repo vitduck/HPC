@@ -9,7 +9,7 @@ use MooseX::Types::Moose qw/Str Int ArrayRef Object/;
 # input
 subtype Inp,
     as Str, 
-    where { $_ =~/^\-i/ }; 
+    where { /^\-i/ }; 
 
 coerce  Inp, 
     from Str, 
@@ -18,7 +18,7 @@ coerce  Inp,
 # log
 subtype Log, 
     as Str, 
-    where { $_ =~/^\-l/ }; 
+    where { /^\-l/ }; 
 
 coerce  Log, 
     from Str, 
@@ -27,7 +27,7 @@ coerce  Log,
 # suffix 
 subtype Suffix,  
     as Str, 
-    where { $_ =~/^\-sf/ }; 
+    where { /^\-sf/ }; 
 
 coerce  Suffix, 
     from Str, 
@@ -36,7 +36,7 @@ coerce  Suffix,
 # kokkos
 subtype Kokkos, 
     as Str,
-    where { $_ =~/^\-k/ }; 
+    where { /^\-k/ }; 
 
 coerce  Kokkos, 
     from Int,      
@@ -45,7 +45,7 @@ coerce  Kokkos,
 # var
 subtype Var, 
     as Str,      
-    where { $_ =~/^\-v/ }; 
+    where { /^\-v/ }; 
 
 coerce  Var,  
     from ArrayRef, 
