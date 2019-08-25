@@ -4,7 +4,7 @@ use Moose;
 use HPC::MPI::IMPI::Options qw(ENV_IMPI); 
 use namespace::autoclean; 
 
-with 'HPC::MPI::Role'; 
+with qw(HPC::MPI::Base); 
 
 has '+eagersize' => ( 
     trigger => sub { 

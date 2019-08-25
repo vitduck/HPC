@@ -8,7 +8,13 @@ sub load {
     for my $module (@modules) { 
         my $index = $self->_index_module(sub {/$module/}); 
 
-        $self->_add_module($module) if $index == -1
+        if ($index == -1) { 
+            $self->_add_module($module);  
+            
+            if ($module =~ /cray-impi|impi|openmpi|mvapich2/) {  
+                $self->_load_mpi($module); 
+            }
+        }
     }
 }
 
@@ -18,7 +24,13 @@ sub unload {
     for my $module (@modules) {
         my $index = $self->_index_module(sub {/$module/}); 
 
-        $self->_delete_module($index) if $index;  
+        if ($index) { 
+            $self->_remove_module($index); 
+
+            if ($module =~ /cray-impi|impi|openmpi|mvapich2/) {  
+                $self->_unload_mpi($module); 
+            }
+        }
     }
 }
 
@@ -36,7 +48,8 @@ sub initialize {
     for my $module ($self->list_module) { 
         next if $module =~ /craype-network-opa/; 
 
-        $self->unload($module); 
+        $self->unload ($module); 
+        $self->_unload_module($module); 
     }
 
     # cache LD_LIBRARY_PATH

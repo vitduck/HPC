@@ -5,10 +5,10 @@ use Moose::Util::TypeConstraints;
 use MooseX::Types::Moose qw/Str Int/; 
 
 has 'shell' => ( 
-    is       => 'rw', 
-    isa      =>  Str,
-    writer   => 'set_shell',
-    default  => '#!/usr/bin/env bash', 
+    is      => 'rw', 
+    isa     =>  Str,
+    writer  => 'set_shell',
+    default => '#!/usr/bin/env bash', 
 ); 
 
 has 'project' => ( 
@@ -19,31 +19,26 @@ has 'project' => (
 ); 
 
 has 'account' => ( 
-    is       => 'rw', 
-    isa      => enum([qw( 
-        ansys abaqus lsdyna nastran gaussian
-        openfoam wrf cesm mpas roms grims mom vasp gromacs charmm
-        amber lammps namd qe qmc bwa cam inhouse tf caffe pytorch etc )
-    ]), 
-    writer   => 'set_account',
-    default  => 'etc',
+    is      => 'rw', 
+    isa     => enum([qw(ansys abaqus lsdyna nastran gaussian
+                         openfoam wrf cesm mpas roms grims mom vasp gromacs charmm
+                         amber lammps namd qe qmc bwa cam inhouse tf caffe pytorch etc)]), 
+    writer  => 'set_account',
+    default => 'etc',
 ); 
 
 has 'queue' => ( 
-    is       => 'rw', 
-    isa      => enum([qw( 
-        exclusive khoa rokaf_knl normal long flat debug
-        commercial norm_skl )
-    ]), 
-    writer   => 'set_queue',
-    default  => 'normal'
+    is      => 'rw', 
+    isa     => enum([qw(exclusive khoa rokaf_knl normal long flat debug  commercial norm_skl)]), 
+    writer  => 'set_queue',
+    default => 'normal'
 ); 
 
 has 'name' => ( 
-    is       => 'rw', 
-    isa      => Str, 
-    writer   => 'set_name',
-    default  => 'jobname', 
+    is      => 'rw', 
+    isa     => Str, 
+    writer  => 'set_name',
+    default => 'jobname', 
 ); 
 
 has 'select' => (
@@ -51,7 +46,15 @@ has 'select' => (
     isa     => Int,
     default => 1,
     writer  => 'set_select',
-    trigger => sub { shift->_reset_mpiprocs }
+    trigger => sub { 
+        my $self = shift; 
+
+        $self->_reset_mpiprocs; 
+
+        if ($self->has_mpi) {  
+            $self->mpi->set_nprocs($self->select*$self->mpiprocs) 
+        }
+    }
 );
 
 has 'ncpus' => (
@@ -59,19 +62,27 @@ has 'ncpus' => (
     isa     => Int,
     default => 1,
     writer  => 'set_ncpus',
-    trigger => sub { shift->_reset_mpiprocs }
+    trigger => sub { 
+        my $self = shift; 
+
+        $self->_reset_mpiprocs;  
+
+        if ($self->has_mpi) {  
+            $self->mpi->set_nprocs($self->select*$self->mpiprocs) 
+        }
+    }
 );
 
 has 'stderr' => ( 
-    is        => 'rw', 
-    isa       => Str,
-    writer  => 'set_stderr',
+    is     => 'rw', 
+    isa    => Str,
+    writer => 'set_stderr',
 ); 
 
 has 'stdout' => ( 
-    is      => 'rw', 
-    isa     => Str,
-    writer  => 'set_stdout',
+    is     => 'rw', 
+    isa    => Str,
+    writer => 'set_stdout',
 ); 
 
 has 'mpiprocs' => (
@@ -83,10 +94,9 @@ has 'mpiprocs' => (
     default => sub { 
         my $self = shift; 
 
-        return 
-            $self->has_omp 
-            ? $self->ncpus / $self->omp
-            : $self->ncpus
+        $self->has_omp 
+        ? $self->ncpus / $self->omp
+        : $self->ncpus
     }
 );
 
@@ -98,7 +108,16 @@ has 'omp' => (
     predicate => 'has_omp',
     writer    => 'set_omp',
     clearer   => '_reset_omp', 
-    trigger   => sub { shift->_reset_mpiprocs }
+    trigger   => sub { 
+        my $self = shift; 
+
+        $self->_reset_mpiprocs; 
+
+        if ($self->has_mpi) { 
+            $self->mpi->set_nprocs($self->select*$self->mpiprocs); 
+            $self->mpi->set_omp($self->omp); 
+        } 
+    }
 );
 
 has 'walltime' => (

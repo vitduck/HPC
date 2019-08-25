@@ -1,9 +1,10 @@
-package HPC::MPI::Role; 
+package HPC::MPI::Base; 
 
 use Moose::Role;  
 use Moose::Util::TypeConstraints; 
 use MooseX::Types::Moose qw(Str Int ArrayRef HashRef); 
-use HPC::MPI::Options    qw(NPROCS HOSTFILE); 
+
+use HPC::MPI::Options qw(NPROCS HOSTFILE); 
 
 requires 'opt'; 
 
@@ -27,25 +28,28 @@ has 'mpirun' => (
 ); 
 
 has 'omp' => ( 
-    is       => 'rw', 
+    is        => 'rw', 
     init_arg  => undef, 
-    lazy      => 1,
     predicate => 'has_omp', 
     writer    => 'set_omp',
+    lazy      => 1,
     default   => 1, 
 ); 
 
 has 'nprocs' => (
     is       => 'rw', 
     isa      => NPROCS, 
-    writer   => 'set_nprocs', 
     coerce   => 1, 
+    writer   => 'set_nprocs', 
+    lazy     => 1, 
+    default  => 1,
 ); 
 
 has 'hostfile' => ( 
     is       => 'ro', 
     isa      => HOSTFILE, 
     coerce   => 1, 
+    lazy     => 1,
     default  => '$PBS_NODEFILE', 
 ); 
 
@@ -54,6 +58,7 @@ has '_env' => (
     isa      => HashRef,
     traits   => ['Hash'],
     init_arg => undef,
+    lazy     => 1,
     default  => sub {{}}, 
     handles  => { 
         has_env   => 'count', 
@@ -68,7 +73,8 @@ has '_env' => (
 has 'env' => ( 
     is       => 'rw', 
     init_arg => undef,
-    default  => sub {{}}
+    lazy     => 1,
+    default  => sub {{}}, 
 ); 
 
 has 'eagersize' => ( 
@@ -77,6 +83,5 @@ has 'eagersize' => (
     init_arg => undef, 
     writer   => 'set_eagersize'
 ); 
-
 
 1 

@@ -1,32 +1,53 @@
 package HPC::PBS::Qsub; 
 
 use Moose::Role; 
-use MooseX::Types::Moose qw/Str/;
+use MooseX::Types::Moose qw(Str);
 
-use HPC::PBS::Types qw/FH/; 
+use HPC::PBS::Types qw(FH); 
 
-has 'pbs' => (
+has 'pbs' => ( 
+    is       => 'rw',
+    isa      => Str,
+    init_arg => undef, 
+    writer   => 'set_pbs',
+    trigger  => sub { 
+        my $self = shift; 
+
+        $self->_io($self->pbs); 
+    }
+); 
+
+has '_io' => (
     is       => 'rw',
     isa      => FH,
     init_arg => undef,
     coerce   => 1, 
-    writer   => 'write_pbs',
     handles  => [qw(print printf)], 
-    trigger  => sub { $_[0]->_write_pbs }
+    trigger  => sub { 
+        my $self = shift; 
+        
+        $self->_write_pbs_opt; 
+        $self->_write_pbs_module; 
+        $self->_write_pbs_cmd; 
+    }
 ); 
 
-sub qsub { 
-    my ($self, $pbs) = @_; 
-    
-    system 'qsub', $pbs; 
+sub add_pbs { 
+    my ($self, @opts) = @_; 
+
+    if ( grep /\\/, @opts ) { 
+        pop @opts; 
+        $self->print(join(" \\\n", @opts));  
+
+    } else { 
+        $self->print(join(' ', @opts)); 
+    }
 } 
 
-sub _write_pbs { 
+sub qsub { 
     my $self = shift; 
     
-    $self->_write_pbs_opt; 
-    $self->_write_pbs_module; 
-    $self->_write_pbs_cmd; 
+    system 'qsub', $self->pbs; 
 } 
 
 sub _write_pbs_opt { 
@@ -63,9 +84,9 @@ sub _write_pbs_opt {
 sub _write_pbs_module { 
     my $self = shift; 
 
-    $self->printf("module load %s\n", $_)     for $self->list_module;
-    $self->printf("%s\n", $self->source_mkl ) if  $self->source_mkl; 
-    $self->printf("%s\n", $self->source_impi) if  $self->source_impi; 
+    $self->printf("module load %s\n", $_) for $self->list_module;
+    $self->printf("%s\n", $self->mpivar ) if  $self->mpivar; 
+    $self->printf("%s\n", $self->mklvar ) if  $self->mklvar; 
     $self->printf("\n"); 
 } 
 
@@ -74,6 +95,7 @@ sub _write_pbs_cmd {
 
     my $cmd = join "\n\n", $self->list_cmd; 
     $self->print("$cmd\n"); 
+    $self->printf("\n"); 
 } 
 
 1

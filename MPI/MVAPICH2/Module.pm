@@ -4,7 +4,7 @@ use Moose;
 use HPC::MPI::MVAPICH2::Options qw(ENV_MVAPICH2); 
 use namespace::autoclean; 
 
-with 'HPC::MPI::Role'; 
+with 'HPC::MPI::Base'; 
 
 has '+mpirun' => ( 
     default => 'mpirun_rsh'

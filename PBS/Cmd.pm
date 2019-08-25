@@ -16,15 +16,4 @@ has 'cmd' => (
     clearer => 'new_cmd', 
 );
 
-sub add_cmd { 
-    my ($self, @opts) = @_; 
-
-    if ( grep /\\/, @opts ) { 
-        pop @opts; 
-        $self->_add_cmd(join(" \\\n", @opts));  
-    } else { 
-        $self->_add_cmd(join(' ', @opts)); 
-    }
-} 
-
 1

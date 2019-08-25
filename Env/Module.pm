@@ -5,7 +5,7 @@ use Env::Modulecmd;
 use Moose::Role; 
 use MooseX::Types::Moose qw/ArrayRef Str/;
 
-use HPC::Env::Types qw/SRC_MKL SRC_IMPI/; 
+use HPC::Env::Types qw/SRC_MKL SRC_MPI/; 
 
 with 'HPC::Env::Cmd', 
      'HPC::Env::Preset'; 
@@ -21,24 +21,26 @@ has 'modules' => (
         find_module    => 'first',
         _add_module    => 'push', 
         _index_module  => 'first_index', 
-        _delete_module => 'delete'
+        _remove_module => 'delete'
     }
 ); 
 
-has 'source_mkl' => (
+has 'mklvar' => (
     is       => 'rw', 
     isa      => SRC_MKL, 
     init_arg => undef, 
     coerce   => 1, 
+    writer   => 'source_mkl',
     clearer  => '_unsource_mkl'
 ); 
 
-has 'source_impi' => (
+has 'mpivar' => (
     is       => 'rw', 
-    isa      => SRC_IMPI, 
+    isa      => SRC_MPI, 
     init_arg => undef, 
     coerce   => 1, 
-    clearer  => '_unsource_impi'
+    writer   => 'source_mpi',
+    clearer  => '_unsource_mpi'
 ); 
 
 sub _build_modules {

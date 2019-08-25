@@ -1,6 +1,6 @@
 package HPC::Env::Types;  
 
-use MooseX::Types -declare => [qw/SRC_IMPI SRC_MKL/]; 
+use MooseX::Types -declare => [qw/SRC_MPI SRC_MKL/]; 
 use MooseX::Types::Moose qw/Str/; 
 
 subtype SRC_MKL, 
@@ -15,11 +15,11 @@ coerce SRC_MKL,
         return ". /apps/compiler/intel/$version/mkl/bin/mklvars.sh intel64"
     };  
 
-subtype SRC_IMPI, 
+subtype SRC_MPI, 
     as Str, 
     where { $_ =~ /^\./ }; 
 
-coerce SRC_IMPI, 
+coerce SRC_MPI, 
     from Str, 
     via { 
         my ($version) = (split /\//, $_)[1]; 

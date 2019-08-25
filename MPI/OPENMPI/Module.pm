@@ -4,8 +4,7 @@ use Moose;
 use HPC::MPI::OPENMPI::Options qw(OMP_OPENMPI ENV_OPENMPI); 
 use namespace::autoclean; 
 
-with 'HPC::MPI::Role', 
-     'HPC::MPI::OPENMPI::MCA'; 
+with qw(HPC::MPI::Base HPC::MPI::OPENMPI::MCA); 
 
 has '+omp' => ( 
     isa    => OMP_OPENMPI, 
