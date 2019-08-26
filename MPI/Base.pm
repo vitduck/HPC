@@ -4,9 +4,9 @@ use Moose::Role;
 use Moose::Util::TypeConstraints; 
 use MooseX::Types::Moose qw(Str Int ArrayRef HashRef); 
 
-use HPC::MPI::Options qw(NPROCS HOSTFILE); 
+use HPC::MPI::Types::MPI qw(NPROCS HOSTFILE); 
 
-requires 'opt'; 
+requires 'mpirun'; 
 
 has 'module' => ( 
     is       => 'ro', 
@@ -18,13 +18,6 @@ has 'version' => (
     is       => 'ro', 
     isa      => Str, 
     required => 1
-); 
-
-has 'mpirun' => ( 
-    is       => 'ro', 
-    isa      => Str, 
-    init_arg => undef, 
-    default  => 'mpirun', 
 ); 
 
 has 'omp' => ( 
