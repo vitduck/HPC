@@ -31,7 +31,6 @@ has 'mklvar' => (
     init_arg => undef, 
     coerce   => 1, 
     writer   => 'source_mkl',
-    clearer  => '_unsource_mkl'
 ); 
 
 has 'mpivar' => (
@@ -40,7 +39,7 @@ has 'mpivar' => (
     init_arg => undef, 
     coerce   => 1, 
     writer   => 'source_mpi',
-    clearer  => '_unsource_mpi'
+    clearer  => 'unsource_mpi'
 ); 
 
 sub _build_modules {

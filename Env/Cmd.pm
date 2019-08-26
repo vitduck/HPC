@@ -12,7 +12,7 @@ sub load {
             $self->_add_module($module);  
             
             if ($module =~ /cray-impi|impi|openmpi|mvapich2/) {  
-                $self->_load_mpi($module); 
+                $self->load_mpi($module); 
             }
         }
     }
@@ -25,11 +25,17 @@ sub unload {
         my $index = $self->_index_module(sub {/$module/}); 
 
         if ($index) { 
+            # remove module from 
             $self->_remove_module($index); 
 
-            if ($module =~ /cray-impi|impi|openmpi|mvapich2/) {  
-                $self->_unload_mpi($module); 
+            # remove mpi attributes
+            if ($module =~ /impi|openmpi|mvapich2/) {
+                if ($self->has_mpi) { 
+                    $self->unload_mpi;  
+                }
             }
+
+            $self->_unload_module($module); 
         }
     }
 }
@@ -43,17 +49,24 @@ sub switch {
 
 sub initialize { 
     my $self = shift; 
+    
+    my @tobe_unloaded = (); 
 
     # unload all modules except opa
+    # mpi module must be removed before compiler module
     for my $module ($self->list_module) { 
-        next if $module =~ /craype-network-opa/; 
+        if ($module =~ /craype-network-opa/) {  
+            next; 
 
-        $self->unload ($module); 
-        $self->_unload_module($module); 
+        } elsif ($module =~ /impi|openmpi|mvapich2/) { 
+            unshift @tobe_unloaded, $module
+        
+        } else { 
+            push @tobe_unloaded, $module
+        }
     }
 
-    # cache LD_LIBRARY_PATH
-    # $self->_ld_library_path; 
+    $self->unload(@tobe_unloaded); 
 } 
 
 # emulate 'module load'

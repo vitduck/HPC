@@ -113,10 +113,10 @@ has 'omp' => (
 
         $self->_reset_mpiprocs; 
 
-        if ($self->has_mpi) { 
-            $self->mpi->set_nprocs($self->select*$self->mpiprocs); 
-            $self->mpi->set_omp($self->omp); 
-        } 
+        # if ($self->has_mpi) { 
+            # $self->mpi->set_nprocs($self->select*$self->mpiprocs); 
+            # $self->mpi->set_omp($self->omp); 
+        # } 
     }
 );
 

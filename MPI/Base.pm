@@ -10,14 +10,14 @@ requires 'mpirun';
 
 has 'module' => ( 
     is       => 'ro', 
-    isa      => enum([qw/cray-impi impi openmpi mvapich2/]), 
-    required => 1
+    isa      => 'Str', 
+    writer   => 'set_module',
 ); 
 
 has 'version' => ( 
     is       => 'ro', 
     isa      => Str, 
-    required => 1
+    writer   => 'set_version',
 ); 
 
 has 'omp' => ( 
