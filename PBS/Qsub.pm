@@ -32,7 +32,7 @@ has '_io' => (
     }
 ); 
 
-sub add_pbs { 
+sub add_pbs_cmd { 
     my ($self, @opts) = @_; 
 
     if ( grep /\\/, @opts ) { 
