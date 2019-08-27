@@ -5,6 +5,8 @@ use Moose::Role;
 sub load { 
     my ($self, @modules) = @_; 
 
+    my $mpi_module; 
+
     for my $module (@modules) { 
         # check if module is loaded 
         my $index = $self->_index_module(sub {/$module/}); 
@@ -13,14 +15,16 @@ sub load {
         if ($index == -1) { 
             # mpi module must be loaded last
             if ($module =~ /impi|openmpi|mvapich2/) {  
-                $self->_push_module($module); 
+                $mpi_module = $module; 
                 $self->load_mpi($module); 
             # otherl module
             } else { 
-                $self->_unshift_module($module); 
+                $self->_push_module($module); 
             }
         } 
     }
+
+    $self->_push_module($mpi_module) if $mpi_module; 
 }
 
 sub unload { 
