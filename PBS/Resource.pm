@@ -113,10 +113,10 @@ has 'omp' => (
 
         $self->_reset_mpiprocs; 
 
-        # if ($self->has_mpi) { 
-            # $self->mpi->set_nprocs($self->select*$self->mpiprocs); 
-            # $self->mpi->set_omp($self->omp); 
-        # } 
+        if ($self->has_mpi) { 
+            $self->mpi->set_nprocs($self->select*$self->mpiprocs); 
+            $self->mpi->set_omp($self->omp); 
+        } 
     }
 );
 
@@ -126,5 +126,36 @@ has 'walltime' => (
     default => '48:00:00',
     writer  => 'set_walltime',
 );
+
+sub _write_pbs_opt {
+    my $self = shift;
+
+    # shell
+    $self->printf("%s\n", $self->shell);
+    $self->printf("\n");
+
+    #  pbs header
+    $self->printf("#PBS -V\n");
+    $self->printf("#PBS -A %s\n", $self->account);
+    $self->printf("#PBS -P %s\n", $self->project);
+    $self->printf("#PBS -q %s\n", $self->queue);
+    $self->printf("#PBS -N %s\n", $self->name);
+
+    # optional
+    $self->printf("#PBS -e %s\n", $self->stderr) if $self->stderr;
+    $self->printf("#PBS -o %s\n", $self->stdout) if $self->stdout;
+
+    # resource
+    $self->printf(
+        "#PBS -l select=%d:ncpus=%d:mpiprocs=%d:ompthreads=%d\n",
+        $self->select,
+        $self->ncpus,
+        $self->mpiprocs,
+        $self->omp
+    );
+
+    $self->printf("#PBS -l walltime=%s\n", $self->walltime);
+    $self->printf("\n");
+}
 
 1

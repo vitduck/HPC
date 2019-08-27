@@ -1,28 +1,16 @@
 package HPC::PBS::Job; 
 
 use Moose;
-use Moose::Util          qw(apply_all_roles); 
-use MooseX::Types::Moose qw(Str);
+use Moose::Util qw(apply_all_roles); 
 use namespace::autoclean;
 
-with qw(HPC::Debug::Data
-        HPC::Env::Module
-        HPC::PBS::Cmd
-        HPC::PBS::Resource
-        HPC::PBS::IO
-        HPC::PBS::Numa); 
-
-has 'pbs' => ( 
-    is       => 'rw',
-    isa      => Str,
-    init_arg => undef, 
-    writer   => 'set_pbs',
-    trigger  => sub { 
-        my $self = shift; 
-
-        $self->_io($self->pbs); 
-    }
-); 
+with qw(
+    HPC::Debug::Data
+    HPC::PBS::Numa
+    HPC::PBS::Resource
+    HPC::PBS::Module
+    HPC::PBS::Cmd
+    HPC::PBS::Qsub ); 
 
 after 'source_mpi' => sub { 
     my ($self, $module) = @_; 
@@ -47,26 +35,18 @@ sub has_mpi {
 
 sub load_mpi { 
     my ($self, $module) = @_;
-    my ($mpi, $version) = split /\//, $module;  
     
-    if ($mpi =~ /(impi|openmpi|mvapich2)/) {   
+    if ($module =~ /(impi|openmpi|mvapich2)/) {   
     
         # apply corresponding MPI roles
         apply_all_roles($self, join '::', qw(HPC PBS MPI), uc($1));
 
-        $self->mpi->set_module ($mpi); 
-        $self->mpi->set_version($version); 
-        $self->mpi->set_nprocs ($self->select*$self->mpiprocs);
+        $self->mpi->set_module($module); 
+        $self->mpi->set_nprocs($self->select*$self->mpiprocs);
 
         # set the lazy omp attribute inside MPI class  
         $self->mpi->set_omp($self->omp) if $self->has_omp; 
     }
-} 
-
-sub qsub { 
-    my $self = shift; 
-    
-    system 'qsub', $self->pbs; 
 } 
 
 sub BUILD { 

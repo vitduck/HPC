@@ -6,38 +6,56 @@ sub load {
     my ($self, @modules) = @_; 
 
     for my $module (@modules) { 
+        # check if module is loaded 
         my $index = $self->_index_module(sub {/$module/}); 
 
+        # module is not loaded
         if ($index == -1) { 
-            $self->_add_module($module);  
-            
-            if ($module =~ /cray-impi|impi|openmpi|mvapich2/) {  
+            # mpi module must be loaded last
+            if ($module =~ /impi|openmpi|mvapich2/) {  
+                $self->_push_module($module); 
                 $self->load_mpi($module); 
+            # otherl module
+            } else { 
+                $self->_unshift_module($module); 
             }
-        }
+        } 
     }
 }
 
 sub unload { 
     my ($self, @modules) = @_; 
 
-    for my $module (@modules) {
-        my $index = $self->_index_module(sub {/$module/}); 
+    my @to_be_unloaded = (); 
 
-        if ($index) { 
-            # remove module from 
+    for my $module (@modules) {
+        # check if module is alread loaded
+        my $index = $self->_index_module(sub {/$module/}); 
+        
+        # module is loaded
+        if ($index != -1 ) { 
+            # remove module from 'modules' attributes
             $self->_remove_module($index); 
 
-            # remove mpi attributes
-            if ($module =~ /impi|openmpi|mvapich2/) {
-                if ($self->has_mpi) { 
+            # mpi module must be unloaded first
+            if ($module =~ /impi|openmpi|mvapich2/) {  
+                # matching between loaded mpi and to-be-unloaded mpi 
+                if ( $self->has_mpi and $self->mpi->module eq $module) { 
                     $self->unload_mpi;  
                 }
-            }
 
-            $self->_unload_module($module); 
+                unshift @to_be_unloaded, $module
+            # normal module 
+            } else { 
+                push @to_be_unloaded, $module
+            }
         }
     }
+    
+    # unloaded module via Env::Modulecmd 
+    for my $module (@to_be_unloaded) { 
+        $self->_unload_module($module); 
+    } 
 }
 
 sub switch { 
@@ -50,23 +68,7 @@ sub switch {
 sub initialize { 
     my $self = shift; 
     
-    my @tobe_unloaded = (); 
-
-    # unload all modules except opa
-    # mpi module must be removed before compiler module
-    for my $module ($self->list_module) { 
-        if ($module =~ /craype-network-opa/) {  
-            next; 
-
-        } elsif ($module =~ /impi|openmpi|mvapich2/) { 
-            unshift @tobe_unloaded, $module
-        
-        } else { 
-            push @tobe_unloaded, $module
-        }
-    }
-
-    $self->unload(@tobe_unloaded); 
+    $self->unload($self->list_module); 
 } 
 
 # emulate 'module load'

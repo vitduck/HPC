@@ -14,12 +14,6 @@ has 'module' => (
     writer   => 'set_module',
 ); 
 
-has 'version' => ( 
-    is       => 'ro', 
-    isa      => Str, 
-    writer   => 'set_version',
-); 
-
 has 'omp' => ( 
     is        => 'rw', 
     init_arg  => undef, 
@@ -34,7 +28,6 @@ has 'nprocs' => (
     isa      => NPROCS, 
     coerce   => 1, 
     writer   => 'set_nprocs', 
-    lazy     => 1, 
     default  => 1,
 ); 
 
@@ -42,7 +35,6 @@ has 'hostfile' => (
     is       => 'ro', 
     isa      => HOSTFILE, 
     coerce   => 1, 
-    lazy     => 1,
     default  => '$PBS_NODEFILE', 
 ); 
 

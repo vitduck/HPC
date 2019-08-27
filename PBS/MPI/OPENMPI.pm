@@ -7,7 +7,6 @@ use HPC::MPI::OPENMPI;
 has 'mpi' => (
     is       => 'rw', 
     isa       => OPENMPI, 
-    coerce    => 1, 
     init_arg  => undef, 
     clearer   => 'unload_mpi', 
     default   => sub { HPC::MPI::OPENMPI->new }, 
@@ -18,4 +17,4 @@ has 'mpi' => (
     }
 ); 
 
-1; 
+1 
