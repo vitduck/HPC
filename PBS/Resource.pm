@@ -1,45 +1,97 @@
 package HPC::PBS::Resource; 
 
 use Moose::Role; 
-use Moose::Util::TypeConstraints;
-use MooseX::Types::Moose qw/Str Int/; 
+use MooseX::Types::Moose qw(Str Int); 
+use HPC::PBS::Types::PBS qw(Shell Export Project Account Queue Name Resource Walltime Stdout Stderr); 
 
 has 'shell' => ( 
     is      => 'rw', 
-    isa     =>  Str,
+    isa     =>  Shell,
+    coerce  => 1,
     writer  => 'set_shell',
-    default => '#!/usr/bin/env bash', 
+    default => 'bash'
+); 
+
+has 'export' => ( 
+    is       => 'ro', 
+    isa      =>  Export,
+    coerce   => 1, 
+    init_arg => undef,
+    default  => 1
 ); 
 
 has 'project' => ( 
     is       => 'ro', 
-    isa      => Str,
+    isa      => Project,
+    coerce   => 1, 
     init_arg => undef,
     default  => 'burst_buffer'
 ); 
 
 has 'account' => ( 
     is      => 'rw', 
-    isa     => enum([qw(ansys abaqus lsdyna nastran gaussian
-                         openfoam wrf cesm mpas roms grims mom vasp gromacs charmm
-                         amber lammps namd qe qmc bwa cam inhouse tf caffe pytorch etc)]), 
+    isa     =>  Account,
+    coerce  => 1,
     writer  => 'set_account',
     default => 'etc',
 ); 
 
 has 'queue' => ( 
     is      => 'rw', 
-    isa     => enum([qw(exclusive khoa rokaf_knl normal long flat debug  commercial norm_skl)]), 
+    isa     => Queue,
+    coerce  => 1,
     writer  => 'set_queue',
     default => 'normal'
 ); 
 
 has 'name' => ( 
     is      => 'rw', 
-    isa     => Str, 
+    isa     => Name, 
+    coerce => 1,
     writer  => 'set_name',
     default => 'jobname', 
 ); 
+
+has 'stderr' => ( 
+    is     => 'rw', 
+    isa    => Stderr,
+    coerce => 1,
+    writer => 'set_stderr',
+); 
+
+has 'stdout' => ( 
+    is     => 'rw', 
+    isa    => Stdout,
+    coerce => 1,
+    writer => 'set_stdout',
+); 
+
+has 'resource' => ( 
+    is      => 'rw', 
+    isa     => Resource,
+    coerce  => 1,
+    lazy    => 1, 
+    clearer => '_reset_resource',
+    default => sub { 
+        my $self = shift; 
+
+        my @resource; 
+        push @resource, join('=', 'select'    , $self->select); 
+        push @resource, join('=', 'ncpus'     , $self->ncpus );  
+        push @resource, join('=', 'mpiprocs'  , ($self->has_mpi ? $self->mpiprocs : 1));
+        push @resource, join('=', 'ompthreads', ($self->has_omp ? $self->omp      : 1)); 
+
+        return [@resource]
+    }
+); 
+
+has 'walltime' => (
+    is      => 'rw',
+    isa     => Walltime,
+    coerce  => 1,
+    writer  => 'set_walltime',
+    default => '48:00:00',
+);
 
 has 'select' => (
     is      => 'rw',
@@ -47,13 +99,11 @@ has 'select' => (
     default => 1,
     writer  => 'set_select',
     trigger => sub { 
-        my $self = shift; 
+        my $self  = shift; 
 
         $self->_reset_mpiprocs; 
-
-        if ($self->has_mpi) {  
-            $self->mpi->set_nprocs($self->select*$self->mpiprocs) 
-        }
+        $self->_reset_resource; 
+        $self->mvapich2->set_nprocs($self->select*$self->mpiprocs) if $self->_has_mvapich2;  
     }
 );
 
@@ -63,27 +113,13 @@ has 'ncpus' => (
     default => 1,
     writer  => 'set_ncpus',
     trigger => sub { 
-        my $self = shift; 
+        my $self  = shift; 
 
         $self->_reset_mpiprocs;  
-
-        if ($self->has_mpi) {  
-            $self->mpi->set_nprocs($self->select*$self->mpiprocs) 
-        }
+        $self->_reset_resource; 
+        $self->mvapich2->set_nprocs($self->select*$self->mpiprocs) if $self->_has_mvapich2; 
     }
 );
-
-has 'stderr' => ( 
-    is     => 'rw', 
-    isa    => Str,
-    writer => 'set_stderr',
-); 
-
-has 'stdout' => ( 
-    is     => 'rw', 
-    isa    => Str,
-    writer => 'set_stdout',
-); 
 
 has 'mpiprocs' => (
     is      => 'rw',
@@ -103,59 +139,35 @@ has 'mpiprocs' => (
 has 'omp' => (
     is        => 'rw',
     isa       => Int,
-    lazy      => 1, 
-    default   => 1,
     predicate => 'has_omp',
     writer    => 'set_omp',
-    clearer   => '_reset_omp', 
     trigger   => sub { 
-        my $self = shift; 
+        my $self  = shift; 
 
         $self->_reset_mpiprocs; 
+        $self->_reset_resource; 
 
-        if ($self->has_mpi) { 
-            $self->mpi->set_nprocs($self->select*$self->mpiprocs); 
-            $self->mpi->set_omp($self->omp); 
+        # mvapich2 requires both nprocs and omp
+        if ($self->_has_mvapich2 ) { 
+            $self->mvapich2->set_nprocs($self->select*$self->mpiprocs); 
+            $self->mvapich2->set_omp($self->omp); 
+        } 
+
+        # openmpi requires only omp
+        if ($self->_has_openmpi) { 
+            $self->openmpi->set_omp($self->omp); 
         } 
     }
 );
 
-has 'walltime' => (
-    is      => 'rw',
-    isa     => Str,
-    default => '48:00:00',
-    writer  => 'set_walltime',
-);
+sub _write_pbs_resource { 
+    my $self = shift; 
 
-sub _write_pbs_opt {
-    my $self = shift;
+    $self->printf("%s\n\n", $self->shell);  
 
-    # shell
-    $self->printf("%s\n", $self->shell);
-    $self->printf("\n");
-
-    #  pbs header
-    $self->printf("#PBS -V\n");
-    $self->printf("#PBS -A %s\n", $self->account);
-    $self->printf("#PBS -P %s\n", $self->project);
-    $self->printf("#PBS -q %s\n", $self->queue);
-    $self->printf("#PBS -N %s\n", $self->name);
-
-    # optional
-    $self->printf("#PBS -e %s\n", $self->stderr) if $self->stderr;
-    $self->printf("#PBS -o %s\n", $self->stdout) if $self->stdout;
-
-    # resource
-    $self->printf(
-        "#PBS -l select=%d:ncpus=%d:mpiprocs=%d:ompthreads=%d\n",
-        $self->select,
-        $self->ncpus,
-        $self->mpiprocs,
-        $self->omp
-    );
-
-    $self->printf("#PBS -l walltime=%s\n", $self->walltime);
-    $self->printf("\n");
-}
+    for (qw(export account project queue name stderr stdout resource walltime)) { 
+        $self->printf("%s\n", $self->$_) if $self->$_;  
+    } 
+} 
 
 1

@@ -1,24 +1,26 @@
 package HPC::PBS::Cmd; 
 
 use Moose::Role; 
-use MooseX::Types::Moose qw/Str ArrayRef/; 
+use MooseX::Types::Moose qw(ArrayRef); 
+
 use List::Util qw(max); 
 use Text::Tabs; 
 
 has 'cmd' => (
     is      => 'rw',
+    isa     => ArrayRef,
     traits  => ['Array'],
-    isa     => ArrayRef[Str],
     lazy    => 1, 
-    default => sub {["cd \$PBS_O_WORKDIR"]},
+    clearer => '_reset_cmd',
+    default => sub { ['','cd $PBS_O_WORKDIR'] }, 
     handles => { 
-         _add_cmd => 'push',
-         list_cmd => 'elements' 
+        _push_cmd    => 'push',
+        _unshift_cmd => 'unshift',
+        _list_cmd    => 'elements' 
     }, 
-    clearer => 'new_cmd', 
 );
 
-sub add_pbs_cmd { 
+sub add_cmd { 
     my ($self, @cmds) = @_; 
 
     my $level  = 0; 
@@ -30,12 +32,9 @@ sub add_pbs_cmd {
     # pad the command with tabs 
     # then convert tabs to space
     for my $cmd (@cmds) { 
-        if ( ref $cmd eq 'ARRAY' ) { 
-            push @lines, expand(map { "\t"x($level) . $_ } $cmd->@*);   
-
-        } else { 
-            push @lines, expand("\t"x($level) . $cmd)
-        }
+        ref $cmd eq 'ARRAY' 
+        ? push @lines, expand(map { "\t"x($level) . $_ } $cmd->@*)
+        : push @lines, expand("\t"x($level).$cmd); 
 
         $level++; 
     } 
@@ -43,19 +42,18 @@ sub add_pbs_cmd {
     # max length for line break
     $maxlen = max(map length($_), @lines); 
 
-    # print cmd to pbs
-    for my $line (@lines) { 
-        $self->printf("%-${maxlen}s \\\n", $line)
-    } 
-
+    $self->_push_cmd(''); 
+    $self->_push_cmd([map { sprintf("%-${maxlen}s", $_) } @lines])
 } 
 
 sub _write_pbs_cmd {
-    my $self = shift; 
+    my $self = shift;  
 
-    my $cmd = join "\n\n", $self->list_cmd; 
-    $self->print("$cmd\n"); 
-    $self->printf("\n"); 
-} 
+    for my $cmd ( $self->_list_cmd ) {  
+        ref $cmd eq 'ARRAY' 
+        ? $self->printf("%s\n", join(" \\\n", $cmd->@*)) 
+        : $self->printf("%s\n", $cmd);                    
+    }
+}
 
 1

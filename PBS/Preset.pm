@@ -1,9 +1,9 @@
-package HPC::Env::Preset; 
+package HPC::PBS::Preset;
 
-use Moose::Role; 
-use MooseX::Types::Moose qw/HashRef/; 
+use Moose::Role;
+use MooseX::Types::Moose qw(HashRef); 
 
-has '_preset' => (
+has 'preset' => (
     is       => 'ro', 
     isa      => HashRef, 
     traits   => ['Hash'], 
@@ -37,7 +37,6 @@ has '_preset' => (
     } 
 ); 
 
-
 sub load_preset { 
     my ($self, $cpu, $env) = @_; 
     
@@ -46,14 +45,5 @@ sub load_preset {
         $self->get_preset($env)->@*
     ); 
 } 
-
-sub unload_preset { 
-    my ($self, $cpu, $env) = @_; 
-    
-    $self->unload(
-        $self->get_preset($cpu), 
-        reverse $self->get_preset($env)->@*
-    ); 
-}
 
 1 

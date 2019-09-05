@@ -1,4 +1,4 @@
-package HPC::Env::Path; 
+package HPC::PBS::Path; 
 
 use Env qw(@LD_LIBRARY_PATH); 
 use Moose::Role; 
