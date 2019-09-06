@@ -168,6 +168,8 @@ sub _write_pbs_resource {
     for (qw(export account project queue name stderr stdout resource walltime)) { 
         $self->printf("%s\n", $self->$_) if $self->$_;  
     } 
+
+    $self->print("\n"); 
 } 
 
 1

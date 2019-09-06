@@ -9,7 +9,7 @@ has 'pbs' => (
     is       => 'rw', 
     isa      => Str, 
     init_arg => undef, 
-    writer   => 'write_pbs', 
+    writer   => 'write', 
     trigger  => sub { 
         my $self = shift; 
 

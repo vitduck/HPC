@@ -1,94 +1,92 @@
-package HPC::App::LAMMPS::GPU; 
+package HPC::App::Lammps::Gpu; 
 
 use Moose; 
 use Moose::Util::TypeConstraints; 
 use MooseX::Types::Moose qw/Num Int Str/; 
+use HPC::App::Types::Lammps qw(Ngpu); 
+use namespace::autoclean; 
 
-with 'HPC::App::LAMMPS::Package'; 
-
-has '+suffix' => ( 
-    default => 'gpu', 
-    trigger => sub { shift->_reset_cmd },
-); 
-
-has 'Ngpu' => ( 
+has 'ngpu' => ( 
     is      => 'rw', 
-    isa     => Int, 
+    isa     => Ngpu, 
+    coerce  => 1, 
     default => 0,
-    trigger => sub { shift->_reset_cmd },
+    writer  => 'set_ngpu'
 ); 
 
 has 'neigh' => ( 
     is        => 'rw', 
     isa       => enum([qw/full half/]), 
-    predicate => 'has_neigh', 
-    trigger   => sub { shift->_reset_cmd },
+    predicate => '_has_neigh', 
+    writer    => 'set_neigh'
 ); 
 
 has 'newton' => ( 
     is        => 'rw', 
     isa       => enum([qw/off on/]), 
-    predicate => 'has_newton', 
-    trigger   => sub { shift->_reset_cmd },
+    predicate => '_has_newton', 
+    writer    => 'set_newton'
 ); 
 
 has 'binsize' => ( 
     is        => 'rw', 
     isa       => Num,
-    predicate => 'has_binsize',
-    trigger   => sub { shift->_reset_cmd },
+    predicate => '_has_binsize',
+    writer    => 'set_binsize'
 ); 
 
 has 'split' => ( 
     is        => 'rw', 
     isa       => Num,
     default   => 1.0,
-    predicate => 'has_split', 
-    trigger   => sub { shift->_reset_cmd },
+    predicate => '_has_split', 
+    writer    => 'set_split'
 ); 
 
 has 'gpuID' => ( 
     is        => 'rw', 
     isa       => Str, 
     default   => 0,
-    predicate => 'has_gpuID', 
-    trigger   => sub { shift->_reset_cmd },
+    predicate => '_has_gpuID', 
+    writer    => 'set_gpuID',
 ); 
 
 has 'tpa' => ( 
     is        => 'rw', 
     isa       => Int, 
     default   => 0,
-    predicate => 'has_tpa', 
-    trigger   => sub { shift->_reset_cmd },
+    predicate => '_has_tpa', 
+    writer    => 'set_tpa'
 ); 
 
 has 'device' => ( 
     is        => 'rw', 
     isa       => Str, 
     default   => 0,
-    predicate => 'has_device', 
-    trigger   => sub { shift->_reset_cmd },
-
+    predicate => '_has_device', 
+    writer    => 'set_device'
 ); 
 
 has 'blocksize' => ( 
     is        => 'rw', 
     isa       => Str, 
     default   => 0,
-    predicate => 'has_blocksize', 
-    trigger   => sub { shift->_reset_cmd },
+    predicate => '_has_blocksize', 
+    writer    => 'set_blocksize'
 ); 
 
-has '+_opt' => ( 
-    default => sub {[qw/neigh newton binsize split gpuID tpa device blocksize/]}
-); 
-
-around 'options' => sub {
-    my ($opt, $self) = @_; 
+sub pkg_opt { 
+    my $self = shift; 
+    my @pkgs = ($self->ngpu); 
     
-    return ['gpu', $self->Ngpu, $self->$opt->@*]
-}; 
+    for my $attr ( grep !/ngpu/, $self->meta->get_attribute_list ) { 
+        my $predicate = "_has_$attr"; 
+    
+        push @pkgs, $attr, $self->$attr if $self->$predicate; 
+    }
+    
+    return [@pkgs]
+} 
 
 __PACKAGE__->meta->make_immutable;
 

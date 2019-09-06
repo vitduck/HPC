@@ -1,91 +1,86 @@
-package HPC::App::LAMMPS::INTEL; 
+package HPC::App::Lammps::Intel; 
 
 use Moose; 
 use MooseX::Types::Moose qw/Int Num Bool/; 
 use Moose::Util::TypeConstraints; 
+use HPC::App::Types::Lammps qw(Nphi); 
+use namespace::autoclean; 
 
-use HPC::App::LAMMPS::Types qw/Suffix/; 
-
-with 'HPC::App::LAMMPS::Package'; 
-
-has '+suffix' => ( 
-    default => 'intel',
-    trigger => sub { shift->_reset_cmd },
-); 
-
-has 'Nphi' => ( 
+has 'nphi' => ( 
     is      => 'rw', 
-    isa     => Int, 
+    isa     => Nphi, 
+    coerce  => 1, 
+    writer  => 'set_nphi',
     default => 0,
-    trigger => sub { shift->_reset_cmd },
 ); 
 
 has 'mode' => ( 
     is        => 'rw', 
     isa       => enum([qw/single mixed double/]),
+    lazy      => 1, 
+    predicate => '_has_mode',
+    writer    => 'set_mode', 
     default   => 'mixed',
-    predicate => 'has_mode',
-    trigger => sub { shift->_reset_cmd },
 ); 
 
 has 'omp' => ( 
     is        => 'rw', 
     isa       => Int,
-    predicate => 'has_omp',
-    trigger => sub { shift->_reset_cmd },
+    lazy      => 1, 
+    writer    => 'set_omp',
+    predicate => '_has_omp',
+    default   => 1
 ); 
 
 has 'lrt' => ( 
     is        => 'rw', 
     isa       => enum([qw/yes no/]),
-    predicate => 'has_lrt',
-    trigger => sub { shift->_reset_cmd },
+    lazy      => 1, 
+    predicate => '_has_lrt',
+    writer    => 'set_lrt',
+    default   => 'no'
 ); 
 
 has 'balance' => ( 
     is        => 'rw', 
     isa       => Num,
-    predicate => 'has_balance',
-    trigger => sub { shift->_reset_cmd },
+    predicate => '_has_balance',
+    writer    => 'set_balance',
 ); 
 
 has 'ghost' => ( 
     is        => 'rw', 
     isa       => enum([qw/yes no/]),
-    predicate => 'has_ghost',
-    trigger => sub { shift->_reset_cmd },
+    predicate => '_has_ghost',
+    writer    => 'set_ghost',
 ); 
 
 has 'tpc' => ( 
     is        => 'rw', 
     isa       => Int,
-    predicate => 'has_tpc',
-    trigger => sub { shift->_reset_cmd },
+    predicate => '_has_tpc',
+    writer    => 'set_tpc',
 ); 
 
 has 'tptask' => ( 
     is        => 'rw', 
     isa       => Int,
-    predicate => 'has_tptask',
-    trigger => sub { shift->_reset_cmd },
+    predicate => '_has_tptask',
+    writer    => 'set_tptask',
 ); 
 
-has 'no_affinity' => ( 
-    is        => 'rw', 
-    isa       => Bool,
-    predicate => 'has_no_affinity',
-    trigger => sub { shift->_reset_cmd },
-); 
-
-has '+_opt' => ( 
-    default => sub {[qw/omp mode lrt balance ghost tpc tptask/]}
-); 
-
-around 'options' => sub {
-    my ($opt, $self) = @_; 
+sub pkg_opt { 
+    my $self = shift; 
+    my @pkgs = ($self->nphi); 
     
-    return ['intel', $self->Nphi, $self->$opt->@*]
-}; 
+    for my $attr ( grep !/nphi/, $self->meta->get_attribute_list ) { 
+        my $predicate = "_has_$attr"; 
+    
+        push @pkgs, $attr, $self->$attr if $self->$predicate; 
+    }
+
+    return [@pkgs]
+} 
 
 __PACKAGE__->meta->make_immutable;
 

@@ -1,144 +1,235 @@
-package HPC::Benchmark::LAMMPS;
+package HPC::App::Lammps;
 
 use Moose; 
-use MooseX::Types::Moose qw/Object Str Undef/; 
+use Text::Tabs; 
+use MooseX::Types::Moose qw(ArrayRef); 
 use namespace::autoclean; 
 
-use HPC::App::LAMMPS::OPT; 
-use HPC::App::LAMMPS::OMP; 
-use HPC::App::LAMMPS::GPU;
-use HPC::App::LAMMPS::INTEL; 
-use HPC::App::LAMMPS::KOKKOS; 
-use HPC::App::LAMMPS::Types qw/Inp Log Var/; 
+use HPC::App::Lammps::Opt; 
+use HPC::App::Lammps::Omp; 
+use HPC::App::Lammps::Gpu; 
+use HPC::App::Lammps::Intel; 
+use HPC::App::Lammps::Kokkos; 
+use HPC::App::Types::Lammps qw(
+    Suffix Kokkos_OMP Inp Log Var Pkg OPT OMP GPU INTEL KOKKOS
+); 
 
-with qw(HPC::Debug::Data HPC::Benchmark::Base);  
+with qw( HPC::Debug::Data HPC::App::Base );  
+
+has _opts => ( 
+    is       => 'ro', 
+    isa      => ArrayRef, 
+    traits   => ['Array'],
+    init_arg => undef,
+    default  => sub { [qw(suffix inp log var pkg kokkos_omp)] }, 
+    handles  => { _list_opts => 'elements' }
+); 
+
+has _pkgs => ( 
+    is       => 'ro', 
+    isa      => ArrayRef, 
+    traits   => ['Array'],
+    init_arg => undef,
+    default  => sub { [qw(opt omp gpu intel kokkos)] },
+    handles  => { _list_pkgs => 'elements' }
+); 
+
+has 'suffix' => (
+    is        => 'rw',
+    isa       => Suffix,
+    coerce    => 1, 
+    predicate => '_has_suffix', 
+    writer    => 'set_suffix',  
+); 
+
+has 'kokkos_omp' => ( 
+    is        => 'rw', 
+    isa       => Kokkos_OMP, 
+    coerce    => 1, 
+    lazy      => 1, 
+    predicate => '_has_kokkos_omp', 
+    writer    => 'set_kokkos_omp',   
+    default   => 1, 
+); 
 
 has 'inp' => ( 
-    is     => 'rw',
-    isa    => Inp, 
-    coerce => 1, 
-    writer => 'set_inp', 
+    is        => 'rw',
+    isa       => Inp, 
+    coerce    => 1, 
+    predicate => '_has_inp',
+    writer    => 'set_inp', 
 ); 
 
 has 'log' => ( 
-    is     => 'rw',
-    isa    => Log, 
-    coerce => 1, 
-    writer => 'set_log', 
+    is        => 'rw',
+    isa       => Log, 
+    coerce    => 1, 
+    predicate => '_has_log',
+    writer    => 'set_log', 
+    default   => 'md.log'
 ); 
 
 has 'var' => ( 
-    is     => 'rw',
-    isa    => Var, 
-    coerce => 1, 
-    writer => 'set_var', 
+    is        => 'rw',
+    isa       => Var, 
+    coerce    => 1, 
+    predicate => '_has_var',
+    writer    => 'set_var',
 ); 
 
-# kokkos: thread number is set through -k option
-has kokkos => ( 
-    is        => 'rw',
-    isa       => 'HPC::App::LAMMPS::KOKKOS',
-    init_arg  => undef,
+has 'pkg' => ( 
+    is        => 'rw', 
+    isa       => Pkg, 
+    coerce    => 1, 
     lazy      => 1, 
-    reader    => 'load_kokkos', 
-    clearer   => 'unload_kokkos',
-    predicate => 'has_kokkos',
-    default   => sub { HPC::App::LAMMPS::KOKKOS->new }, 
-    handles   => { 
-         set_kokkos        => 'set_kokkos',
-         set_kokkos_suffix => 'set_suffix',  
-         set_kokkos_opts   => 'set_opts', 
-        list_kokkos_cmd    => 'list_pkg_cmd'
-    }
+    predicate => '_has_pkg', 
+    writer    => '_set_pkg',
+    clearer   => '_reset_pkg',
+    default   => sub { [] }, 
 ); 
 
 has opt => ( 
     is        => 'rw',
-    isa       => 'HPC::App::LAMMPS::OPT',
-    init_arg  => undef,
+    isa       => OPT,
+    coerce    => 1, 
     lazy      => 1, 
-    reader    => 'load_opt', 
-    clearer   => 'unload_opt',
-    predicate => 'has_opt',
-    default   => sub { HPC::App::LAMMPS::KOKKOS->new }, 
-    handles   => { 
-         set_opt_suffix => 'set_suffix',  
-         set_opt_opts   => 'set_opts', 
-        list_opt_cmd    => 'list_pkg_cmd'
-    }
+    predicate => '_has_opt',
+    clearer   => '_clear_opt',
+    default   => sub { HPC::App::Lammps::Opt->new }, 
+    trigger   => sub { shift->set_suffix('opt')   }
 ); 
 
 has omp => ( 
     is        => 'rw',
-    isa       => 'HPC::App::LAMMPS::OMP',
-    init_arg  => undef,
+    isa       => OMP, 
+    coerce    => 1, 
     lazy      => 1, 
-    reader    => 'load_omp', 
-    clearer   => 'unload_omp',
-    predicate => 'has_omp',
-    default   => sub { HPC::App::LAMMPS::KOKKOS->new }, 
+    predicate => '_has_omp',
+    clearer   => '_clear_omp', 
+    default   => sub { HPC::App::Lammps::Omp->new }, 
+    trigger   => sub { shift->set_suffix('omp') }, 
     handles   => { 
-         set_omp_suffix => 'set_suffix',  
-         set_omp_opts   => 'set_opts', 
-        list_omp_cmd    => 'list_pkg_cmd'
-    }
+        set_omp_nthreads => 'set_nthreads', 
+        set_omp_neigh    => 'set_neigh',
+    }, 
+); 
+
+has gpu => (
+    is        => 'rw',
+    isa       => GPU,
+    coerce    => 1, 
+    lazy      => 1, 
+    predicate => '_has_gpu',
+    clearer   => '_clear_gpu', 
+    default   => sub { HPC::App::Lammps::Gpu->new }, 
+    trigger   => sub { shift->set_suffix('gpu')   }, 
+    handles   => { 
+        set_gpu_ngpu      => 'set_ngpu',
+        set_gpu_neigh     => 'set_neigh',
+        set_gpu_newton    => 'set_newton',
+        set_gpu_binsize   => 'set_binsize',
+        set_gpu_split     => 'set_split',
+        set_gpu_gpuID     => 'set_gpuID',
+        set_gpu_tpa       => 'set_tpa',
+        set_gpu_device    => 'set_device', 
+        set_gpu_blocksize => 'set_blocksize'
+    } 
 ); 
 
 has intel => ( 
     is        => 'rw',
-    isa       => 'HPC::App::LAMMPS::INTEL',
-    init_arg  => undef,
+    isa       => INTEL,
+    coerce    => 1, 
     lazy      => 1, 
-    reader    => 'load_intel', 
-    clearer   => 'unload_intel',
-    predicate => 'has_intel',
-    default   => sub { HPC::App::LAMMPS::KOKKOS->new }, 
+    predicate => '_has_intel',
+    clearer   => '_clear_intel', 
+    default   => sub { HPC::App::Lammps::Intel->new }, 
+    trigger   => sub { shift->set_suffix('intel')   }, 
     handles   => { 
-         set_intel_suffix => 'set_suffix',  
-         set_intel_opts   => 'set_opts', 
-        list_intel_cmd    => 'list_pkg_cmd'
-    }
+        set_intel_nphi    => 'set_nphi',
+        set_intel_mode    => 'set_mode',
+        set_intel_omp     => 'set_omp',
+        set_intel_lrt     => 'set_lrt',
+        set_intel_balance => 'set_balance',
+        set_intel_ghost   => 'set_ghost',
+        set_intel_tpc     => 'set_tpc',
+        set_intel_tptask  => 'set_tptask',
+    }, 
 ); 
 
-has gpu => ( 
+has kokkos => ( 
     is        => 'rw',
-    isa       => 'HPC::App::LAMMPS::GPU',
-    init_arg  => undef,
+    isa       => KOKKOS,
+    coerce    => 1, 
     lazy      => 1, 
-    reader    => 'load_gpu', 
-    clearer   => 'unload_gpu',
-    predicate => 'has_gpu',
-    default   => sub { HPC::App::LAMMPS::KOKKOS->new }, 
+    predicate => '_has_kokkos',
+    clearer   => '_clear_kokkos', 
+    default   => sub { HPC::App::Lammps::Kokkos->new }, 
+    trigger   => sub { 
+        my $self = shift; 
+
+        $self->set_suffix('kk'); 
+        $self->set_kokkos_omp(1); 
+    }, 
     handles   => { 
-         set_gpu_suffix => 'set_suffix',  
-         set_gpu_opts   => 'set_opts', 
-        list_gpu_cmd    => 'list_pkg_cmd'
+        set_kokkos_neigh         => 'set_neigh',
+        set_kokkos_neigh_qeq     => 'set_neigh_qeq',
+        set_kokkos_neigh_thread  => 'set_neigh_thread',
+        set_kokkos_newton        => 'set_newton',
+        set_kokkos_binsize       => 'set_binsize',
+        set_kokkos_comm          => 'set_comm',
+        set_kokkos_comm_exchange => 'set_comm_exchange',
+        set_kokkos_comm_forward  => 'set_comm_forward',
+        set_kokkos_comm_reverse  => 'set_comm_reverse',
+        set_kokkos_gpu_direct    => 'set_gpu_direct',
     }
 ); 
 
-sub cmd { 
+sub get_pkg { 
     my $self = shift; 
+
+    for my $pkg ($self->_list_pkgs) { 
+        my $has_pkg = "_has_$pkg"; 
+
+        return $pkg if $self->$has_pkg
+    } 
+} 
+
+sub load_pkg { 
+    my ($self, $pkg, $opt) = @_; 
+
+    $self->$pkg( $opt ? $opt : {} ); 
+}
+
+sub unload_pkg { 
+    my ($self, $name) = @_; 
+
+    my $loaded_pkg = $self->get_pkg; 
+
+    if ($loaded_pkg) {  
+        my $clear_loaded_pkg = "_clear_$loaded_pkg"; 
+        $self->$clear_loaded_pkg; 
+        $self->_reset_pkg; 
+    } 
+} 
+
+sub cmd {
+    $tabstop = 4;
+    my $self = shift;
     my @opts = (); 
 
-    # application performance snapshot
-    push @opts, 'aps' if $self->aps; 
-    
-    # lmp opts
-    push @opts, (        
-        map  $self->$_, 
-        grep $self->$_, qw(bin inp log var)
-    ); 
+    # if package is loaded 
+    my $pkg = $self->get_pkg; 
+    $self->_set_pkg($self->$pkg->pkg_opt) if $pkg; 
 
-    # pkg opts 
-    for my $pkg (qw(opt omp gpu intel kokkos)) { 
-        my $predicate = "has_$pkg"; 
-        my $pkg_cmd   = "list_${pkg}_cmd"; 
-
-        push @opts, $self->$pkg_cmd if $self->$predicate; 
+    # pad the commandline with tab
+    for my $opt ($self->_list_opts) {
+        my $has_opt = "_has_$opt";
+        push @opts, "\t" . $self->$opt if $self->$has_opt and $self->$opt ne ''
     }
 
-    return join(' ', @opts)
-} 
+    return [$self->bin, expand(sort @opts)]
+}
 
 __PACKAGE__->meta->make_immutable;
 

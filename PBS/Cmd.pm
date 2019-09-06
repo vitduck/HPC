@@ -12,7 +12,7 @@ has 'cmd' => (
     traits  => ['Array'],
     lazy    => 1, 
     clearer => '_reset_cmd',
-    default => sub { ['','cd $PBS_O_WORKDIR'] }, 
+    default => sub { ['cd $PBS_O_WORKDIR', ''] }, 
     handles => { 
         _push_cmd    => 'push',
         _unshift_cmd => 'unshift',
@@ -42,7 +42,6 @@ sub add_cmd {
     # max length for line break
     $maxlen = max(map length($_), @lines); 
 
-    $self->_push_cmd(''); 
     $self->_push_cmd([map { sprintf("%-${maxlen}s", $_) } @lines])
 } 
 

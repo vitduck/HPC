@@ -1,38 +1,38 @@
-package HPC::App::LAMMPS::OMP; 
+package HPC::App::Lammps::Omp; 
 
 use Moose; 
 use MooseX::Types::Moose qw/Int Str/; 
 use Moose::Util::TypeConstraints; 
-
-with 'HPC::App::LAMMPS::Package'; 
-
-has '+suffix' => (
-    default => 'omp',
-);
+use HPC::App::Types::Lammps qw(Nthread); 
+use namespace::autoclean; 
 
 has 'nthreads' => ( 
     is      => 'rw', 
-    isa     => Int,
+    isa     => Nthread, 
+    writer  => 'set_nthreads',
+    coerce  => 1, 
     default => 0, 
-    trigger => sub { shift->_reset_cmd }
 ); 
 
 has 'neigh' => ( 
     is        => 'rw', 
     isa       => enum([qw/yes no/]), 
-    predicate => 'has_neigh', 
-    trigger   => sub { shift->_reset_cmd }
+    writer    => 'set_neigh',
+    predicate => '_has_neigh', 
 ); 
 
-has '+_opt' => ( 
-    default => sub {['neigh']}  
-); 
-
-around 'options' => sub {
-    my ($opt, $self) = @_; 
+sub pkg_opt { 
+    my $self = shift; 
+    my @pkgs = ($self->nthreads); 
     
-    return ['omp', $self->nthreads, $self->$opt->@*]
-}; 
+    for my $attr ( grep !/nthreads/, $self->meta->get_attribute_list ) { 
+        my $predicate = "_has_$attr"; 
+    
+        push @pkgs, $attr, $self->$attr if $self->$predicate; 
+    }
+
+    return [@pkgs]
+} 
 
 __PACKAGE__->meta->make_immutable;
 

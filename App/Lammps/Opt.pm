@@ -1,16 +1,11 @@
-package HPC::App::LAMMPS::OPT; 
+package HPC::App::Lammps::Opt; 
 
 use Moose; 
+use namespace::autoclean; 
 
-with 'HPC::App::LAMMPS::Package'; 
-
-has '+suffix' => (
-    default => 'opt',
-);
-
-sub options { 
-    return ''
-} 
+sub pkg_opt { 
+    return []
+}
 
 __PACKAGE__->meta->make_immutable;
 

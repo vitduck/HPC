@@ -1,14 +1,14 @@
 package HPC::App::Gromacs::Prof;  
 
 use Moose::Role; 
-use HPC::App::Gromacs::Types qw(Nsteps Resetstep Resethway); 
+use HPC::App::Types::Gromacs qw(Nsteps Resetstep Resethway); 
 
 has 'nsteps' => (  
     is        => 'rw', 
     isa       => Nsteps, 
     coerce    => 1,
+    predicate => '_has_nsteps', 
     writer    => 'set_nsteps',
-    predicate => 'has_nsteps', 
     default   => 1000, 
 ); 
 
@@ -17,8 +17,8 @@ has 'resetstep' => (
     isa       => Resetstep, 
     coerce    => 1,
     lazy      => 1, 
+    predicate => '_has_resetstep', 
     writer    => 'set_resetstep',
-    predicate => 'has_resetstep', 
     default   => 0, 
 ); 
 
@@ -27,8 +27,8 @@ has 'resethway' => (
     isa       => Resethway, 
     coerce    => 1,
     lazy      => 1, 
+    predicate => '_has_resethway', 
     writer    => 'set_resethway', 
-    predicate => 'has_resethway', 
     default   => 0, 
 ); 
 

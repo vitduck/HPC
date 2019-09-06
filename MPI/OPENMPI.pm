@@ -10,7 +10,7 @@ with qw(HPC::MPI::Base);
 
 has '+omp' => ( 
     isa    => OMP_OPENMPI, 
-    coerce => 1
+    coerce => 1, 
 ); 
 
 has '+eagersize' => ( 

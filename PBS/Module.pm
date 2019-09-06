@@ -126,11 +126,10 @@ sub _unload_module {
 sub _write_pbs_module { 
     my $self = shift; 
 
-    $self->printf("\n"); 
-    
     $self->printf("module load %s\n", $_) for $self->_list_module;
     $self->printf("%s\n", $self->mklvar)  if  $self->_has_mklvar; 
     $self->printf("%s\n", $self->mpivar)  if  $self->_has_mpivar; 
+    $self->print("\n"); 
 } 
 
 1

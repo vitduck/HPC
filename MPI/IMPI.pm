@@ -1,9 +1,9 @@
 package HPC::MPI::IMPI;  
 
-use Text::Tabs; 
 use Moose; 
-use MooseX::Types::Moose  qw(Int); 
+use MooseX::Types::Moose  qw(Int Bool); 
 use HPC::MPI::Types::IMPI qw(ENV_IMPI); 
+use Text::Tabs; 
 use namespace::autoclean; 
 
 with qw(HPC::MPI::Base); 
@@ -32,6 +32,19 @@ has 'debug' => (
         my $self = shift; 
 
         $self->set_env(I_MPI_DEBUG => $self->debug)
+    }
+); 
+
+has 'ipm' => ( 
+    is       => 'rw', 
+    isa      => Bool, 
+    lazy     => 1, 
+    traits   => ['Bool'],
+    init_arg => undef,
+    default  => 0, 
+    handles  => { 
+         'enable_ipm' => 'set', 
+        'disable_ipm' => 'unset', 
     }
 ); 
 

@@ -27,6 +27,7 @@ has 'nprocs' => (
     is       => 'rw', 
     isa      => NPROCS, 
     coerce   => 1, 
+    lazy     => 1, 
     writer   => 'set_nprocs', 
     default  => 1,
 ); 
@@ -34,7 +35,9 @@ has 'nprocs' => (
 has 'hostfile' => ( 
     is       => 'ro', 
     isa      => HOSTFILE, 
+    init_arg => undef,
     coerce   => 1, 
+    lazy     => 1, 
     default  => '$PBS_NODEFILE', 
 ); 
 

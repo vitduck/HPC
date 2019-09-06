@@ -1,122 +1,96 @@
-package HPC::App::LAMMPS::KOKKOS;  
+package HPC::App::Lammps::Kokkos;  
 
 use Moose; 
 use Moose::Util::TypeConstraints; 
 use MooseX::Types::Moose qw/Num/; 
-
-use HPC::App::LAMMPS::Types qw/Kokkos/; 
-
-with 'HPC::App::LAMMPS::Package'; 
-
-has '+suffix' => ( 
-    default => 'kk', 
-    trigger => sub { shift->_reset_cmd },
-); 
-
-has 'kokkos' => ( 
-    is      => 'rw', 
-    isa     => Kokkos, 
-    coerce  => 1, 
-    default => 1, 
-    writer  => 'set_kokkos',   
-    trigger => sub { shift->_reset_cmd },
-); 
+use namespace::autoclean; 
 
 has 'neigh' => ( 
     is        => 'rw', 
     isa       => enum([qw/full half/]), 
     default   => 'half',
-    predicate => 'has_neigh', 
-    trigger   => sub { shift->_reset_cmd },
+    predicate => '_has_neigh', 
+    writer    => 'set_neigh',
 ); 
 
 has 'neigh_qeq' => ( 
     is        => 'rw', 
     isa       => enum([qw/full half/]), 
-    predicate => 'has_neigh_qeq', 
-    trigger   => sub { shift->_reset_cmd },
+    predicate => '_has_neigh_qeq', 
+    writer    => 'set_neigh_qeq',
 ); 
 
 has 'neigh_thread' => ( 
     is        => 'rw', 
     isa       => enum([qw/off on/]), 
-    predicate => 'has_neigh_thread', 
-    trigger   => sub { shift->_reset_cmd },
+    predicate => '_has_neigh_thread', 
+    writer    => 'set_neigh_thread',
 ); 
 
 has 'newton' => ( 
     is        => 'rw', 
     isa       => enum([qw/off on/]), 
     default   => 'on',
-    predicate => 'has_newton', 
-    trigger   => sub { shift->_reset_cmd },
+    predicate => '_has_newton', 
+    writer    => 'set_newton',
 ); 
 
 has 'binsize' => ( 
     is        => 'rw', 
     isa       => Num,
-    predicate => 'has_binsize', 
-    trigger   => sub { shift->_reset_cmd },
+    predicate => '_has_binsize', 
+    writer    => 'set_binsize',
 ); 
 
 has 'comm' => ( 
     is        => 'rw', 
     isa       => enum([qw/no host device/]), 
-    predicate => 'has_comm', 
-    trigger   => sub { shift->_reset_cmd },
+    predicate => '_has_comm', 
+    writer    => 'set_comm',
 ); 
 
 has 'comm_exchange' => ( 
     is        => 'rw', 
     isa       => enum([qw/no host device/]), 
-    predicate => 'has_comm_exchange', 
-    trigger   => sub { shift->_reset_cmd },
+    predicate => '_has_comm_exchange', 
+    writer    => 'set_comm_exchange',
 ); 
 
 has 'comm_forward' => ( 
     is        => 'rw', 
     isa       => enum([qw/no host device/]), 
-    predicate => 'has_comm_forward', 
-    trigger   => sub { shift->_reset_cmd },
+    predicate => '_has_comm_forward', 
+    writer    => 'set_comm_forward',
 ); 
 
 has 'comm_reverse' => ( 
     is        => 'rw', 
     isa       => enum([qw/no host device/]), 
-    predicate => 'has_comm_reverse', 
-    trigger   => sub { shift->_reset_cmd },
+    predicate => '_has_comm_reverse', 
+    writer    => 'set_comm_reverse',
 ); 
 
 has 'gpu_direct' => ( 
     is        => 'rw', 
     isa       => enum([qw/off on/]), 
-    predicate => 'has_gpu_direct', 
-    trigger   => sub { shift->_reset_cmd },
+    predicate => '_has_gpu_direct', 
+    writer    => 'set_gpu_direct',
 ); 
 
-has '+_opt' => ( 
-    default => sub {[qw/
-        neigh neigh_qeq neigh_thread 
-        newton binsize 
-        comm comm_exchange comm_forward comm_reverse 
-        gpu_direct/
-    ]}
-); 
-
-around 'options' => sub {
-    my ($opt, $self) = @_; 
+sub pkg_opt { 
+    my $self = shift; 
+    my @pkgs = ('kokkos'); 
     
-    # for neight/* comm/* and gpu/direct
-    my @opts = map { s/_/\//; $_ } $self->$opt->@*; 
+    for my $attr ( $self->meta->get_attribute_list ) { 
+        my $predicate = "_has_$attr"; 
+    
+        push @pkgs, $attr, $self->$attr if $self->$predicate; 
+    }
 
-    return ['kokkos', @opts]
-}; 
+    @pkgs = map { s/_/\//; $_ } @pkgs;  
 
-around '_build_cmd' => sub { 
-    my ($cmd, $self) = @_; 
-
-    return [$self->kokkos, $self->$cmd->@*]
-}; 
+    return [@pkgs]
+} 
 
 __PACKAGE__->meta->make_immutable;
 
