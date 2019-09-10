@@ -2,17 +2,11 @@ package HPC::PBS::Module;
 
 use Moose::Role; 
 use MooseX::Types::Moose qw(ArrayRef Str);
-
+use HPC::PBS::Types::Src qw(SRC_MKL SRC_MPI); 
 use Env::Modulecmd; 
 use Capture::Tiny qw(capture_stderr);
 
-use HPC::PBS::Types::Src qw(SRC_MKL SRC_MPI); 
-
-with qw(
-    HPC::PBS::Preset
-    HPC::PBS::Path
-    HPC::PBS::MPI
-); 
+with qw( HPC::PBS::Preset HPC::PBS::Path HPC::PBS::MPI ); 
 
 has 'modules' => (
     is       => 'rw',
@@ -35,9 +29,9 @@ has 'mklvar' => (
     isa       => SRC_MKL, 
     init_arg  => undef, 
     coerce    => 1, 
+    reader    => 'get_mklvar',
+    writer    => 'set_mklvar',
     predicate => '_has_mklvar',
-    writer    => 'src_mkl',
-    clearer   => 'unsrc_mkl',
 ); 
 
 has 'mpivar'  => (
@@ -45,9 +39,9 @@ has 'mpivar'  => (
     isa       => SRC_MPI, 
     init_arg  => undef, 
     coerce    => 1, 
+    reader    => 'get_mpivar',
+    writer    => 'set_mpivar',
     predicate => '_has_mpivar', 
-    writer    => 'src_mpi',
-    clearer   => 'unsrc_mpi'
 ); 
 
 # emulate 'module load'
@@ -61,9 +55,9 @@ sub load {
             $self->_push_module($module);  
 
             # mpi hook 
-            if ($module =~ /^(?:cray\-)?(impi|openmpi|mvapich2)/ and $self->has_mpi == 0) {
-                my $mpi_loader = "_load_" . $1; 
-                $self->$mpi_loader($module);  
+            if ($module =~ /^(?:cray\-)?(impi|openmpi|mvapich2)/ and $self->_has_mpi == 0) {
+                my $load = "_load_" . $1; 
+                $self->$load($module);  
             }
         }
     } 
@@ -81,8 +75,8 @@ sub unload {
 
             # mpi hook 
             if ($module =~ /^(?:cray\-)?(impi|openmpi|mvapich2)/) {
-                my $mpi_unloader = "_unload_" . $1; 
-                $self->$mpi_unloader; 
+                my $unload = "_unload_" . $1; 
+                $self->$unload; 
             }
         }
     } 
@@ -126,9 +120,9 @@ sub _unload_module {
 sub _write_pbs_module { 
     my $self = shift; 
 
-    $self->printf("module load %s\n", $_) for $self->_list_module;
-    $self->printf("%s\n", $self->mklvar)  if  $self->_has_mklvar; 
-    $self->printf("%s\n", $self->mpivar)  if  $self->_has_mpivar; 
+    $self->printf("module load %s\n", $_)    for $self->_list_module;
+    $self->printf("%s\n", $self->get_mklvar) if  $self->_has_mklvar; 
+    $self->printf("%s\n", $self->get_mpivar) if  $self->_has_mpivar; 
     $self->print("\n"); 
 } 
 

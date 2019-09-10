@@ -8,6 +8,7 @@ has 'tpr' => (
     isa       => Tpr,
     coerce    => 1,
     predicate => '_has_tpr',
+    reader    => 'get_tpr',
     writer    => 'set_tpr'
 );
 

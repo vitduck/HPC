@@ -5,34 +5,51 @@ use Moose::Util::TypeConstraints;
 use MooseX::Types::Moose qw/Num/; 
 use namespace::autoclean; 
 
+with 'HPC::App::Lammps::Package'; 
+
+has '+name' => (
+    default => 'kokkos' 
+); 
+
+has '+arg' => ( 
+    lazy => 1
+); 
+
 has 'neigh' => ( 
     is        => 'rw', 
     isa       => enum([qw/full half/]), 
-    default   => 'half',
-    predicate => '_has_neigh', 
+    reader    => 'get_neigh',
     writer    => 'set_neigh',
+    predicate => '_has_neigh', 
+    default   => 'half',
 ); 
 
 has 'neigh_qeq' => ( 
     is        => 'rw', 
     isa       => enum([qw/full half/]), 
-    predicate => '_has_neigh_qeq', 
+    reader    => 'get_neigh_qeq',
     writer    => 'set_neigh_qeq',
+    predicate => '_has_neigh_qeq', 
+    lazy      => 1, 
+    default   => 'half'
 ); 
 
 has 'neigh_thread' => ( 
     is        => 'rw', 
     isa       => enum([qw/off on/]), 
-    predicate => '_has_neigh_thread', 
+    reader    => 'get_neigh_thread',
     writer    => 'set_neigh_thread',
+    predicate => '_has_neigh_thread', 
+    default   => 'on',
 ); 
 
 has 'newton' => ( 
     is        => 'rw', 
     isa       => enum([qw/off on/]), 
-    default   => 'on',
-    predicate => '_has_newton', 
+    reader    => 'get_newton', 
     writer    => 'set_newton',
+    predicate => '_has_newton', 
+    default   => 'on',
 ); 
 
 has 'binsize' => ( 
@@ -40,57 +57,56 @@ has 'binsize' => (
     isa       => Num,
     predicate => '_has_binsize', 
     writer    => 'set_binsize',
+    lazy      => 1, 
+    default   => 0.0
 ); 
 
 has 'comm' => ( 
     is        => 'rw', 
     isa       => enum([qw/no host device/]), 
-    predicate => '_has_comm', 
+    reader    => 'get_comm',
     writer    => 'set_comm',
+    predicate => '_has_comm', 
+    
 ); 
 
 has 'comm_exchange' => ( 
     is        => 'rw', 
     isa       => enum([qw/no host device/]), 
-    predicate => '_has_comm_exchange', 
+    reader    => 'get_comm_exchange',
     writer    => 'set_comm_exchange',
+    predicate => '_has_comm_exchange', 
 ); 
 
 has 'comm_forward' => ( 
     is        => 'rw', 
     isa       => enum([qw/no host device/]), 
-    predicate => '_has_comm_forward', 
+    reader    => 'get_comm_forward',
     writer    => 'set_comm_forward',
+    predicate => '_has_comm_forward', 
 ); 
 
 has 'comm_reverse' => ( 
     is        => 'rw', 
     isa       => enum([qw/no host device/]), 
-    predicate => '_has_comm_reverse', 
+    reader    => 'get_comm_reverse',
     writer    => 'set_comm_reverse',
+    predicate => '_has_comm_reverse', 
 ); 
 
 has 'gpu_direct' => ( 
     is        => 'rw', 
     isa       => enum([qw/off on/]), 
-    predicate => '_has_gpu_direct', 
+    reader    => 'get_gpu_direct',
     writer    => 'set_gpu_direct',
+    predicate => '_has_gpu_direct', 
 ); 
 
-sub pkg_opt { 
-    my $self = shift; 
-    my @pkgs = ('kokkos'); 
-    
-    for my $attr ( $self->meta->get_attribute_list ) { 
-        my $predicate = "_has_$attr"; 
-    
-        push @pkgs, $attr, $self->$attr if $self->$predicate; 
-    }
+around 'pkg_opt' => sub { 
+    my ($opt, $self) = @_; 
 
-    @pkgs = map { s/_/\//; $_ } @pkgs;  
-
-    return [@pkgs]
-} 
+    return [ map { s/_/\//; $_ } $self->$opt->@* ]
+};  
 
 __PACKAGE__->meta->make_immutable;
 

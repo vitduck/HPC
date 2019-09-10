@@ -1,19 +1,29 @@
 package HPC::MPI::MVAPICH2; 
 
-use Text::Tabs; 
 use Moose; 
+use MooseX::XSAccessor; 
 use HPC::MPI::Types::MVAPICH2 qw(ENV_MVAPICH2); 
 use namespace::autoclean; 
 
-with qw(HPC::MPI::Base); 
+extends qw(HPC::MPI::Base); 
+
+has '+bin' => ( 
+    default => 'mpirun_rsh'
+); 
+
+has '+hostfile' => ( 
+    lazy => 0
+); 
 
 has '+omp' => ( 
     trigger => sub { 
         my $self = shift; 
 
-        $self->set_env( OMP_NUM_THREADS         => $self->omp,  
-                        MV2_THREADS_PER_PROCESS => $self->omp, 
-                        MV2_ENABLE_AFFINITY     => 1 ); 
+        $self->set_env( 
+            OMP_NUM_THREADS         => $self->get_omp,  
+            MV2_THREADS_PER_PROCESS => $self->get_omp, 
+            MV2_ENABLE_AFFINITY     => 1 
+        ); 
     }
 ); 
 
@@ -21,7 +31,9 @@ has '+eagersize' => (
     trigger => sub { 
         my $self = shift; 
 
-        $self->set_env( MV2_SMP_EAGERSIZE => $self->eagersize ); 
+        $self->set_env( 
+            MV2_SMP_EAGERSIZE => $self->get_eagersize 
+        ); 
     }
 ); 
 
@@ -30,15 +42,9 @@ has '+env' => (
     coerce => 1
 ); 
 
-sub mpirun { 
-    my $self = shift; 
-    my @opts = ($self->nprocs, $self->hostfile);
-    $tabstop = 4; 
-
-    push @opts, $self->env($self->_env)->@* if $self->has_env; 
-
-    return ['mpirun_rsh', expand(map "\t".$_, @opts)]
-};  
+override '_get_opts' => sub { 
+    return qw(nprocs hostfile env)
+}; 
 
 __PACKAGE__->meta->make_immutable;
 

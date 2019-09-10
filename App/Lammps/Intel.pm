@@ -3,23 +3,25 @@ package HPC::App::Lammps::Intel;
 use Moose; 
 use MooseX::Types::Moose qw/Int Num Bool/; 
 use Moose::Util::TypeConstraints; 
-use HPC::App::Types::Lammps qw(Nphi); 
 use namespace::autoclean; 
 
-has 'nphi' => ( 
-    is      => 'rw', 
-    isa     => Nphi, 
-    coerce  => 1, 
-    writer  => 'set_nphi',
-    default => 0,
+with 'HPC::App::Lammps::Package'; 
+
+has '+name' => (
+    default => 'intel' 
+); 
+
+has '+arg' => ( 
+    writer => 'set_nphi'
 ); 
 
 has 'mode' => ( 
     is        => 'rw', 
     isa       => enum([qw/single mixed double/]),
     lazy      => 1, 
-    predicate => '_has_mode',
+    reader    => 'get_mode',
     writer    => 'set_mode', 
+    predicate => '_has_mode',
     default   => 'mixed',
 ); 
 
@@ -27,6 +29,7 @@ has 'omp' => (
     is        => 'rw', 
     isa       => Int,
     lazy      => 1, 
+    reader    => 'get_omp',
     writer    => 'set_omp',
     predicate => '_has_omp',
     default   => 1
@@ -36,51 +39,43 @@ has 'lrt' => (
     is        => 'rw', 
     isa       => enum([qw/yes no/]),
     lazy      => 1, 
-    predicate => '_has_lrt',
+    reader    => 'get_lrt',
     writer    => 'set_lrt',
+    predicate => '_has_lrt',
     default   => 'no'
 ); 
 
 has 'balance' => ( 
     is        => 'rw', 
     isa       => Num,
-    predicate => '_has_balance',
+    reader    => 'get_balance',
     writer    => 'set_balance',
+    predicate => '_has_balance',
 ); 
 
 has 'ghost' => ( 
     is        => 'rw', 
     isa       => enum([qw/yes no/]),
-    predicate => '_has_ghost',
+    reader    => 'get_ghost',
     writer    => 'set_ghost',
+    predicate => '_has_ghost',
 ); 
 
 has 'tpc' => ( 
     is        => 'rw', 
     isa       => Int,
-    predicate => '_has_tpc',
+    reader    => 'get_tpc',
     writer    => 'set_tpc',
+    predicate => '_has_tpc',
 ); 
 
 has 'tptask' => ( 
     is        => 'rw', 
     isa       => Int,
-    predicate => '_has_tptask',
+    reader    => 'get_tptask',
     writer    => 'set_tptask',
+    predicate => '_has_tptask',
 ); 
-
-sub pkg_opt { 
-    my $self = shift; 
-    my @pkgs = ($self->nphi); 
-    
-    for my $attr ( grep !/nphi/, $self->meta->get_attribute_list ) { 
-        my $predicate = "_has_$attr"; 
-    
-        push @pkgs, $attr, $self->$attr if $self->$predicate; 
-    }
-
-    return [@pkgs]
-} 
 
 __PACKAGE__->meta->make_immutable;
 

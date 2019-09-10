@@ -1,18 +1,26 @@
 package HPC::App::Numa; 
 
 use Moose;  
+use MooseX::XSAccessor; 
 use HPC::App::Types::Numa qw(Membind Preferred);  
-use Text::Tabs; 
 
-with qw(HPC::App::Base); 
+with qw(
+    HPC::Share::Cmd
+    HPC::Debug::Data
+);  
+
+has '+bin' => ( 
+    default => 'numactl'
+); 
 
 has 'membind' => ( 
     is        => 'rw', 
     isa       => Membind,
     coerce    => 1, 
     lazy      => 1, 
-    predicate => 'has_membind', 
-    writer    => 'set_membind', 
+    reader    => 'get_membind',
+    writer    => 'set_membind',
+    predicate => '_has_membind', 
     default   => 'mcdram', 
 ); 
 
@@ -21,20 +29,14 @@ has 'preferred' => (
     isa       => Preferred,
     coerce    => 1, 
     lazy      => 1, 
-    predicate => 'has_preferred', 
+    reader    => 'get_preferred',
     writer    => 'set_preferred',
+    predicate => '_has_preferred', 
     default   => 'mcdram',
 ); 
 
-sub cmd {
-    my $self  = shift; 
-    my @opts  = (); 
-    $tabstop  = 4; 
-
-    push @opts, $self->membind   if $self->has_membind; 
-    push @opts, $self->preferred if $self->has_preferred; 
-
-    return ['numactl', expand(map "\t".$_, @opts)]
+sub _get_opts { 
+    return qw(membind preferred)
 } 
 
 __PACKAGE__->meta->make_immutable;

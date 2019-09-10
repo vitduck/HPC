@@ -1,62 +1,44 @@
 package HPC::MPI::IMPI;  
 
 use Moose; 
+use MooseX::XSAccessor; 
 use MooseX::Types::Moose  qw(Int Bool); 
 use HPC::MPI::Types::IMPI qw(ENV_IMPI); 
-use Text::Tabs; 
 use namespace::autoclean; 
 
-with qw(HPC::MPI::Base); 
+extends qw(HPC::MPI::Base);  
 
 has '+eagersize' => ( 
     trigger => sub { 
         my $self = shift; 
-
-        $self->set_env(I_MPI_EAGER_THRESHOLD => $self->eagersize);
+        
+        $self->set_env( I_MPI_EAGER_THRESHOLD => $self->get_eagersize );
     }
 ); 
 
-has '+env' => ( 
-    isa    => ENV_IMPI, 
-    coerce => 1
+has '+env' => (
+    isa      => ENV_IMPI, 
+    coerce   => 1, 
 ); 
 
 has 'debug' => ( 
     is       => 'rw', 
     isa      => Int, 
     init_arg => undef,
-    lazy     => 1, 
+    reader   => 'get_debug',
     writer   => 'set_debug',
+    lazy     => 1, 
     default  => 3, 
     trigger  => sub { 
         my $self = shift; 
 
-        $self->set_env(I_MPI_DEBUG => $self->debug)
+        $self->set_env( I_MPI_DEBUG => $self->get_debug )
     }
 ); 
 
-has 'ipm' => ( 
-    is       => 'rw', 
-    isa      => Bool, 
-    lazy     => 1, 
-    traits   => ['Bool'],
-    init_arg => undef,
-    default  => 0, 
-    handles  => { 
-         'enable_ipm' => 'set', 
-        'disable_ipm' => 'unset', 
-    }
-); 
-
-sub mpirun { 
-    my $self = shift; 
-    my @opts = (); 
-    $tabstop = 4; 
-
-    push @opts, $self->env($self->_env)->@* if $self->has_env; 
-
-    return ['mpirun', expand(map "\t".$_, @opts)]
-} 
+override _get_opts => sub { 
+    return qw(env); 
+}; 
 
 __PACKAGE__->meta->make_immutable;
 

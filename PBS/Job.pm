@@ -1,32 +1,29 @@
 package HPC::PBS::Job; 
 
 use Moose;
+use MooseX::XSAccessor; 
 use namespace::autoclean;
 
 with qw(
     HPC::Debug::Data
     HPC::PBS::IO HPC::PBS::Resource HPC::PBS::Module 
-    HPC::PBS::App HPC::PBS::Cmd HPC::PBS::Sys
+    HPC::PBS::Cmd HPC::PBS::Sys
+    HPC::PBS::App 
 );   
 
-after 'src_mpi' => sub {
-    my ($self, $mpi) = @_; 
-    
-    $self->_load_impi($mpi); 
-};  
 
-after 'unsrc_mpi' => sub { 
+after 'set_mpivar' => sub {
     my ($self, $module) = @_; 
     
-    $self->_unload_mpi; 
-}; 
+    $self->_load_impi($module); 
+};  
 
 before qr/aps_cmd/ => sub {
     my $self = shift; 
 
-    $self->_push_cmd($self->get_aps_type  ) if ($self->has_aps_type); 
-    $self->_push_cmd($self->get_aps_level ) if $self->has_aps_level; 
-    $self->_push_cmd('' )                   if $self->has_aps_level or $self->has_aps_type;  
+    $self->_push_cmd($self->aps->get_type  ) if $self->aps->_has_type; 
+    $self->_push_cmd($self->aps->get_level ) if $self->aps->_has_level; 
+    $self->_push_cmd('' )                    if $self->aps->_has_level or $self->aps->_has_type; 
 }; 
 
 sub qsub { 

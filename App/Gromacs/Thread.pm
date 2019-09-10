@@ -8,8 +8,9 @@ has 'nt' => (
     isa       => Nt,
     coerce    => 1,
     lazy      => 1, 
-    predicate => '_has_nt',
+    reader    => 'get_nt',
     writer    => 'set_nt',
+    predicate => '_has_nt',
     default   => 1,
 );
 
@@ -18,8 +19,9 @@ has 'ntmpi' => (
     isa       => Ntmpi,
     coerce    => 1,
     lazy      => 1,
-    predicate => '_has_ntmpi',
+    reader    => 'get_ntmpi',
     writer    => 'set_ntmpi',
+    predicate => '_has_ntmpi',
     default   => 1,
 );
 
@@ -28,8 +30,9 @@ has 'ntomp' => (
     isa       => Ntomp,
     coerce    => 1,
     lazy      => 1,
-    predicate => '_has_ntomp',
+    reader    => 'get_ntomp',
     writer    => 'set_ntomp',
+    predicate => '_has_ntomp',
     default   => 1,
 );
 

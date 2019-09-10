@@ -1,92 +1,98 @@
 package HPC::App::Lammps::Gpu; 
 
 use Moose; 
-use Moose::Util::TypeConstraints; 
+use MooseX::XSAccessor; 
 use MooseX::Types::Moose qw/Num Int Str/; 
-use HPC::App::Types::Lammps qw(Ngpu); 
+use Moose::Util::TypeConstraints; 
 use namespace::autoclean; 
 
-has 'ngpu' => ( 
-    is      => 'rw', 
-    isa     => Ngpu, 
-    coerce  => 1, 
-    default => 0,
-    writer  => 'set_ngpu'
+with 'HPC::App::Lammps::Package'; 
+
+has '+name' => (
+    default => 'gpu' 
+); 
+
+has '+arg' => ( 
+    writer => 'set_ngpu'
 ); 
 
 has 'neigh' => ( 
     is        => 'rw', 
-    isa       => enum([qw/full half/]), 
+    isa       => enum([qw/yes no/]), 
+    reader    => 'get_neigh',
+    writer    => 'set_neigh', 
     predicate => '_has_neigh', 
-    writer    => 'set_neigh'
+    default   => 'yes'
 ); 
 
 has 'newton' => ( 
     is        => 'rw', 
     isa       => enum([qw/off on/]), 
+    reader    => 'get_newton',
+    writer    => 'set_newton', 
     predicate => '_has_newton', 
-    writer    => 'set_newton'
+    default   => 'off',
 ); 
 
 has 'binsize' => ( 
     is        => 'rw', 
     isa       => Num,
+    reader    => 'get_binsize',
+    writer    => 'set_binsize', 
     predicate => '_has_binsize',
-    writer    => 'set_binsize'
+    lazy      => 1, 
+    default   => 0.0
 ); 
 
 has 'split' => ( 
     is        => 'rw', 
     isa       => Num,
-    default   => 1.0,
+    reader    => 'get_split',
+    writer    => 'set_split', 
     predicate => '_has_split', 
-    writer    => 'set_split'
+    lazy      => 1, 
+    default   => 1.0,
 ); 
 
 has 'gpuID' => ( 
     is        => 'rw', 
     isa       => Str, 
-    default   => 0,
-    predicate => '_has_gpuID', 
+    reader    => 'get_gpuID',
     writer    => 'set_gpuID',
+    predicate => '_has_gpuID', 
+    lazy      => 1, 
+    default   => 0,
 ); 
 
 has 'tpa' => ( 
     is        => 'rw', 
     isa       => Int, 
-    default   => 0,
+    reader    => 'get_tpa', 
+    writer    => 'set_tpa', 
     predicate => '_has_tpa', 
-    writer    => 'set_tpa'
+    lazy      => 1,
+    default   => 1,
 ); 
 
 has 'device' => ( 
     is        => 'rw', 
     isa       => Str, 
-    default   => 0,
+    reader    => 'get_device',
+    writer    => 'set_device', 
     predicate => '_has_device', 
-    writer    => 'set_device'
+    lazy      => 1, 
+    default   => 'fermi'
 ); 
 
 has 'blocksize' => ( 
     is        => 'rw', 
     isa       => Str, 
-    default   => 0,
+    reader    => 'get_blocksize',
+    writer    => 'set_blocksize', 
     predicate => '_has_blocksize', 
-    writer    => 'set_blocksize'
+    lazy      => 1, 
+    default   => 64,
 ); 
-
-sub pkg_opt { 
-    my $self = shift; 
-    my @pkgs = ($self->ngpu); 
-    
-    for my $attr ( grep !/ngpu/, $self->meta->get_attribute_list ) { 
-        my $predicate = "_has_$attr"; 
-    
-        push @pkgs, $attr, $self->$attr if $self->$predicate; 
-    }
-    
-    return [@pkgs]
-} 
 
 __PACKAGE__->meta->make_immutable;
 

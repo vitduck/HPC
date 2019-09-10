@@ -7,8 +7,9 @@ has 'tunepme' => (
     is        => 'rw',
     isa       => Tunepme,
     coerce    => 1,
-    predicate => '_has_tunepme',
+    reader    => 'get_tunepme',
     writer    => 'set_tunepme',
+    predicate => '_has_tunepme',
     default   => 0,
 );
 
@@ -16,8 +17,9 @@ has 'dlb' => (
     is        => 'rw',
     isa       => Dlb,
     coerce    => 1,
-    predicate => '_has_dlb',
+    reader    => 'get_dlb',
     writer    => 'set_dlb',
+    predicate => '_has_dlb',
     default   => 'auto',
 );
 
@@ -26,8 +28,9 @@ has 'ddorder' => (
     isa       => DDorder,
     coerce    => 1,
     lazy      => 1,
-    predicate => '_has_ddorder',
+    reader    => 'get_ddorder',
     writer    => 'set_ddorder',
+    predicate => '_has_ddorder',
     default   => 'interleave', 
 );
 

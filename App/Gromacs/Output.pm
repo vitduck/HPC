@@ -7,8 +7,9 @@ has 'verbose' => (
     is        => 'rw', 
     isa       => Verbose, 
     coerce    => 1,
-    predicate => '_has_verbose', 
+    reader    => 'get_verbose',
     writer    => 'set_verbose',
+    predicate => '_has_verbose', 
     default   => 1, 
 ); 
 
@@ -17,8 +18,9 @@ has 'deffnm' => (
     isa       => Deffnm, 
     coerce    => 1, 
     lazy      => 1, 
-    predicate => '_has_deffnm',
+    reader    => 'get_deffnm',
     writer    => 'set_deffnm', 
+    predicate => '_has_deffnm',
     default   => 'md'
 ); 
 
@@ -27,8 +29,9 @@ has 'log' => (
     isa       => Log, 
     coerce    => 1, 
     lazy      => 1,
-    predicate => '_has_log', 
+    reader    => 'get_log', 
     writer    => 'set_log', 
+    predicate => '_has_log', 
     default   => 'md.log'
 ); 
 
@@ -36,8 +39,9 @@ has 'confout' => (
     is        => 'rw', 
     isa       => Confout, 
     coerce    => 1,
-    predicate => '_has_confout', 
+    reader    => 'get_confout',
     writer    => 'set_confout', 
+    predicate => '_has_confout', 
     default   => 0,
 ); 
 

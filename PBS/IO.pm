@@ -14,7 +14,9 @@ has 'pbs' => (
         my $self = shift; 
 
         # write to fh
-        $self->set_fh(IO::File->new($self->pbs, 'w')); 
+        $self->_set_fh(
+            IO::File->new($self->pbs, 'w')
+        ); 
 
         $self->_write_pbs_resource; 
         $self->_write_pbs_module; 
@@ -32,7 +34,7 @@ has 'fh' => (
     is       => 'rw', 
     isa      => FileHandle, 
     init_arg => undef, 
-    writer   => 'set_fh',
+    writer   => '_set_fh',
     handles  => [ qw(print printf close) ]
 ); 
 
