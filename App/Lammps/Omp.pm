@@ -2,6 +2,7 @@ package HPC::App::Lammps::Omp;
 
 use Moose; 
 use MooseX::XSAccessor; 
+use MooseX::Attribute::Chained; 
 use MooseX::Types::Moose qw/Int Str/; 
 use Moose::Util::TypeConstraints; 
 use namespace::autoclean; 
@@ -19,8 +20,7 @@ has '+arg' => (
 has 'neigh' => (
     is        => 'rw', 
     isa       => enum([qw/yes no/]), 
-    reader    => 'get_neigh',
-    writer    => 'set_neigh',
+    traits    => ['Chained'],
     predicate => '_has_neigh', 
     default   => 'yes'
 ); 

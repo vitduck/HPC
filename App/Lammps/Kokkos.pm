@@ -1,6 +1,7 @@
 package HPC::App::Lammps::Kokkos;  
 
 use Moose; 
+use MooseX::Attribute::Chained; 
 use Moose::Util::TypeConstraints; 
 use MooseX::Types::Moose qw/Num/; 
 use namespace::autoclean; 
@@ -18,8 +19,7 @@ has '+arg' => (
 has 'neigh' => ( 
     is        => 'rw', 
     isa       => enum([qw/full half/]), 
-    reader    => 'get_neigh',
-    writer    => 'set_neigh',
+    traits    => ['Chained'],
     predicate => '_has_neigh', 
     default   => 'half',
 ); 
@@ -27,8 +27,7 @@ has 'neigh' => (
 has 'neigh_qeq' => ( 
     is        => 'rw', 
     isa       => enum([qw/full half/]), 
-    reader    => 'get_neigh_qeq',
-    writer    => 'set_neigh_qeq',
+    traits    => ['Chained'],
     predicate => '_has_neigh_qeq', 
     lazy      => 1, 
     default   => 'half'
@@ -37,8 +36,7 @@ has 'neigh_qeq' => (
 has 'neigh_thread' => ( 
     is        => 'rw', 
     isa       => enum([qw/off on/]), 
-    reader    => 'get_neigh_thread',
-    writer    => 'set_neigh_thread',
+    traits    => ['Chained'],
     predicate => '_has_neigh_thread', 
     default   => 'on',
 ); 
@@ -46,8 +44,7 @@ has 'neigh_thread' => (
 has 'newton' => ( 
     is        => 'rw', 
     isa       => enum([qw/off on/]), 
-    reader    => 'get_newton', 
-    writer    => 'set_newton',
+    traits    => ['Chained'],
     predicate => '_has_newton', 
     default   => 'on',
 ); 
@@ -55,8 +52,8 @@ has 'newton' => (
 has 'binsize' => ( 
     is        => 'rw', 
     isa       => Num,
+    traits    => ['Chained'],
     predicate => '_has_binsize', 
-    writer    => 'set_binsize',
     lazy      => 1, 
     default   => 0.0
 ); 
@@ -64,8 +61,7 @@ has 'binsize' => (
 has 'comm' => ( 
     is        => 'rw', 
     isa       => enum([qw/no host device/]), 
-    reader    => 'get_comm',
-    writer    => 'set_comm',
+    traits    => ['Chained'],
     predicate => '_has_comm', 
     
 ); 
@@ -73,32 +69,28 @@ has 'comm' => (
 has 'comm_exchange' => ( 
     is        => 'rw', 
     isa       => enum([qw/no host device/]), 
-    reader    => 'get_comm_exchange',
-    writer    => 'set_comm_exchange',
+    traits    => ['Chained'],
     predicate => '_has_comm_exchange', 
 ); 
 
 has 'comm_forward' => ( 
     is        => 'rw', 
     isa       => enum([qw/no host device/]), 
-    reader    => 'get_comm_forward',
-    writer    => 'set_comm_forward',
+    traits    => ['Chained'],
     predicate => '_has_comm_forward', 
 ); 
 
 has 'comm_reverse' => ( 
     is        => 'rw', 
     isa       => enum([qw/no host device/]), 
-    reader    => 'get_comm_reverse',
-    writer    => 'set_comm_reverse',
+    traits    => ['Chained'],
     predicate => '_has_comm_reverse', 
 ); 
 
 has 'gpu_direct' => ( 
     is        => 'rw', 
     isa       => enum([qw/off on/]), 
-    reader    => 'get_gpu_direct',
-    writer    => 'set_gpu_direct',
+    traits    => ['Chained'],
     predicate => '_has_gpu_direct', 
 ); 
 

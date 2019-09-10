@@ -2,6 +2,7 @@ package HPC::MPI::OPENMPI;
 
 use Moose; 
 use MooseX::XSAccessor; 
+use MooseX::Attribute::Chained; 
 use MooseX::Types::Moose qw(HashRef); 
 use HPC::MPI::Types::OPENMPI qw(OMP_OPENMPI ENV_OPENMPI MCA_OPENMPI); 
 use namespace::autoclean; 
@@ -25,38 +26,50 @@ has '+eagersize' => (
     }
 ); 
 
-has '+env' => ( 
+has '+env_opt' => ( 
     isa    => ENV_OPENMPI, 
     coerce => 1
 ); 
 
-has '_mca' => (
+has 'mca' => (
     is       => 'rw',
     isa      => HashRef,
-    traits   => ['Hash'],
+    traits   => [qw(Chained Hash)],
     init_arg => undef,
     lazy     => 1, 
+    clearer  => 'reset_mca',
     default  => sub {{}},
     handles  => {
         set_mca   => 'set',
         unset_mca => 'delete',
-        reset_mca => 'clear',
     }
 );
 
-has 'mca' => (
-    is       => 'rw',
+has 'mca_opt' => (
+    is        => 'rw',
     isa       => MCA_OPENMPI,
     coerce    => 1,
+    clearer   => '_unset_mca_opt',
+    predicate => '_has_mca_opt',
     init_arg  => undef,
-    reader    => 'get_mca', 
-    predicate => '_has_mca',
     lazy      => 1, 
     default   => sub {{}}, 
 );
 
+after [qw(set_mca unset_mca)] => sub {
+    my $self = shift;
+
+    $self->mca_opt($self->mca)
+};
+
+after 'reset_mca' => sub {
+    my $self = shift;
+
+    $self->_unset_mca_opt
+};
+
 override _get_opts => sub { 
-    return qw(omp env mca)  
+    return qw(omp env_opt mca_opt)  
 }; 
 
 __PACKAGE__->meta->make_immutable;

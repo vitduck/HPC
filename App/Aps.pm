@@ -2,6 +2,7 @@ package HPC::App::Aps;
 
 use Moose;  
 use MooseX::XSAccessor; 
+use MooseX::Attribute::Chained; 
 use MooseX::Types::Moose qw(Str); 
 use HPC::App::Types::Aps qw(Type Level Report); 
 use namespace::autoclean; 
@@ -20,7 +21,7 @@ has 'type' => (
     isa       => Type,
     coerce    => 1, 
     reader    => 'get_type',
-    writer    => 'set_type',
+    traits    => ['Chained'],
     predicate => '_has_type',
     lazy      => 1, 
     default   => 1, 
@@ -29,9 +30,8 @@ has 'type' => (
 has 'level' => (
     is        => 'rw', 
     isa       => Level, 
+    traits    => ['Chained'],
     coerce    => 1, 
-    reader    => 'get_level',
-    writer    => 'set_level', 
     predicate => '_has_level', 
     lazy      => 1, 
     default   => 1,
@@ -40,9 +40,8 @@ has 'level' => (
 has 'report' => ( 
     is        => 'rw', 
     isa       => Report, 
+    traits    => ['Chained'],
     coerce    => 1, 
-    reader    => 'get_report',
-    writer    => 'set_report',
     predicate => '_has_report', 
 );
 

@@ -2,6 +2,7 @@ package HPC::MPI::Base;
 
 use Moose; 
 use MooseX::XSAccessor; 
+use MooseX::Attribute::Chained; 
 use MooseX::Types::Moose qw(Str Int ArrayRef HashRef); 
 use HPC::MPI::Types::MPI qw(NPROCS HOSTFILE); 
 use namespace::autoclean; 
@@ -15,15 +16,13 @@ has '+bin' => (
 has 'module' => ( 
     is       => 'ro', 
     isa      => Str,
-    reader   => 'get_module',
-    writer   => 'set_module'
+    traits   => ['Chained'],
 ); 
 
 has 'omp' => ( 
     is        => 'rw', 
+    traits   => ['Chained'],
     init_arg  => undef, 
-    reader    => 'get_omp',
-    writer    => 'set_omp',
     predicate => '_has_omp', 
     lazy      => 1,
     default   => 1, 
@@ -32,10 +31,9 @@ has 'omp' => (
 has 'nprocs' => (
     is        => 'rw', 
     isa       => NPROCS, 
+    traits   => ['Chained'],
     coerce    => 1, 
     lazy      => 1, 
-    reader    => 'get_nprocs',
-    writer    => 'set_nprocs', 
     predicate => '_has_nprocs', 
     default   => 1,
 ); 
@@ -43,50 +41,60 @@ has 'nprocs' => (
 has 'hostfile' => ( 
     is        => 'ro', 
     isa       => HOSTFILE, 
+    traits   => ['Chained'],
     init_arg  => undef,
     coerce    => 1, 
     lazy      => 1, 
-    reader    => 'get_hostfile',
     predicate => '_has_hostfile', 
     default   => '$PBS_NODEFILE', 
 ); 
 
-has '_env' => (
+has 'env' => (
     is       => 'rw', 
     isa      => HashRef,
-    traits   => ['Hash'],
+    traits   => [qw(Hash Chained)],
     init_arg => undef,
+    clearer  => 'reset_env', 
     lazy     => 1,
     default  => sub {{}}, 
     handles  => { 
-        set_env    => 'set',
-        unset_env  => 'delete',
-        reset_env  => 'clear', 
-    } 
+        set_env   => 'set', 
+        unset_env => 'delete', 
+    },  
+    trigger  => sub { 
+        my $self = shift; 
+
+        $self->env_opt($self->env)
+    }
 ); 
 
-has 'env' => ( 
+has 'env_opt' => ( 
     is        => 'rw', 
-    init_arg  => undef,
-    reader    => 'get_env',
-    predicate => '_has_env', 
-    lazy      => 1, 
+    init_arg  => undef, 
+    lazy      => 1,  
+    clearer   => '_unset_env_opt',
+    predicate => '_has_env_opt',
     default   => sub {{}}
 ); 
-
-after [qw(set_env unset_env reset_env)] => sub {
-    my $self = shift; 
-
-    $self->env($self->_env)
-}; 
 
 has 'eagersize' => (
     is       => 'rw', 
     isa      => Str|Int,
+    traits   => ['Chained'],
     init_arg => undef, 
-    reader   => 'get_eagersize',
-    writer   => 'set_eagersize'
 ); 
+
+after [qw(set_env unset_env)] => sub {
+    my $self = shift; 
+
+    $self->env_opt($self->env)
+}; 
+
+after 'reset_env' => sub {
+    my $self = shift; 
+
+    $self->_unset_env_opt
+}; 
 
 sub _get_opts { 
     return () 

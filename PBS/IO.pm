@@ -8,13 +8,14 @@ use IO::File;
 has 'pbs' => ( 
     is       => 'rw', 
     isa      => Str, 
+    traits   => ['Chained'],
     init_arg => undef, 
     writer   => 'write', 
     trigger  => sub { 
         my $self = shift; 
 
         # write to fh
-        $self->_set_fh(
+        $self->fh(
             IO::File->new($self->pbs, 'w')
         ); 
 
@@ -26,7 +27,7 @@ has 'pbs' => (
         $self->close; 
 
         # reset pbs_cmd
-        $self->_reset_cmd; 
+        $self->reset_cmd; 
     } 
 ); 
 
@@ -34,7 +35,6 @@ has 'fh' => (
     is       => 'rw', 
     isa      => FileHandle, 
     init_arg => undef, 
-    writer   => '_set_fh',
     handles  => [ qw(print printf close) ]
 ); 
 

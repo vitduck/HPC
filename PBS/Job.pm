@@ -2,6 +2,7 @@ package HPC::PBS::Job;
 
 use Moose;
 use MooseX::XSAccessor; 
+use MooseX::Attribute::Chained; 
 use namespace::autoclean;
 
 with qw(
@@ -11,25 +12,26 @@ with qw(
     HPC::PBS::App 
 );   
 
-
-after 'set_mpivar' => sub {
+after 'mpivar' => sub {
     my ($self, $module) = @_; 
     
-    $self->_load_impi($module); 
+    $self->_load_impi($module) if $module; 
 };  
 
 before qr/aps_cmd/ => sub {
     my $self = shift; 
 
-    $self->_push_cmd($self->aps->get_type  ) if $self->aps->_has_type; 
-    $self->_push_cmd($self->aps->get_level ) if $self->aps->_has_level; 
-    $self->_push_cmd('' )                    if $self->aps->_has_level or $self->aps->_has_type; 
+    $self->_push_cmd($self->aps->type  ) if $self->aps->_has_type; 
+    $self->_push_cmd($self->aps->level ) if $self->aps->_has_level; 
+    $self->_push_cmd('' )                if $self->aps->_has_level or $self->aps->_has_type; 
 }; 
 
 sub qsub { 
     my $self = shift; 
     
     system 'qsub', $self->pbs; 
+
+    return $self; 
 } 
 
 sub BUILD {

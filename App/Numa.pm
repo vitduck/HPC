@@ -17,9 +17,8 @@ has 'membind' => (
     is        => 'rw', 
     isa       => Membind,
     coerce    => 1, 
+    traits    => ['Chained'],
     lazy      => 1, 
-    reader    => 'get_membind',
-    writer    => 'set_membind',
     predicate => '_has_membind', 
     default   => 'mcdram', 
 ); 
@@ -28,9 +27,8 @@ has 'preferred' => (
     is        => 'rw', 
     isa       => Preferred,
     coerce    => 1, 
+    traits    => ['Chained'],
     lazy      => 1, 
-    reader    => 'get_preferred',
-    writer    => 'set_preferred',
     predicate => '_has_preferred', 
     default   => 'mcdram',
 ); 

@@ -14,11 +14,6 @@ has 'impi' => (
     writer    => '_load_impi',
     predicate => '_has_impi', 
     clearer   => '_unload_impi', 
-    handles => { 
-        set_impi_env   => 'set_env', 
-        set_impi_debug => 'set_debug',
-        set_impi_eager => 'set_eagersize',
-    }
 ); 
 
 # openmpi requires omp 
@@ -30,15 +25,11 @@ has 'openmpi' => (
     writer    => '_load_openmpi',
     predicate => '_has_openmpi', 
     clearer   => '_unload_openmpi', 
-    handles => { 
-        set_openmpi_env   => 'set_env', 
-        set_openmpi_eager => 'set_eagersize', 
-    }, 
     trigger   => sub { 
         my $self = shift; 
 
         if ( $self->_has_omp ) { 
-            $self->openmpi->set_omp($self->get_omp) 
+            $self->openmpi->omp($self->omp) 
         }
     }
 ); 
@@ -49,7 +40,7 @@ has 'mvapich2' => (
     isa       => MVAPICH2, 
     init_arg  => undef, 
     coerce    => 1, 
-    writer    => '_load_mvapich2', 
+    writer    => '_load_mvapich2',
     predicate => '_has_mvapich2',
     clearer   => '_unload_mvapich2', 
     handles => { 
@@ -59,10 +50,10 @@ has 'mvapich2' => (
     trigger  => sub {  
         my $self = shift; 
 
-        $self->mvapich2->set_nprocs($self->get_select * $self->get_mpiprocs);
+        $self->mvapich2->nprocs($self->select * $self->mpiprocs);
 
         if ( $self->_has_omp ) {  
-            $self->mvapich2->set_omp($self->get_omp) 
+            $self->mvapich2->omp($self->omp) 
         }
     }
 ); 
@@ -77,7 +68,7 @@ sub _has_mpi {
     }
 }
 
-sub get_mpi { 
+sub _get_mpi { 
     my $self = shift; 
 
     for my $mpi (qw(impi openmpi mvapich2)) { 
@@ -90,7 +81,7 @@ sub get_mpi {
 sub mpirun { 
     my $self = shift; 
 
-    my $mpi = $self->get_mpi; 
+    my $mpi = $self->_get_mpi; 
     
     return $self->$mpi->cmd
 } 

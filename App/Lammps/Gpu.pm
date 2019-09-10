@@ -2,6 +2,7 @@ package HPC::App::Lammps::Gpu;
 
 use Moose; 
 use MooseX::XSAccessor; 
+use MooseX::Attribute::Chained; 
 use MooseX::Types::Moose qw/Num Int Str/; 
 use Moose::Util::TypeConstraints; 
 use namespace::autoclean; 
@@ -19,8 +20,7 @@ has '+arg' => (
 has 'neigh' => ( 
     is        => 'rw', 
     isa       => enum([qw/yes no/]), 
-    reader    => 'get_neigh',
-    writer    => 'set_neigh', 
+    traits    => ['Chained'],
     predicate => '_has_neigh', 
     default   => 'yes'
 ); 
@@ -28,8 +28,7 @@ has 'neigh' => (
 has 'newton' => ( 
     is        => 'rw', 
     isa       => enum([qw/off on/]), 
-    reader    => 'get_newton',
-    writer    => 'set_newton', 
+    traits    => ['Chained'],
     predicate => '_has_newton', 
     default   => 'off',
 ); 
@@ -37,8 +36,7 @@ has 'newton' => (
 has 'binsize' => ( 
     is        => 'rw', 
     isa       => Num,
-    reader    => 'get_binsize',
-    writer    => 'set_binsize', 
+    traits    => ['Chained'],
     predicate => '_has_binsize',
     lazy      => 1, 
     default   => 0.0
@@ -47,8 +45,7 @@ has 'binsize' => (
 has 'split' => ( 
     is        => 'rw', 
     isa       => Num,
-    reader    => 'get_split',
-    writer    => 'set_split', 
+    traits    => ['Chained'],
     predicate => '_has_split', 
     lazy      => 1, 
     default   => 1.0,
@@ -57,8 +54,7 @@ has 'split' => (
 has 'gpuID' => ( 
     is        => 'rw', 
     isa       => Str, 
-    reader    => 'get_gpuID',
-    writer    => 'set_gpuID',
+    traits    => ['Chained'],
     predicate => '_has_gpuID', 
     lazy      => 1, 
     default   => 0,
@@ -67,8 +63,7 @@ has 'gpuID' => (
 has 'tpa' => ( 
     is        => 'rw', 
     isa       => Int, 
-    reader    => 'get_tpa', 
-    writer    => 'set_tpa', 
+    traits    => ['Chained'],
     predicate => '_has_tpa', 
     lazy      => 1,
     default   => 1,
@@ -77,8 +72,7 @@ has 'tpa' => (
 has 'device' => ( 
     is        => 'rw', 
     isa       => Str, 
-    reader    => 'get_device',
-    writer    => 'set_device', 
+    traits    => ['Chained'],
     predicate => '_has_device', 
     lazy      => 1, 
     default   => 'fermi'
@@ -87,8 +81,7 @@ has 'device' => (
 has 'blocksize' => ( 
     is        => 'rw', 
     isa       => Str, 
-    reader    => 'get_blocksize',
-    writer    => 'set_blocksize', 
+    traits    => ['Chained'],
     predicate => '_has_blocksize', 
     lazy      => 1, 
     default   => 64,

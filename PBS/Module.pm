@@ -27,20 +27,18 @@ has 'modules' => (
 has 'mklvar' => (
     is        => 'rw', 
     isa       => SRC_MKL, 
+    traits    => ['Chained'],
     init_arg  => undef, 
     coerce    => 1, 
-    reader    => 'get_mklvar',
-    writer    => 'set_mklvar',
     predicate => '_has_mklvar',
 ); 
 
 has 'mpivar'  => (
     is        => 'rw', 
     isa       => SRC_MPI, 
+    traits    => ['Chained'],
     init_arg  => undef, 
     coerce    => 1, 
-    reader    => 'get_mpivar',
-    writer    => 'set_mpivar',
     predicate => '_has_mpivar', 
 ); 
 
@@ -61,6 +59,8 @@ sub load {
             }
         }
     } 
+
+    return $self; 
 }
 
 # emulate 'module unload' 
@@ -80,6 +80,8 @@ sub unload {
             }
         }
     } 
+    
+    return $self
 } 
 
 sub init {
@@ -93,14 +95,17 @@ sub init {
         grep !/Currently|Loaded|Modulefiles:/,
         split(' ', capture_stderr { system 'modulecmd', 'perl', 'list' })
     );
+
+    return $self; 
 }
 
 # emulate 'module switch'
 sub switch { 
     my ($self, $old_module, $new_module) = @_; 
 
-    $self->unload($old_module); 
-    $self->load  ($new_module); 
+    $self->unload($old_module)->load($new_module); 
+
+    return $self
 }
 
 # emulate 'module load'
