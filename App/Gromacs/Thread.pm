@@ -1,6 +1,7 @@
 package HPC::App::Gromacs::Thread;  
 
 use Moose::Role; 
+use MooseX::Attribute::Chained; 
 use HPC::App::Types::Gromacs qw(Nt Ntmpi Ntomp); 
 
 has 'nt' => (
@@ -8,8 +9,7 @@ has 'nt' => (
     isa       => Nt,
     coerce    => 1,
     lazy      => 1, 
-    reader    => 'get_nt',
-    writer    => 'set_nt',
+    traits    => ['Chained'],
     predicate => '_has_nt',
     default   => 1,
 );
@@ -19,8 +19,7 @@ has 'ntmpi' => (
     isa       => Ntmpi,
     coerce    => 1,
     lazy      => 1,
-    reader    => 'get_ntmpi',
-    writer    => 'set_ntmpi',
+    traits    => ['Chained'],
     predicate => '_has_ntmpi',
     default   => 1,
 );
@@ -28,10 +27,9 @@ has 'ntmpi' => (
 has 'ntomp' => (
     is        => 'rw',
     isa       => Ntomp,
+    traits    => ['Chained'],
     coerce    => 1,
     lazy      => 1,
-    reader    => 'get_ntomp',
-    writer    => 'set_ntomp',
     predicate => '_has_ntomp',
     default   => 1,
 );
