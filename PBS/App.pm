@@ -4,9 +4,10 @@ use Moose::Role;
 
 use HPC::App::Aps; 
 use HPC::App::Numa; 
+use HPC::App::Qe; 
 use HPC::App::Lammps; 
 use HPC::App::Gromacs; 
-use HPC::PBS::Types::App qw(Aps Numa Gromacs Lammps); 
+use HPC::PBS::Types::App qw(Aps Numa Qe Gromacs Lammps); 
 
 has 'aps' => ( 
     is       => 'rw', 
@@ -14,6 +15,8 @@ has 'aps' => (
     coerce   => 1, 
     traits   => ['Chained'],
     init_arg => undef, 
+    writer   => 'load_aps',
+    clearer  => 'unload_aps',
     handles  => { aps_cmd => 'cmd' }
 ); 
 
@@ -23,7 +26,20 @@ has 'numa' => (
     traits   => ['Chained'],
     coerce   => 1, 
     init_arg => undef, 
+    writer   => 'load_numa',
+    clearer  => 'unload_numa', 
     handles  => { numa_cmd => 'cmd' }
+); 
+
+has 'qe' => (
+    is       => 'rw', 
+    isa      => Qe,
+    traits   => ['Chained'],
+    coerce   => 1, 
+    init_arg => undef, 
+    writer   => 'load_qe',
+    clearer  => 'unload_qe',
+    handles  => { qe_cmd => 'cmd' }
 ); 
 
 has 'lammps' => (
@@ -32,7 +48,9 @@ has 'lammps' => (
     traits    => ['Chained'],
     coerce    => 1, 
     init_arg  => undef,
-    handles  => { lammps_cmd => 'cmd' }
+    writer    => 'load_lammps',
+    clearer   => 'unload_lammps',
+    handles   => { lammps_cmd => 'cmd' }
 ); 
 
 has 'gromacs' => (
@@ -41,7 +59,9 @@ has 'gromacs' => (
     traits    => ['Chained'],
     coerce    => 1, 
     init_arg  => undef,
-    handles  => { gromacs_cmd => 'cmd' }
+    writer    => 'load_gromacs',
+    clearer   => 'unload_gromacs',
+    handles   => { gromacs_cmd => 'cmd' }
 ); 
 
 1
