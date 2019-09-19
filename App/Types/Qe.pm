@@ -6,7 +6,7 @@ use MooseX::Types -declare => [qw(Input Output Image Pools Band Task Diag)];
 subtype Input , as Str, where { /^\-i/   }; 
 subtype Output, as Str, where { /^>/     }; 
 subtype Image , as Str, where { /^\-ni/  }; 
-subtype Pools , as Str, where { /^\-nks/ }; 
+subtype Pools , as Str, where { /^\-nk/  }; 
 subtype Band  , as Str, where { /^\-nb/  }; 
 subtype Task  , as Str, where { /^\-nt/  }; 
 subtype Diag  , as Str, where { /^\-nd/  }; 

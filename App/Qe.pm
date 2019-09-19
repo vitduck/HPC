@@ -94,4 +94,6 @@ sub _get_opts {
     return qw(image pools band task diag inp out); 
 }
 
+__PACKAGE__->meta->make_immutable;
+
 1

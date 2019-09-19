@@ -7,7 +7,8 @@ use HPC::App::Numa;
 use HPC::App::Qe; 
 use HPC::App::Lammps; 
 use HPC::App::Gromacs; 
-use HPC::PBS::Types::App qw(Aps Numa Qe Gromacs Lammps); 
+use HPC::App::Tensorflow; 
+use HPC::PBS::Types::App qw(Aps Numa Qe Gromacs Lammps Tensorflow); 
 
 has 'aps' => ( 
     is       => 'rw', 
@@ -62,6 +63,17 @@ has 'gromacs' => (
     writer    => 'load_gromacs',
     clearer   => 'unload_gromacs',
     handles   => { gromacs_cmd => 'cmd' }
+); 
+
+has 'tensorflow' => (
+    is        => 'rw', 
+    isa       => Tensorflow,
+    traits    => ['Chained'],
+    coerce    => 1, 
+    init_arg  => undef,
+    writer    => 'load_tensorflow',
+    clearer   => 'unload_tensorflow',
+    handles   => { tensorflow_cmd => 'cmd' }
 ); 
 
 1

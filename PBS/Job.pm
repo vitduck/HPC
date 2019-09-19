@@ -26,6 +26,12 @@ before qr/aps_cmd/ => sub {
     $self->_push_cmd('' )                if $self->aps->_has_level or $self->aps->_has_type; 
 }; 
 
+before 'tensorflow_cmd' => sub { 
+    my $self = shift; 
+
+    $self->tensorflow->num_intra_threads($self->omp) if $self->_has_omp 
+}; 
+
 sub qsub { 
     my $self = shift; 
     

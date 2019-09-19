@@ -25,6 +25,8 @@ sub load_preset {
         $self->_get_preset($cpu), 
         $self->_get_preset($env)->@*
     ); 
+
+    return $self
 } 
 
 1 
