@@ -11,17 +11,15 @@ with qw(
     HPC::App::Gromacs::Output
     HPC::App::Gromacs::Pme
     HPC::App::Gromacs::Thread
-    HPC::App::Gromacs::Prof
-); 
+    HPC::App::Gromacs::Prof ); 
 
 sub _get_opts { 
     return sort qw( 
         tpr 
         deffnm log confout verbose 
-        tunepme dlb ddorder 
+        tunepme dlb ddorder npme
         nsteps resetstep resethway 
-        nt ntmpi ntomp
-    ); 
+        nt ntmpi ntomp ) 
 }
 
 1

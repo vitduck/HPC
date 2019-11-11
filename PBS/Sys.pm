@@ -1,45 +1,37 @@
 package HPC::PBS::Sys; 
 
 use Moose::Role; 
-
 use File::Path qw(make_path); 
 use File::Copy qw(copy move);
 
-sub mkdir { 
-    my ($self, @dirs) = @_; 
+use feature 'signatures';  
+no warnings 'experimental::signatures'; 
 
+sub mkdir ($self, @dirs) { 
     make_path($_) for @dirs; 
 
     return $self
 } 
 
-sub chdir { 
-    my ($self, $dir) = @_; 
-
+sub chdir ($self, $dir) { 
     chdir($dir); 
     
     return $self
 } 
 
-sub cp { 
-    my ($self, $source, $destination) = @_; 
-
+sub cp ($self, $source, $destination) { 
     copy($source => $destination);  
     
     return $self
 }
 
-sub mv { 
-    my ($self, $source, $destination) = @_; 
-
+sub mv ($self, $source, $destination) {
     move($source => $destination); 
     
     return $self
 } 
 
-sub wait { 
-    my ($self, $time) = @_; 
-
+sub wait ($self, $time) {
     sleep ($time); 
     
     return $self

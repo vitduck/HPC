@@ -1,9 +1,10 @@
 package HPC::Share::Cmd;  
 
 use Moose::Role; 
-use MooseX::Attribute::Chained; 
 use MooseX::Types::Moose qw/Str/; 
-use Text::Tabs; 
+
+use feature 'signatures';  
+no warnings 'experimental::signatures'; 
 
 requires qw(_get_opts); 
 
@@ -13,23 +14,19 @@ has 'bin' => (
     traits => ['Chained'],
 ); 
 
-sub cmd {
-    $tabstop = 4;
-    my $self = shift;
+sub cmd ($self) {
     my @opts = ();
 
-    # flatten cmd options
-    for ($self->_get_opts) {
-        my $has = "_has_$_";
-
-        if ($self->$has and $self->$_) {
-            ref $self->$_ eq 'ARRAY'
-            ? push @opts, (map { "\t" . $_ } $self->$_->@*)
-            : push @opts, "\t" . $self->$_
+    for my $opt ($self->_get_opts) {
+        my $has_opt = "_has_$opt";
+        
+        if ($self->$has_opt) { 
+            push @opts, ( ref $self->$opt eq ref [] ? $self->$opt->@* : $self->$opt )
         }
     }
 
-    return [$self->bin, expand(@opts)]
+    # return a hash ref
+    return { $self->bin => \@opts }
 }
 
 1

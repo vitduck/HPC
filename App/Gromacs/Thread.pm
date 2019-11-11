@@ -7,20 +7,20 @@ use HPC::App::Types::Gromacs qw(Nt Ntmpi Ntomp);
 has 'nt' => (
     is        => 'rw',
     isa       => Nt,
-    coerce    => 1,
     lazy      => 1, 
     traits    => ['Chained'],
     predicate => '_has_nt',
+    coerce    => 1,
     default   => 1,
 );
 
 has 'ntmpi' => (
     is        => 'rw',
     isa       => Ntmpi,
-    coerce    => 1,
-    lazy      => 1,
     traits    => ['Chained'],
     predicate => '_has_ntmpi',
+    coerce    => 1,
+    lazy      => 1,
     default   => 1,
 );
 
@@ -28,9 +28,9 @@ has 'ntomp' => (
     is        => 'rw',
     isa       => Ntomp,
     traits    => ['Chained'],
+    predicate => '_has_ntomp',
     coerce    => 1,
     lazy      => 1,
-    predicate => '_has_ntomp',
     default   => 1,
 );
 

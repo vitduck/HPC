@@ -6,41 +6,50 @@ use MooseX::Attribute::Chained;
 use HPC::MPI::Types::MVAPICH2 qw(ENV_MVAPICH2); 
 use namespace::autoclean; 
 
+use feature 'signatures';
+no warnings 'experimental::signatures';
+
 extends qw(HPC::MPI::Base); 
 
 has '+bin' => ( 
-    default => 'mpirun_rsh'
+    default => 'mpirun_rsh' 
 ); 
 
 has '+hostfile' => ( 
-    lazy => 0
+    lazy => 0 
 ); 
 
 has '+omp' => ( 
-    trigger => sub { 
-        my $self = shift; 
-
+    trigger => sub ($self, $omp, @) { 
         $self->set_env( 
-            OMP_NUM_THREADS         => $self->omp,  
-            MV2_THREADS_PER_PROCESS => $self->omp, 
-            MV2_ENABLE_AFFINITY     => 1 
+            PSM2_KASSIST_MODE       => 'none', 
+            OMP_NUM_THREADS         => $omp,  
+            MV2_THREADS_PER_PROCESS => $omp, 
+            MV2_ENABLE_AFFINITY     => 1,
+            MV2_CPU_BINDING_POLICY  => 'hybrid', 
         ); 
     }
 ); 
 
-has '+eagersize' => ( 
-    trigger => sub { 
-        my $self = shift; 
+has '+debug' => ( 
+    trigger  => sub ($self, $debug, @) {
+        $self->set_env(
+            MV2_SHOW_ENV_INFO        => 2, 
+            MV2_SHOW_CPU_BINDING     => 1, 
+            MV2_DEBUG_SHOW_BACKTRACE => 1
+        )
+    } 
+); 
 
-        $self->set_env( 
-            MV2_SMP_EAGERSIZE => $self->eagersize 
-        ); 
+has '+eager' => ( 
+    trigger => sub ($self, $size, @) { 
+        $self->set_env( MV2_SMP_EAGERSIZE => $size )
     }
 ); 
 
 has '+env_opt' => ( 
     isa    => ENV_MVAPICH2, 
-    coerce => 1
+    coerce => 1 
 ); 
 
 override '_get_opts' => sub { 

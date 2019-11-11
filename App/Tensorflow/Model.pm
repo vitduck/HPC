@@ -16,12 +16,13 @@ has data_format => (
     isa       => Str,
     traits    => ['Chained'],
     predicate => '_has_data_format', 
-    default   => 'NHWC',
+    default   => 'NCHW',
 );   
 
 has batch_size => ( 
     is        => 'rw',
     isa       => Str,
+    lazy      => 1,
     traits    => ['Chained'],
     predicate => '_has_batch_size', 
     default   => 64
@@ -33,6 +34,15 @@ has optimizer => (
     traits    => ['Chained'],
     predicate => '_has_optimizer', 
     default   => 'sgd'
+); 
+
+has tfprof_file => ( 
+    is        => 'rw',
+    isa       => Str,
+    lazy      => 1,
+    traits    => ['Chained'],
+    predicate => '_has_tfprof_file', 
+    default   => 'profile.dat'
 ); 
 
 1

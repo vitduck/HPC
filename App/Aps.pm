@@ -3,46 +3,45 @@ package HPC::App::Aps;
 use Moose;  
 use MooseX::XSAccessor; 
 use MooseX::Attribute::Chained; 
-use MooseX::Types::Moose qw(Str); 
+use MooseX::Types::Moose 'Str'; 
 use HPC::App::Types::Aps qw(Type Level Report); 
 use namespace::autoclean; 
 
 with qw(
     HPC::Share::Cmd
-    HPC::Debug::Data
-);
+    HPC::Debug::Data );
 
 has '+bin' => (
-    default => 'aps'
+    default => 'aps' 
 );
 
 has 'type' => ( 
     is        => 'rw', 
     isa       => Type,
-    coerce    => 1, 
-    reader    => 'get_type',
     traits    => ['Chained'],
     predicate => '_has_type',
+    reader    => 'get_type',
+    coerce    => 1, 
     lazy      => 1, 
-    default   => 1, 
+    default   => 1 
 ); 
 
 has 'level' => (
     is        => 'rw', 
     isa       => Level, 
     traits    => ['Chained'],
-    coerce    => 1, 
     predicate => '_has_level', 
+    coerce    => 1, 
     lazy      => 1, 
-    default   => 1,
+    default   => 1 
 ); 
 
 has 'report' => ( 
     is        => 'rw', 
     isa       => Report, 
     traits    => ['Chained'],
-    coerce    => 1, 
     predicate => '_has_report', 
+    coerce    => 1 
 );
 
 sub _get_opts {

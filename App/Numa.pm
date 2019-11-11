@@ -6,30 +6,29 @@ use HPC::App::Types::Numa qw(Membind Preferred);
 
 with qw(
     HPC::Share::Cmd
-    HPC::Debug::Data
-);  
+    HPC::Debug::Data );  
 
 has '+bin' => ( 
-    default => 'numactl'
+    default => 'numactl' 
 ); 
 
 has 'membind' => ( 
     is        => 'rw', 
     isa       => Membind,
-    coerce    => 1, 
     traits    => ['Chained'],
-    lazy      => 1, 
     predicate => '_has_membind', 
-    default   => 'mcdram', 
+    coerce    => 1, 
+    lazy      => 1, 
+    default   => 'mcdram' 
 ); 
 
 has 'preferred' => ( 
     is        => 'rw', 
     isa       => Preferred,
-    coerce    => 1, 
     traits    => ['Chained'],
-    lazy      => 1, 
     predicate => '_has_preferred', 
+    coerce    => 1, 
+    lazy      => 1, 
     default   => 'mcdram',
 ); 
 

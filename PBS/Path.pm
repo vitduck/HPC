@@ -16,7 +16,6 @@ has '_ld_library_path' => (
           list_ld_library_path => 'elements', 
         delete_ld_library_path => 'delete', 
          index_ld_library_path => 'first_index', 
-    },  
-); 
+    }); 
 
 1 

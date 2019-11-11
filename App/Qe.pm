@@ -4,14 +4,14 @@ use Moose;
 use MooseX::XSAccessor; 
 use MooseX::Attribute::Chained; 
 use MooseX::XSAccessor; 
-use namespace::autoclean; 
-
-use HPC::App::Types::Qe qw(Input Output Image Pools Band Task Diag); 
+use MooseX::StrictConstructor; 
+use HPC::App::Types::Qe qw(Input Output Image Pools Band Task Diag);
+use namespace::autoclean;
 
 with qw(
     HPC::Share::Cmd
     HPC::Debug::Data 
-); 
+);
 
 has inp => (
     is        => 'rw',
@@ -29,69 +29,57 @@ has out => (
     predicate => '_has_out',
 );
 
-has image => (
+has ni => (
     is        => 'rw',
     isa       => Image,
     traits    => ['Chained'],
     coerce    => 1,
-    predicate => '_has_image', 
+    predicate => '_has_ni', 
     lazy      => 1, 
     default   => 1 
 );   
 
-has image => (
-    is        => 'rw',
-    isa       => Image,
-    traits    => ['Chained'],
-    coerce    => 1,
-    predicate => '_has_image', 
-    lazy      => 1, 
-    default   => 1 
-);   
-
-has pools => (
+has nk => (
     is        => 'rw',
     isa       => Pools, 
     traits    => ['Chained'],
     coerce    => 1,
-    predicate => '_has_pools', 
-    lazy      => 1, 
+    predicate => '_has_nk', 
     default   => 1 
 );   
 
-has band => (
+has nb => (
     is        => 'rw',
     isa       => Band,
     traits    => ['Chained'],
     coerce    => 1,
-    predicate => '_has_band', 
+    predicate => '_has_nb', 
     lazy      => 1, 
     default   => 1 
-);   
+);
 
-has task => (
+has nt => (
     is        => 'rw',
     isa       => Task,
     traits    => ['Chained'],
     coerce    => 1,
-    predicate => '_has_task', 
+    predicate => '_has_nt', 
     lazy      => 1, 
     default   => 1 
-);   
+);
 
-has diag => (
+has nd => (
     is        => 'rw',
     isa       => Diag,
     traits    => ['Chained'],
     coerce    => 1,
-    predicate => '_has_diag', 
+    predicate => '_has_nd', 
     lazy      => 1, 
     default   => 1 
-);   
-
+);
 
 sub _get_opts { 
-    return qw(image pools band task diag inp out); 
+    return qw(ni nk nb nt nd inp out); 
 }
 
 __PACKAGE__->meta->make_immutable;

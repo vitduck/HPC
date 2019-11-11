@@ -10,70 +10,68 @@ use HPC::App::Gromacs;
 use HPC::App::Tensorflow; 
 use HPC::PBS::Types::App qw(Aps Numa Qe Gromacs Lammps Tensorflow); 
 
+use feature 'signatures';  
+no warnings 'experimental::signatures'; 
+
 has 'aps' => ( 
     is       => 'rw', 
     isa      => Aps,
+    init_arg => undef, 
     coerce   => 1, 
     traits   => ['Chained'],
-    init_arg => undef, 
-    writer   => 'load_aps',
-    clearer  => 'unload_aps',
-    handles  => { aps_cmd => 'cmd' }
 ); 
 
 has 'numa' => (
     is       => 'rw', 
     isa      => Numa,
+    init_arg => undef,
     traits   => ['Chained'],
     coerce   => 1, 
-    init_arg => undef, 
-    writer   => 'load_numa',
-    clearer  => 'unload_numa', 
-    handles  => { numa_cmd => 'cmd' }
 ); 
 
 has 'qe' => (
     is       => 'rw', 
     isa      => Qe,
+    init_arg => undef, 
     traits   => ['Chained'],
     coerce   => 1, 
-    init_arg => undef, 
-    writer   => 'load_qe',
-    clearer  => 'unload_qe',
-    handles  => { qe_cmd => 'cmd' }
+    trigger  => sub ($self, $app, @) { 
+        $self->account('qe')
+    }
 ); 
 
 has 'lammps' => (
     is        => 'rw', 
     isa       => Lammps, 
+    init_arg  => undef,
     traits    => ['Chained'],
     coerce    => 1, 
-    init_arg  => undef,
-    writer    => 'load_lammps',
-    clearer   => 'unload_lammps',
-    handles   => { lammps_cmd => 'cmd' }
+    trigger  => sub ($self, $app, @) { 
+        $self->account('lammps')
+    }
 ); 
 
 has 'gromacs' => (
     is        => 'rw', 
     isa       => Gromacs, 
+    init_arg  => undef, 
     traits    => ['Chained'],
     coerce    => 1, 
-    init_arg  => undef,
-    writer    => 'load_gromacs',
-    clearer   => 'unload_gromacs',
-    handles   => { gromacs_cmd => 'cmd' }
+    trigger  => sub ($self, $app, @) { 
+        $self->account('gromacs')
+    }
 ); 
 
 has 'tensorflow' => (
     is        => 'rw', 
     isa       => Tensorflow,
+    init_arg  => undef, 
     traits    => ['Chained'],
-    coerce    => 1, 
-    init_arg  => undef,
-    writer    => 'load_tensorflow',
-    clearer   => 'unload_tensorflow',
-    handles   => { tensorflow_cmd => 'cmd' }
+    coerce    => 1,  
+    trigger  => sub ($self, $app, @) { 
+        $self->account('tf')
+    }
+
 ); 
 
 1

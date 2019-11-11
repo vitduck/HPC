@@ -7,16 +7,16 @@ use MooseX::Types::Moose qw(Int Str);
 has 'name' => ( 
     is        => 'rw', 
     isa       => Str, 
-    traits    => ['Chained'],
     init_arg  => undef, 
+    traits    => ['Chained'],
     predicate => '_has_name'
 ); 
 
 has 'arg' => ( 
     is        => 'rw', 
     isa       => Int, 
-    traits    => ['Chained'],
     init_arg  => undef, 
+    traits    => ['Chained'],
     predicate => '_has_arg', 
     lazy      => 0, 
     default   => 0,

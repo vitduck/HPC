@@ -8,8 +8,8 @@ has 'tpr' => (
     is        => 'rw',
     isa       => Tpr,
     traits    => ['Chained'], 
-    coerce    => 1,
     predicate => '_has_tpr',
+    coerce    => 1,
 );
 
 1 

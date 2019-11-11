@@ -1,41 +1,41 @@
 package HPC::PBS::IO; 
 
 use Moose::Role; 
-use MooseX::Types::Moose qw(Str FileHandle); 
+use MooseX::Types::Moose 'Str'; 
+use HPC::PBS::Types::IO 'FH'; 
 
-use IO::File; 
+use feature 'signatures';  
+no warnings 'experimental::signatures'; 
 
-has 'pbs' => ( 
+has 'script' => ( 
     is       => 'rw', 
     isa      => Str, 
-    traits   => ['Chained'],
     init_arg => undef, 
-    writer   => 'write', 
-    trigger  => sub { 
-        my $self = shift; 
-
-        # write to fh
-        $self->fh(
-            IO::File->new($self->pbs, 'w')
-        ); 
-
-        $self->_write_pbs_resource; 
-        $self->_write_pbs_module; 
-        $self->_write_pbs_cmd; 
-
-        # close fh 
-        $self->close; 
-
-        # reset pbs_cmd
-        $self->reset_cmd; 
-    } 
+    traits   => [ 'Chained' ],
+    lazy     => 1, 
+    default  => 'run.sh', 
+    trigger  => sub ($self, @args) { $self->fh(shift @args) } 
 ); 
 
 has 'fh' => ( 
     is       => 'rw', 
-    isa      => FileHandle, 
+    isa      => FH, 
     init_arg => undef, 
-    handles  => [ qw(print printf close) ]
+    traits   => ['Chained'],
+    coerce   => 1, 
+    lazy     => 1, 
+    default  => 'run.sh',
+    handles  => [qw(print printf close)]
 ); 
+
+sub write ($self, $file) { 
+    $self->script($file)
+         ->write_pbs_resource 
+         ->write_pbs_module   
+         ->write_pbs_cmd
+         ->close; 
+    
+    return $self
+} 
 
 1; 

@@ -8,8 +8,8 @@ subtype OMP_OPENMPI, as Str, where { /\-\-map\-by/ };
 subtype ENV_OPENMPI, as ArrayRef; 
 subtype MCA_OPENMPI, as ArrayRef; 
 
-coerce OMP_OPENMPI, from Int,     via { '--map-by NUMA:PE='.$_ };
-coerce ENV_OPENMPI, from HashRef, via { my $env = $_; [ map   '-x '.$_.'='.$env->{$_}, sort keys $env->%* ] }; 
-coerce MCA_OPENMPI, from HashRef, via { my $mca = $_; [ map '-mca '.$_.'='.$mca->{$_}, sort keys $mca->%* ] }; 
+coerce OMP_OPENMPI, from Int,     via { return '--map-by NUMA:PE='.$_ };
+coerce ENV_OPENMPI, from HashRef, via { my $env = $_; [map   '-x '.$_.'='.$env->{$_}, sort keys $env->%*] }; 
+coerce MCA_OPENMPI, from HashRef, via { my $mca = $_; [map '-mca '.$_.' '.$mca->{$_}, sort keys $mca->%*] }; 
 
 1

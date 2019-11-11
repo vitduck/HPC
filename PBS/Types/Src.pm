@@ -11,6 +11,7 @@ coerce SRC_MKL, from Str, via {
 
     return ". /apps/compiler/intel/$version/mkl/bin/mklvars.sh intel64"
 };  
+
 coerce SRC_MPI, from Str, via { 
     my ($version) = (split /\//, $_)[1]; 
 

@@ -3,9 +3,12 @@ package HPC::App::Tensorflow;
 use Moose; 
 use MooseX::XSAccessor; 
 use MooseX::Attribute::Chained; 
-use HPC::App::Types::Tensorflow qw(Cnn); 
+use HPC::App::Types::Tensorflow 'Cnn'; 
 use Text::Tabs; 
 use namespace::autoclean; 
+
+use feature 'signatures'; 
+no warnings 'experimental::signatures'; 
 
 with qw(
     HPC::Share::Cmd
@@ -13,12 +16,11 @@ with qw(
     HPC::App::Tensorflow::Model
     HPC::App::Tensorflow::Device
     HPC::App::Tensorflow::Kmp
-    HPC::App::Tensorflow::Threads
-); 
+    HPC::App::Tensorflow::Threads ); 
 
 has '+bin' => ( 
     isa    => Cnn, 
-    coerce => 1,
+    coerce => 1 
 ); 
 
 sub cmd {
@@ -30,7 +32,7 @@ sub cmd {
     for ($self->_get_opts) {
         my $has = "_has_$_";
 
-        if ($self->$has and $self->$_) {
+        if ($self->$has) {
             push @opts, "\t--".$_.'='. $self->$_
         }
     }
@@ -44,7 +46,7 @@ sub _get_opts {
         device horovod_device variable_update local_parameter_device sync_on_finish
         mkl kmp_affinity kmp_blocktime kmp_settings 
         num_inter_threads num_intra_threads
-    ); 
+        tfprof_file ); 
 }
 
 __PACKAGE__->meta->make_immutable;
