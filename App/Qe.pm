@@ -1,12 +1,13 @@
 package HPC::App::Qe; 
 
 use Moose; 
+use MooseX::Aliases;
 use MooseX::XSAccessor; 
 use MooseX::Attribute::Chained; 
-use MooseX::XSAccessor; 
 use MooseX::StrictConstructor; 
-use HPC::App::Types::Qe qw(Input Output Image Pools Band Task Diag);
 use namespace::autoclean;
+
+use HPC::App::Types::Qe qw(Input Output Image Pools Band Task Diag);
 
 with qw(
     HPC::Share::Cmd
@@ -19,6 +20,7 @@ has inp => (
     traits    => ['Chained'],
     coerce    => 1,
     predicate => '_has_inp',
+    alias     => 'in',
 );
 
 has out => (
@@ -29,57 +31,62 @@ has out => (
     predicate => '_has_out',
 );
 
-has ni => (
+has nimage => (
     is        => 'rw',
     isa       => Image,
     traits    => ['Chained'],
     coerce    => 1,
-    predicate => '_has_ni', 
+    predicate => '_has_nimage', 
     lazy      => 1, 
-    default   => 1 
+    default   => 1, 
+    alias     => 'ni'
 );   
 
-has nk => (
+has npools => (
     is        => 'rw',
     isa       => Pools, 
     traits    => ['Chained'],
     coerce    => 1,
-    predicate => '_has_nk', 
-    default   => 1 
+    predicate => '_has_npools', 
+    default   => 1,  
+    alias     => 'nk'
 );   
 
-has nb => (
+has nband => (
     is        => 'rw',
     isa       => Band,
     traits    => ['Chained'],
     coerce    => 1,
-    predicate => '_has_nb', 
+    predicate => '_has_nband', 
     lazy      => 1, 
-    default   => 1 
+    default   => 1, 
+    alias     => 'nb'
 );
 
-has nt => (
+has ntg => (
     is        => 'rw',
     isa       => Task,
     traits    => ['Chained'],
     coerce    => 1,
-    predicate => '_has_nt', 
+    predicate => '_has_ntg', 
     lazy      => 1, 
-    default   => 1 
+    default   => 1,
+    alias     => 'nt'
 );
 
-has nd => (
+has ndiag => (
     is        => 'rw',
     isa       => Diag,
     traits    => ['Chained'],
     coerce    => 1,
-    predicate => '_has_nd', 
+    predicate => '_has_ndiag', 
     lazy      => 1, 
-    default   => 1 
+    default   => 1, 
+    alias     => 'nd'
 );
 
-sub _get_opts { 
-    return qw(ni nk nb nt nd inp out); 
+sub _get_opts {
+    return qw(inp nimage npools nband ntg ndiag out)
 }
 
 __PACKAGE__->meta->make_immutable;
