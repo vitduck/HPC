@@ -2,7 +2,6 @@ package HPC::Share::Cmd;
 
 use Moose::Role; 
 use MooseX::Types::Moose qw/Str/; 
-
 use feature 'signatures';  
 no warnings 'experimental::signatures'; 
 
@@ -21,7 +20,11 @@ sub cmd ($self) {
         my $has_opt = "_has_$opt";
         
         if ($self->$has_opt) { 
-            push @opts, ( ref $self->$opt eq ref [] ? $self->$opt->@* : $self->$opt )
+            push @opts, (
+                ref $self->$opt eq ref [] 
+                ? $self->$opt->@* 
+                : $self->$opt 
+            )
         }
     }
 

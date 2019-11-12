@@ -11,7 +11,7 @@ no warnings 'experimental::signatures';
 
 with qw(
     HPC::Debug::Data
-    HPC::PBS::IO HPC::PBS::Sys HPC::PBS::Chained
+    HPC::PBS::IO HPC::PBS::Sys
     HPC::PBS::Resource HPC::PBS::Module HPC::PBS::Cmd HPC::PBS::App );   
 
 after 'mpivar' => sub {
@@ -34,10 +34,24 @@ after 'mpivar' => sub {
     # $self->tensorflow->num_intra_threads($self->omp) if $self->_has_omp 
 # }; 
 
+sub write ($self, $file) { 
+    $self->script($file); 
+
+    $self->_write_pbs_resource;  
+    $self->_write_pbs_module; 
+    $self->_write_pbs_cmd; 
+
+    return $self
+} 
+
 sub qsub ($self) { 
     system 'qsub', $self->script; 
 
     return $self; 
+} 
+
+sub BUILD ($self,@) { 
+    $self->resource; 
 } 
 
 __PACKAGE__->meta->make_immutable;

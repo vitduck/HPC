@@ -32,7 +32,7 @@ sub add ($self, $cmd) {
     return $self; 
 }
 
-sub write_pbs_cmd ($self) {
+sub _write_pbs_cmd ($self) {
     for my $cmd ($self->list_cmd) { 
         $self->print("\n"); 
 

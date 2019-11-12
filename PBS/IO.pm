@@ -14,7 +14,7 @@ has 'script' => (
     traits   => [ 'Chained' ],
     lazy     => 1, 
     default  => 'run.sh', 
-    trigger  => sub ($self, @args) { $self->fh(shift @args) } 
+    trigger  => sub ($self, $pbs, @) { $self->fh($pbs) } 
 ); 
 
 has 'fh' => ( 
@@ -28,14 +28,4 @@ has 'fh' => (
     handles  => [qw(print printf close)]
 ); 
 
-sub write ($self, $file) { 
-    $self->script($file)
-         ->write_pbs_resource 
-         ->write_pbs_module   
-         ->write_pbs_cmd
-         ->close; 
-    
-    return $self
-} 
-
-1; 
+1

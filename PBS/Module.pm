@@ -94,20 +94,12 @@ sub unload ($self, @modules) {
 
 # emulate 'module switch'
 sub switch ($self, $old, $new) { 
-    $self->unload($old)
-         ->load($new); 
+    $self->unload($old); 
+    $self->load($new); 
 
     return $self
 } 
 
-sub write_pbs_module ($self) { 
-    $self->print("\n")
-         ->_write_module
-         ->_write_mpivar
-         ->_write_mklvar; 
-
-    return $self 
-} 
 
 # private 
 sub _load_module ($self, $module) { 
@@ -124,8 +116,6 @@ sub _load_module ($self, $module) {
             $self->$load_mpi($module);  
         }
     } 
-
-    return $self; 
 }
 
 sub _unload_module ($self, $module) { 
@@ -142,8 +132,14 @@ sub _unload_module ($self, $module) {
             $self->$unload_mpi 
         }
     }
-    
-    return $self
+} 
+
+sub _write_pbs_module ($self) { 
+    $self->print("\n"); 
+
+    $self->_write_module; 
+    $self->_write_mpivar; 
+    $self->_write_mklvar
 } 
 
 sub _write_module ($self) { 
@@ -154,20 +150,14 @@ sub _write_module ($self) {
             $self->printf("module load %s\n", $_)
         }
     }
-
-    return $self; 
 } 
 
 sub _write_mklvar ($self) { 
     $self->printf("%s\n", $self->get_mpivar) if $self->_has_mpivar; 
-
-    return $self; 
 } 
 
 sub _write_mpivar ($self) {  
     $self->printf("%s\n", $self->get_mpivar) if  $self->_has_mpivar; 
-
-    return $self
 }
 
 # sub init ($self) {

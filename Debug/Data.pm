@@ -6,15 +6,18 @@ use Data::Printer {
         internals    => 1,  
         parents      => 0, 
         expand       => 'all', 
-        show_methods => 'none' },
-    scalar_quotes => '' };  
+        show_methods => 'none' 
+    },
+    scalar_quotes => '' 
+};  
+
 use feature qw(signatures); 
 no warnings qw(experimental::signatures);
 
 sub dump ($self) { 
     p $self; 
 
-    return $self; 
+    return $self
 } 
 
 1 

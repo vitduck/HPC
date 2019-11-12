@@ -1,7 +1,6 @@
 package HPC::PBS::App;  
 
 use Moose::Role; 
-
 use HPC::App::Aps; 
 use HPC::App::Numa; 
 use HPC::App::Qe; 
@@ -9,7 +8,6 @@ use HPC::App::Lammps;
 use HPC::App::Gromacs; 
 use HPC::App::Tensorflow; 
 use HPC::PBS::Types::App qw(Aps Numa Qe Gromacs Lammps Tensorflow); 
-
 use feature 'signatures';  
 no warnings 'experimental::signatures'; 
 
@@ -27,6 +25,7 @@ has 'numa' => (
     init_arg => undef,
     traits   => ['Chained'],
     coerce   => 1, 
+    trigger  => sub ($self, @) { $self->queue('flat') } 
 ); 
 
 has 'qe' => (
@@ -35,9 +34,7 @@ has 'qe' => (
     init_arg => undef, 
     traits   => ['Chained'],
     coerce   => 1, 
-    trigger  => sub ($self, $app, @) { 
-        $self->account('qe')
-    }
+    trigger  => sub ($self, $app, @) { $self->account('qe') }
 ); 
 
 has 'lammps' => (
@@ -46,9 +43,7 @@ has 'lammps' => (
     init_arg  => undef,
     traits    => ['Chained'],
     coerce    => 1, 
-    trigger  => sub ($self, $app, @) { 
-        $self->account('lammps')
-    }
+    trigger  => sub ($self, $app, @) { $self->account('lammps') }
 ); 
 
 has 'gromacs' => (
@@ -57,9 +52,7 @@ has 'gromacs' => (
     init_arg  => undef, 
     traits    => ['Chained'],
     coerce    => 1, 
-    trigger  => sub ($self, $app, @) { 
-        $self->account('gromacs')
-    }
+    trigger  => sub ($self, $app, @) { $self->account('gromacs') }
 ); 
 
 has 'tensorflow' => (
@@ -68,10 +61,7 @@ has 'tensorflow' => (
     init_arg  => undef, 
     traits    => ['Chained'],
     coerce    => 1,  
-    trigger  => sub ($self, $app, @) { 
-        $self->account('tf')
-    }
-
+    trigger  => sub ($self, $app, @) { $self->account('tf') }
 ); 
 
 1

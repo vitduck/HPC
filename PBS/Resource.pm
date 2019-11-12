@@ -156,20 +156,19 @@ has 'omp' => (
     }
 );
 
-sub write_pbs_resource ($self) { 
-    # build resource string
-    $self->resource; 
-    
-    # shell 
-    $self->printf("%s\n\n", $self->shell);  
+sub _write_pbs_resource ($self) { 
+    $self->_write_shell;     
 
     # others
     for (qw(export account project queue name stderr stdout resource walltime)) { 
         my $has = "_has_$_"; 
         $self->printf("%s\n", $self->$_) if $self->$has; 
     } 
+} 
 
-    return $self
+sub _write_shell ($self) { 
+    # shell 
+    $self->printf("%s\n\n", $self->shell);  
 } 
 
 1
