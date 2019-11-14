@@ -1,7 +1,7 @@
-package HPC::PBS::Types::PBS; 
+package HPC::PBS::Types::Resource; 
 
-use MooseX::Types -declare => [qw(Shell Export Project Account Queue Name Resource Walltime Stderr Stdout)]; 
 use MooseX::Types::Moose qw(Str Bool ArrayRef); 
+use MooseX::Types -declare => [qw(Shell Export Project Account Queue Name Resource Walltime Stderr Stdout)]; 
 
 subtype Shell   , as Str, where { /^#!/   }; 
 subtype Export  , as Str, where { /^#PBS/ }; 
