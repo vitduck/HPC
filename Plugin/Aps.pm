@@ -1,53 +1,15 @@
 package HPC::Plugin::Aps; 
 
-use Moose;  
-use MooseX::XSAccessor; 
-use MooseX::Attribute::Chained; 
-use MooseX::Types::Moose 'Str'; 
-use HPC::Plugin::Types::Aps qw(Type Level Report); 
-use namespace::autoclean; 
+use Moose::Role; 
+use HPC::Types::Sched::Plugin 'Aps'; 
+use HPC::Profile::Aps; 
 
-with qw(
-    HPC::Debug::Dump 
-    HPC::Plugin::Cmd ); 
-
-has '+bin' => (
-    default => 'aps' 
-);
-
-has 'type' => ( 
-    is        => 'rw', 
-    isa       => Type,
-    traits    => ['Chained'],
-    predicate => '_has_type',
-    reader    => 'get_type',
-    coerce    => 1, 
-    lazy      => 1, 
-    default   => 1 
+has 'aps' => ( 
+    is       => 'rw', 
+    isa      => Aps,
+    init_arg => undef, 
+    coerce   => 1, 
+    traits   => ['Chained'],
 ); 
-
-has 'level' => (
-    is        => 'rw', 
-    isa       => Level, 
-    traits    => ['Chained'],
-    predicate => '_has_level', 
-    coerce    => 1, 
-    lazy      => 1, 
-    default   => 1 
-); 
-
-has 'report' => ( 
-    is        => 'rw', 
-    isa       => Report, 
-    traits    => ['Chained'],
-    predicate => '_has_report', 
-    coerce    => 1 
-);
-
-sub _get_opts {
-    return (qw(report))
-} 
-
-__PACKAGE__->meta->make_immutable;
 
 1

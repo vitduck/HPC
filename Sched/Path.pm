@@ -10,13 +10,8 @@ has '_ld_library_path' => (
     traits   => ['Array'], 
     init_arg => undef, 
     lazy     => 1, 
-    clearer  => '_clear_ld_library_path', 
+    clearer  => '_reset_ld_library_path', 
     default  => sub { \@LD_LIBRARY_PATH },
-    handles  => { 
-          list_ld_library_path => 'elements', 
-        delete_ld_library_path => 'delete', 
-         index_ld_library_path => 'first_index', 
-    }
 ); 
 
 1 

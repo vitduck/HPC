@@ -5,7 +5,7 @@ use MooseX::Types::Moose qw/Str/;
 use feature 'signatures';  
 no warnings 'experimental::signatures'; 
 
-requires qw(_get_opts); 
+requires qw(_opts); 
 
 has 'bin' => ( 
     is     => 'rw',
@@ -16,7 +16,7 @@ has 'bin' => (
 sub cmd ($self) {
     my @opts = ();
 
-    for my $opt ($self->_get_opts) {
+    for my $opt ($self->_opts) {
         my $has_opt = "_has_$opt";
         
         if ($self->$has_opt) { 

@@ -1,54 +1,18 @@
 package HPC::Plugin::Tensorflow; 
 
-use Moose; 
-use MooseX::XSAccessor; 
-use MooseX::Attribute::Chained; 
-use HPC::Plugin::Types::Tensorflow 'Cnn'; 
-use Text::Tabs; 
-use namespace::autoclean; 
-
+use Moose::Role; 
+use HPC::Types::Sched::Plugin 'Tensorflow'; 
+use HPC::App::Tensorflow; 
 use feature 'signatures'; 
 no warnings 'experimental::signatures'; 
 
-with qw(
-    HPC::Debug::Dump
-    HPC::Plugin::Cmd
-    HPC::Plugin::Tensorflow::Model
-    HPC::Plugin::Tensorflow::Device
-    HPC::Plugin::Tensorflow::Kmp
-    HPC::Plugin::Tensorflow::Threads ); 
-
-has '+bin' => ( 
-    isa    => Cnn, 
-    coerce => 1 
+has 'tensorflow' => (
+    is        => 'rw', 
+    isa       => Tensorflow,
+    init_arg  => undef, 
+    traits    => ['Chained'],
+    coerce    => 1,  
+    trigger  => sub ($self, $app, @) { $self->account('tf') }
 ); 
-
-sub cmd {
-    $tabstop = 4;
-    my $self = shift;
-    my @opts = ();
-
-    # flatten cmd options
-    for ($self->_get_opts) {
-        my $has = "_has_$_";
-
-        if ($self->$has) {
-            push @opts, "\t--".$_.'='. $self->$_
-        }
-    }
-
-    return [$self->bin, expand(@opts)]
-}
-
-sub _get_opts { 
-    return qw(
-        model data_format batch_size optimizer 
-        device horovod_device variable_update local_parameter_device sync_on_finish
-        mkl kmp_affinity kmp_blocktime kmp_settings 
-        num_inter_threads num_intra_threads
-        tfprof_file ); 
-}
-
-__PACKAGE__->meta->make_immutable;
 
 1

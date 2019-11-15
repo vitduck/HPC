@@ -2,22 +2,16 @@ package HPC::Sched::Module;
 
 use Moose::Role; 
 use MooseX::Types::Moose qw(ArrayRef Str);
-use HPC::Sched::Types::Src qw(SRC_MKL SRC_MPI); 
+use HPC::Types::Sched::Src qw(Src_Mkl Src_Mpi); 
+use HPC::Types::Sched::Module 'Module'; 
 use feature 'signatures';  
 no warnings 'experimental::signatures'; ;
 
-# to be removed
-# use Env::Modulecmd; 
-# use Capture::Tiny 'capture_stderr'; 
-
-with qw(
-    HPC::Sched::MPI
-    HPC::Sched::Env ); 
-
 has 'module' => (
     is      => 'rw',
-    isa     => ArrayRef[Str], 
+    isa     => Module, 
     traits  => [qw(Array Chained)], 
+    coerce  => 1, 
     default => sub {[]}, 
     handles => { 
              _add_module => 'push', 
@@ -26,14 +20,17 @@ has 'module' => (
         _index_of_module => 'first_index', 
     }, 
     trigger => sub ($self, $new_module, $old_module) { 
+        # for old MPI environment 
         $self->_unload_mpi_module($_) for $old_module->@*;
+
+        # for new MPI environment
         $self->_load_mpi_module  ($_) for $new_module->@*; 
     }
 ); 
 
 has 'mklvar' => (
     is        => 'rw', 
-    isa       => SRC_MKL, 
+    isa       => Src_Mkl, 
     init_arg  => undef, 
     traits    => ['Chained'],
     predicate => '_has_mklvar',
@@ -42,7 +39,7 @@ has 'mklvar' => (
 
 has 'mpivar'  => (
     is        => 'rw', 
-    isa       => SRC_MPI, 
+    isa       => Src_Mpi, 
     init_arg  => undef, 
     traits    => ['Chained'],
     predicate => '_has_mpivar', 
@@ -112,8 +109,9 @@ sub _unload_mpi_module($self, $module) {
     }
 } 
 
-sub _write_module ($self) { 
+sub write_module ($self) { 
     if ($self->_list_module != 0) {
+        $self->printf("\n"); 
         $self->printf("module purge\n"); 
 
         for ($self->_list_module) { 
@@ -123,31 +121,8 @@ sub _write_module ($self) {
 
     $self->printf("%s\n", $self->get_mpivar) if $self->_has_mpivar; 
     $self->printf("%s\n", $self->get_mpivar) if $self->_has_mpivar; 
+
+    return $self
 } 
-
-# to be removed
-# sub init ($self) {
-
-    # $self->_unload_module(
-        # reverse
-        # grep !/\d+\)/,
-        # grep !/Currently|Loaded|Modulefiles:/,
-        # split(' ', capture_stderr { system 'modulecmd', 'perl', 'list' })
-    # );
-
-    # return $self; 
-# }
-
-# sub _load_module ($self, @modules) { 
-    # Env::Modulecmd::load(@modules);
-    
-    # return $self
-# }
-
-# sub _unload_module ($self, @modules) { 
-    # Env::Modulecmd::unload( @modules );
-
-    # return $self; 
-# }
 
 1

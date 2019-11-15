@@ -1,35 +1,42 @@
 package HPC::Sched::Env;
 
 use Moose::Role;
-use MooseX::Types::Moose 'Str';
+use MooseX::Types::Moose 'HashRef';
 use feature 'signatures';
 no warnings 'experimental::signatures';
 
-my %preset = (
-        knl   => 'craype-mic-knl',
-        skl   => 'craype-x86-skylake', 
-        intel => [qw(intel/18.0.3 impi/18.0.3 vtune/18.0.3)], 
-        cray  => [qw(cce/8.6.3 PrgEnv-cray/1.0.2 cray-impi/1.1.4 cray-libsci/17.09.1 cray-fftw_impi/3.3.6.2)],
-        gnu   => [qw(gcc/8.3.0 openmpi/3.1.0 lapack/3.7.0 fftw_mpi/3.3.7)]
-); 
-
 has 'env' => (
     is       => 'rw', 
-    isa      => Str,
+    isa      => HashRef,
     init_arg => undef,
-    traits   => ['Chained'],
+    traits   => [qw(Hash Chained)],
     lazy     => 1, 
-    default  => 'knl/intel', 
-    trigger  => sub ($self, $env, @) { 
-        my ($cpu, $compiler) = split /\//, $env;  
-
-        $self->purge; 
-
-        $self->load(
-            $preset{$cpu}, 
-            $preset{$compiler}->@*
-        ); 
+    default  => sub { {} }, 
+    handles  => { 
+        get      => 'get',
+        set      => 'set', 
+        unset    => 'delete',
+        _has_env => 'count'
     } 
 ); 
+
+# chained delegation methods
+around [qw(set unset)] => sub ($method, $self, @args) { 
+    $self->$method(@args); 
+
+    return $self 
+}; 
+
+sub write_env ($self) { 
+    if ($self->_has_env) { 
+        $self->print("\n"); 
+
+        for my $env (sort keys $self->env->%*) { 
+            $self->printf("export %s\n", join('=', $env, $self->get($env)))
+        } 
+    } 
+
+    return $self
+} 
 
 1 

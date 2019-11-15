@@ -14,80 +14,61 @@ has 'cmd' => (
     traits    => [qw(Array Chained)],
     predicate => '_has_cmd',
     clearer   => 'reset_cmd',
+    lazy      => 1, 
     default   => sub {[]},
     handles   => { 
-         add_cmd => 'push', 
-        list_cmd => 'elements' 
+         _add_cmd => 'push', 
+        _list_cmd => 'elements' 
     }
 );
 
-sub add ($self, $cmd) { 
-    ref $cmd eq ref [] 
-        ? $self->_add_multiple($cmd) 
-        : $self->_add_single  ($cmd); 
+sub add ($self, @cmds) { 
+    for my $cmd ( @cmds ) { 
+        my $level = 0; 
+        
+        $self->_add_cmd( $self->_expand_cmd(\$level, $cmd) )              if ref $cmd eq ''; 
+        $self->_add_cmd([$self->_expand_cmd(\$level, $cmd)])              if ref $cmd eq ref {}; 
+        $self->_add_cmd([map $self->_expand_cmd(\$level, $_), $cmd->@* ]) if ref $cmd eq ref []
+    }
 
     return $self; 
 }
 
-sub _write_cmd ($self) {
-    for my $cmd ($self->list_cmd) { 
-        $self->print("\n"); 
-
-        ref $cmd eq ref [] 
-            ? $self->_write_multiple($cmd) 
-            : $self->_write_single  ($cmd); 
-    }
-
-    return $self
-}
-
-sub _add_single($self, $cmd) { 
-    $self->add_cmd($cmd); 
-} 
-
-sub _write_single($self, $cmd) { 
-    $self->printf("%s\n", $cmd)
-} 
-
-sub _add_multiple($self, $cmd) { 
-    my $level = 0; 
-    my @cmds  = ();  
-
-    for my $app ($cmd->@*) { 
-        #  application w/ options: { bin => [opts] }
-        if ( ref $app eq ref {} ) { 
-            my ($bin, $opt) = $app->%*; 
-
-            # the options is +1 level w.r.t to bin
-            push @cmds,  
-                $self->_tab_expand($level++, $bin),  
-                $self->_tab_expand($level  , $app->{$bin}->@*);
-        # application w/o options: 
-        } else { 
-            push @cmds, $self->_tab_expand($level++, $app)
-        }
-    }
-
-    $self->add_cmd([@cmds]); 
-} 
-
-sub _write_multiple($self, $cmd) { 
-    # reformat command
-    my $length = max(map length($_), $cmd->@*); 
-
-    $self->printf(
-        "%s\n", 
-        join(
-            " \\\n", 
-            map sprintf("%-${length}s", $_), $cmd->@* 
-        )
-    )
-} 
-
-sub _tab_expand ($self, $level, @lines) { 
-    $tabstop = 4; 
+sub _expand_tab ($self, $level, @lines) { 
+    $tabstop = 4;
 
     return expand(map "\t"x($level).$_, @lines)
+}
+
+sub _expand_cmd ($self, $level, $cmd) { 
+    if (ref $cmd eq 'HASH') { 
+        my ($bin, $opt) = $cmd->%*; 
+
+        return ( 
+            $self->_expand_tab($level->$*++, $bin),  
+            $self->_expand_tab($level->$*  , $opt->@*) )
+    } else { 
+        return 
+            $self->_expand_tab($level->$*++, $cmd)
+    }
+} 
+
+sub write_cmd ($self) { 
+    my $length; 
+
+    for my $cmd ($self->_list_cmd) { 
+        $self->print("\n"); 
+
+        if (ref $cmd eq '') {
+            $self->printf("%s\n", $cmd)
+        } else { 
+            $length = max(map length($_), $cmd->@*); 
+
+            $self->printf("%s\n", join(" \\\n", map sprintf("%-${length}s", $_), $cmd->@* ))
+        }
+    } 
+
+    return $self
 } 
 
 1
