@@ -25,7 +25,7 @@ has 'cmd' => (
 sub add ($self, @cmds) { 
     for my $cmd ( @cmds ) { 
         my $level = 0; 
-        
+
         $self->_add_cmd( $self->_expand_cmd(\$level, $cmd) )              if ref $cmd eq ''; 
         $self->_add_cmd([$self->_expand_cmd(\$level, $cmd)])              if ref $cmd eq ref {}; 
         $self->_add_cmd([map $self->_expand_cmd(\$level, $_), $cmd->@* ]) if ref $cmd eq ref []

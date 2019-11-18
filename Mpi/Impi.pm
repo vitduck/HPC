@@ -15,11 +15,11 @@ has '+debug' => (
         $debug == 1 
         ? $self->set_env(
             I_MPI_DEBUG        => 5, 
-            I_MPI_HYHDRA_DEBUG => 1
+            # I_MPI_HYHDRA_DEBUG => 1
         ) 
         : $self->unset_env(
             'I_MPI_DEBUG',
-            'I_MPI_HYDRA_DEBUG'
+            # 'I_MPI_HYDRA_DEBUG'
         )
     } 
 ); 
@@ -46,10 +46,18 @@ has 'fabrics' => (
 
         $self->set_env(
             I_MPI_FABRICS  => $fabric, 
-            $provider      => 'psm2',
+            $provider      => $self->fabric_provider,
             I_MPI_FALLBACK => 0
         ) 
     }
+); 
+
+has 'fabric_provider' => ( 
+    is       => 'rw', 
+    isa      => Str,
+    init_arg => undef,
+    traits   => ['Chained'],
+    default  => 'psm2',
 ); 
 
 sub _opts { 

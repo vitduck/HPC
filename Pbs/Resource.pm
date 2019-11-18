@@ -25,26 +25,12 @@ has 'project' => (
     default   => 'burst_buffer' 
 ); 
 
-has 'mpiprocs' => (
+has 'ncpus' => (
     is        => 'rw',
     isa       => Int,
     traits    => ['Chained'],
-    predicate => '_has_mpiprocs',
-    clearer   => '_reset_mpiprocs', 
-    lazy      => 1,
-    default   => sub ($self, @) { $self->ncpus } 
-);
-
-has 'omp' => (
-    is        => 'rw',
-    isa       => Int,
-    traits    => ['Chained'],
-    predicate => '_has_omp',
-    trigger   => sub ($self, @) { 
-        $self->_reset_resource; 
-        $self->mvapich2->nprocs($self->select*$self->get_mpiprocs)->omp($self->omp) if $self->_has_mvapich2; 
-        $self->openmpi->omp($self->omp)                                             if $self->_has_openmpi;  
-    }
+    predicate => '_has_ncpus',
+    default   => 64,
 );
 
 has 'resource' => ( 

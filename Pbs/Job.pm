@@ -23,13 +23,13 @@ with qw(
     HPC::Sched::Sys
     HPC::Pbs::Resource ); 
 
-has '+account' => ( 
-    isa     => Account, 
+has '+name' => (
+    isa     => Name, 
     coerce  => 1, 
 ); 
 
-has '+name' => ( 
-    isa     => Name, 
+has '+account' => ( 
+    isa     => Account, 
     coerce  => 1, 
 ); 
 
@@ -69,6 +69,19 @@ has '+ncpus' => (
     }
 ); 
 
+has '+mpiprocs' => (
+    lazy      => 1,
+    default   => sub ($self, @) { $self->ncpus } 
+);
+
+has '+omp' => (
+    trigger   => sub ($self, @) { 
+        $self->_reset_resource; 
+        $self->mvapich2->nprocs($self->select*$self->get_mpiprocs)->omp($self->omp) if $self->_has_mvapich2; 
+        $self->openmpi->omp($self->omp)                                             if $self->_has_openmpi;  
+    }
+);
+
 has '+cmd' => ( 
     default => sub { ['cd $PBS_O_WORKDIR'] }
 ); 
@@ -91,7 +104,7 @@ sub write_resource ($self) {
 
     # build resource string
     $self->resource; 
-    for (qw(export account project queue name stderr stdout resource walltime)) {
+    for (qw(export name account project queue stderr stdout resource walltime)) {
         my $has = "_has_$_";
         $self->printf("%s\n", $self->$_) if $self->$has;
     }

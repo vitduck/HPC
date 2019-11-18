@@ -38,26 +38,26 @@ has 'mvapich2' => (
     coerce    => 1, 
 ); 
 
-sub _has_mpi ($self) { 
-    for my $mpi (qw(impi openmpi mvapich2)) { 
-        my $has = "_has_$mpi"; 
+sub _has_mpi ($self) {
+    for my $mpi (qw(impi openmpi mvapich2)) {
+        my $has = "_has_$mpi";
 
-        return 1 if $self->$has; 
+        return 1 if $self->$has;
     }
 }
 
-sub _get_mpi ($self) { 
-    for my $mpi (qw(impi openmpi mvapich2)) { 
-        my $has = "_has_$mpi"; 
+sub _get_mpi ($self) {
+    for my $mpi (qw(impi openmpi mvapich2)) {
+        my $has = "_has_$mpi";
 
-        return $mpi if $self->$has; 
+        return $mpi if $self->$has;
     }
-} 
+}
 
-sub mpirun ($self) { 
-    my $mpi  = $self->_get_mpi; 
-    
+sub mpirun ($self) {
+    my $mpi  = $self->_get_mpi;
+
     return $self->$mpi->cmd
-} 
+}
 
 1

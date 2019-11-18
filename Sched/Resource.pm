@@ -15,6 +15,13 @@ has 'shell' => (
     default   => '#!/usr/bin/env bash'
 ); 
 
+has 'name' => ( 
+    is        => 'rw', 
+    traits    => ['Chained'],
+    predicate => '_has_name',
+    default   => 'test' 
+); 
+
 has 'account' => ( 
     is        => 'rw', 
     traits    => ['Chained'],
@@ -28,12 +35,6 @@ has 'queue' => (
     predicate => '_has_queue',
 ); 
 
-has 'name' => ( 
-    is        => 'rw', 
-    traits    => ['Chained'],
-    predicate => '_has_name',
-    default   => 'test' 
-); 
 
 has 'stderr' => ( 
     is        => 'rw', 
@@ -60,14 +61,25 @@ has 'select' => (
     traits    => ['Chained'],
     predicate => '_has_select',
     default   => 1,
-);
+); 
 
-has 'ncpus' => (
+has 'mpiprocs' => (
     is        => 'rw',
     isa       => Int,
     traits    => ['Chained'],
-    predicate => '_has_ncpus',
-    default   => 64,
+    predicate => '_has_mpiprocs',
+    clearer   => '_reset_mpiprocs', 
 );
+
+has 'omp' => (
+    is        => 'rw',
+    isa       => Int,
+    traits    => ['Chained'],
+    predicate => '_has_omp',
+    lazy      => 1, 
+    default   => 1,
+); 
+
+
 
 1
