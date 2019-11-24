@@ -9,7 +9,9 @@ no warnings 'experimental::signatures';
 
 with qw(
     HPC::Debug::Dump 
-    HPC::Plugin::Cmd ); 
+    HPC::Plugin::Cmd 
+    HPC::Mpi::Affinity
+    HPC::Mpi::Psm2); 
 
 has 'bin' => ( 
     is       => 'rw', 

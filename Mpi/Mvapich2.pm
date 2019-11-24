@@ -3,6 +3,7 @@ package HPC::Mpi::Mvapich2;
 use Moose; 
 use MooseX::XSAccessor; 
 use MooseX::Attribute::Chained; 
+use HPC::Types::Mpi::Mvapich2 'Pin'; 
 use namespace::autoclean; 
 use feature 'signatures';
 no warnings 'experimental::signatures';
@@ -20,7 +21,6 @@ has '+hostfile' => (
 has '+omp' => ( 
     trigger => sub ($self, $omp, @) { 
         $self->set_env( 
-            PSM2_KASSIST_MODE       => 'none', 
             OMP_NUM_THREADS         => $omp,  
             MV2_THREADS_PER_PROCESS => $omp, 
             MV2_ENABLE_AFFINITY     => 1,
@@ -31,11 +31,20 @@ has '+omp' => (
 
 has '+debug' => ( 
     trigger  => sub ($self, $debug, @) {
-        $self->set_env(
-            MV2_SHOW_ENV_INFO        => 2, 
-            MV2_SHOW_CPU_BINDING     => 1, 
-            MV2_DEBUG_SHOW_BACKTRACE => 1
-        )
+        if    ( $debug == 0 ) { $self->unset_env('MV2_SHOW_ENV_INFO', 'MV2_SHOW_CPU_BINDING') } 
+        elsif ( $debug == 4 ) { $self->set_env(MV2_SHOW_CPU_BINDING  => 1)                    } 
+        elsif ( $debug == 5 ) { $self->debug(4) && $self->set_env(MV2_SHOW_ENV_INFO => 2)     } 
+    } 
+); 
+
+has '+pin' => ( 
+    isa     => Pin, 
+    coerce  => 1, 
+    trigger => sub ($self, $pin, @) { 
+        unless ($pin =~ /0/) { 
+            $self->set_env(MV2_ENABLE_AFFINITY    => 1);         
+            $self->set_env(MV2_CPU_BINDING_POLICY => $pin)
+        } 
     } 
 ); 
 
