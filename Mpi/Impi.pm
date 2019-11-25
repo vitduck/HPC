@@ -19,7 +19,7 @@ has '+debug' => (
     } 
 ); 
 
-has '+eager' => (
+has '+eagersize' => (
     lazy    => 1,
     default => '256KB',
     trigger => sub ($self, $size, @) { 

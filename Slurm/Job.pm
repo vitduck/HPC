@@ -100,6 +100,18 @@ has '+walltime' => (
     default => '24:00:00'
 ); 
 
+before 'write' => sub ($self, @) { 
+    my ($mpi, %env);  
+
+    if ($self->_has_mpi) { 
+        $mpi = $self->_get_mpi; 
+
+        # deref MPI env hash and pass it to Slurm's env
+        $self->set($self->$mpi->env->%*) if $self->$mpi->has_env 
+    }
+
+}; 
+
 sub write_resource ($self) {
     $self->printf("%s\n\n", $self->shell);
 
@@ -110,6 +122,10 @@ sub write_resource ($self) {
 
     return $self
 }
+
+sub run ($self) { 
+    system 'sbatch', $self->script
+} 
 
 __PACKAGE__->meta->make_immutable;
 

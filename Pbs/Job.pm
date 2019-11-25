@@ -111,6 +111,10 @@ sub write_resource ($self) {
     return $self
 }
 
+sub run ($self) { 
+    system 'qsub', $self->script; 
+} 
+
 __PACKAGE__->meta->make_immutable;
 
 1

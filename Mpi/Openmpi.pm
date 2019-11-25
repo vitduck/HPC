@@ -26,7 +26,7 @@ has '+debug' => (
     }
 );
 
-has '+eager' => ( 
+has '+eagersize' => ( 
     trigger => sub ($self, $size, @) { 
         $self->set_env(
             PSM2_MQ_RNDV_HFI_THRESH => $size, 

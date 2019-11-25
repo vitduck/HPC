@@ -48,7 +48,7 @@ has '+pin' => (
     } 
 ); 
 
-has '+eager' => ( 
+has '+eagersize' => ( 
     trigger => sub ($self, $size, @) { 
         $self->set_env( MV2_SMP_EAGERSIZE => $size )
     }

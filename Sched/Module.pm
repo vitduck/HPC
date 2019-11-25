@@ -94,19 +94,25 @@ sub switch ($self, $old, $new) {
 sub _load_mpi_module($self, $module) { 
     my $load_mpi; 
 
-    if ($module =~ /^(?:cray\-)?(impi|openmpi|mvapich2)/ and $self->_has_mpi == 0) {
-        $load_mpi = "_load_$1"; 
-        $self->$load_mpi($module);  
-    }
+    if ($self->_has_mpi == 0) { 
+        if    ( $module =~ /impi/     ) { $load_mpi = '_load_impi'     } 
+        elsif ( $module =~ /openmpi/  ) { $load_mpi = '_load_openmpi'  }
+        elsif ( $module =~ /mvapich2/ ) { $load_mpi = '_load_mvapich2' } 
+    } 
+
+    $self->$load_mpi($module) if $load_mpi;  
 } 
 
 sub _unload_mpi_module($self, $module) { 
     my $unload_mpi; 
 
-    if ($module =~ /^(?:cray\-)?(impi|openmpi|mvapich2)/) {
-        $unload_mpi = "_unload_$1"; 
-        $self->$unload_mpi 
-    }
+    if ($self->_has_mpi == 0) { 
+        if    ( $module =~ /impi/     ) { $unload_mpi = '_unload_impi'     } 
+        elsif ( $module =~ /openmpi/  ) { $unload_mpi = '_unload_openmpi'  }
+        elsif ( $module =~ /mvapich2/ ) { $unload_mpi = '_unload_mvapich2' } 
+    } 
+    
+    $self->$unload_mpi if $unload_mpi
 } 
 
 sub write_module ($self) { 

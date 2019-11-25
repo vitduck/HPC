@@ -66,7 +66,7 @@ has 'debug' => (
     default  => 0, 
 ); 
 
-has 'eager' => (
+has 'eagersize' => (
     is       => 'rw', 
     isa      => Str|Int,
     init_arg => undef, 
