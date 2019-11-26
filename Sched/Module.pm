@@ -19,12 +19,12 @@ has 'module' => (
           _remove_module => 'delete', 
         _index_of_module => 'first_index', 
     }, 
-    trigger => sub ($self, $new_module, $old_module) { 
+    trigger => sub ($self, $new, $old) { 
         # for old MPI environment 
-        $self->_unload_mpi_module($_) for $old_module->@*;
+        $self->_unload_mpi_module($_) for $old->@*;
 
         # for new MPI environment
-        $self->_load_mpi_module  ($_) for $new_module->@*; 
+        $self->_load_mpi_module  ($_) for $new->@*; 
     }
 ); 
 
@@ -50,7 +50,7 @@ has 'mpivar'  => (
 ); 
 
 sub purge($self) { 
-    $self->module([]); 
+    $self->unload($self->_list_module); 
 
     return $self
 } 
@@ -94,7 +94,7 @@ sub switch ($self, $old, $new) {
 sub _load_mpi_module($self, $module) { 
     my $load_mpi; 
 
-    if ($self->_has_mpi == 0) { 
+    unless ($self->_has_mpi) { 
         if    ( $module =~ /impi/     ) { $load_mpi = '_load_impi'     } 
         elsif ( $module =~ /openmpi/  ) { $load_mpi = '_load_openmpi'  }
         elsif ( $module =~ /mvapich2/ ) { $load_mpi = '_load_mvapich2' } 
@@ -106,7 +106,7 @@ sub _load_mpi_module($self, $module) {
 sub _unload_mpi_module($self, $module) { 
     my $unload_mpi; 
 
-    if ($self->_has_mpi == 0) { 
+    if ($self->_has_mpi) { 
         if    ( $module =~ /impi/     ) { $unload_mpi = '_unload_impi'     } 
         elsif ( $module =~ /openmpi/  ) { $unload_mpi = '_unload_openmpi'  }
         elsif ( $module =~ /mvapich2/ ) { $unload_mpi = '_unload_mvapich2' } 

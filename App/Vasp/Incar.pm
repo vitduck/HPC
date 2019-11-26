@@ -76,6 +76,8 @@ sub _parse_incar ($self) {
         if ( /(.*)=(.*)/ ) { $cache{trim(uc($1))} = trim($2) }
     }
 
+    $self->_close_io_read; 
+
     return { %cache }
 }
 

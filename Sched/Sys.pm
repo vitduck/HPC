@@ -1,8 +1,9 @@
 package HPC::Sched::Sys; 
 
 use Moose::Role; 
+use File::Copy ();  
 use File::Path qw(make_path); 
-use File::Copy qw(copy move);
+use File::Glob ':bsd_glob';  
 
 use feature 'signatures';  
 no warnings 'experimental::signatures'; 
@@ -19,15 +20,21 @@ sub chdir ($self, $dir) {
     return $self
 } 
 
-sub cp ($self, $source, $destination) { 
-    copy($source => $destination);  
-    
+sub copy ($self, $source, $destination) { 
+    # wild card 
+    $source =~ /\*|\[|\{/ 
+        ? map File::Copy::copy($_ => $destination), bsd_glob("$source") 
+        :     File::Copy::copy($source => $destination);  
+
     return $self
 }
 
-sub mv ($self, $source, $destination) {
-    move($source => $destination); 
-    
+sub move ($self, $source, $destination) {
+    # wild card 
+    $source =~ /\*|\[|\{/ 
+        ? map File::Copy::move($_ => $destination), bsd_glob("$source")
+        :     File::Copy::move($source => $destination);  
+
     return $self
 } 
 

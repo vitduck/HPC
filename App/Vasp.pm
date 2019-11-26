@@ -30,13 +30,13 @@ sub _opts {
     return qw()
 }
 
-sub BUILD ($self,@) { 
-    # cache INCAR file
-    $self->io_read('INCAR'); 
-    $self->incar;  
+# sub BUILD ($self,@) { 
+    # # cache INCAR file
+    # $self->io_read('INCAR'); 
+    # $self->incar;  
 
-    $self->_close_io_read
-} 
+    # $self->_close_io_read
+# } 
 
 __PACKAGE__->meta->make_immutable;
 

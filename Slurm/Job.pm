@@ -124,7 +124,9 @@ sub write_resource ($self) {
 }
 
 sub run ($self) { 
-    system 'sbatch', $self->script
+    system 'sbatch', $self->script; 
+
+    return $self; 
 } 
 
 __PACKAGE__->meta->make_immutable;

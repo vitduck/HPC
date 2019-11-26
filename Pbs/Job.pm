@@ -82,9 +82,9 @@ has '+omp' => (
     }
 );
 
-has '+cmd' => ( 
-    default => sub { ['cd $PBS_O_WORKDIR'] }
-); 
+# has '+cmd' => ( 
+    # default => sub { ['cd $PBS_O_WORKDIR'] }
+# ); 
 
 has '+openmpi' => ( 
     trigger   => sub ($self, @) { 
@@ -113,6 +113,8 @@ sub write_resource ($self) {
 
 sub run ($self) { 
     system 'qsub', $self->script; 
+
+    return $self
 } 
 
 __PACKAGE__->meta->make_immutable;

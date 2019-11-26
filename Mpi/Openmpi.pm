@@ -44,6 +44,7 @@ has '+pin' => (
             if    ($pin eq 'bunch'  ) { $self->map('core') && $self->bind('core') } 
             elsif ($pin eq 'compact') { $self->map('numa') && $self->bind('core') } 
             elsif ($pin eq 'scatter') { $self->bind('core')                       } 
+            elsif ($pin eq 'none'   ) { $self->bind('core')                       } 
             elsif ($pin == 0        ) { $self->bind('none')                       }
         } 
     } 
