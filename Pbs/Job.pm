@@ -11,17 +11,8 @@ use feature 'signatures';
 no warnings 'experimental::signatures';
 
 with qw(
-    HPC::Debug::Dump 
-    HPC::Io::Write 
-    HPC::Sched::Env 
-    HPC::Sched::Path 
-    HPC::Sched::Module 
-    HPC::Sched::Job 
-    HPC::Sched::Resource 
-    HPC::Sched::Cmd 
-    HPC::Sched::Plugin
-    HPC::Sched::Sys
-    HPC::Pbs::Resource ); 
+     HPC::Sched::Job 
+     HPC::Pbs::Resource ); 
 
 has '+name' => (
     isa     => Name, 
@@ -56,14 +47,14 @@ has '+walltime' => (
 ); 
 
 has '+select' => ( 
-    trigger => sub ($self, $) {
+    trigger => sub ($self, @) {
         $self->_reset_resource;
         $self->mvapich2->nprocs($self->select*$self->mpiprocs) if $self->_has_mvapich2;
     }
 ); 
 
 has '+ncpus' => ( 
-    trigger => sub ($self,$) { 
+    trigger => sub ($self,@) { 
         $self->_reset_resource; 
         $self->mvapich2->nprocs($self->select*$self->mpiprocs) if $self->_has_mvapich2
     }

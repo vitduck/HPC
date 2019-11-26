@@ -12,13 +12,13 @@ coerce Module,
     from Str, 
     via { 
         # parse json config file
-        my $config = read_file("$ENV{HOME}/.modulerc");
-        my $preset = decode_json($config);
+        my $config = read_file("$ENV{HOME}/.hpcrc");
+        my $jason  = decode_json($config);
 
         # example: knl/intel
-        my ($cpu, $compiler) = split /\//, $_; 
+        my @presets = split /\//, $_; 
 
-        [$preset->{$cpu}, $preset->{$compiler}->@*]
+        return [ map { ref $jason->{$_} eq ref [] ? $jason->{$_}->@* : $jason->{$_} } @presets ] 
     };  
 
 1

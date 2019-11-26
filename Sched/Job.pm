@@ -6,6 +6,19 @@ use namespace::autoclean;
 use feature 'signatures';
 no warnings 'experimental::signatures';
 
+with qw(
+    HPC::Debug::Dump 
+    HPC::Io::Write 
+    HPC::Sched::Env 
+    HPC::Sched::Path 
+    HPC::Sched::Module 
+    HPC::Sched::Resource 
+    HPC::Sched::Cmd 
+    HPC::Sched::Plugin
+    HPC::Sched::Sys
+    HPC::Sched::Iterator
+); 
+
 has 'script' => ( 
     is       => 'rw', 
     isa      => Str, 
@@ -25,7 +38,5 @@ sub write ($self, $file) {
 
     return $self
 } 
-
-# __PACKAGE__->meta->make_immutable;
 
 1

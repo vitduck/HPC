@@ -12,16 +12,7 @@ use feature 'signatures';
 no warnings 'experimental::signatures';
 
 with qw(
-    HPC::Debug::Dump 
-    HPC::Io::Write 
-    HPC::Sched::Env 
-    HPC::Sched::Path 
-    HPC::Sched::Module 
     HPC::Sched::Job 
-    HPC::Sched::Resource 
-    HPC::Sched::Cmd 
-    HPC::Sched::Plugin
-    HPC::Sched::Sys
     HPC::Slurm::Resource
     HPC::Slurm::Srun ); 
 
