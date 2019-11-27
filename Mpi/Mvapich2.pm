@@ -41,10 +41,8 @@ has '+pin' => (
     isa     => Pin, 
     coerce  => 1, 
     trigger => sub ($self, $pin, @) { 
-        unless ($pin =~ /0/) { 
-            $self->set_env(MV2_ENABLE_AFFINITY    => 1);         
-            $self->set_env(MV2_CPU_BINDING_POLICY => $pin)
-        } 
+        $self->set_env(MV2_ENABLE_AFFINITY    => 1);         
+        $self->set_env(MV2_CPU_BINDING_POLICY => $pin)
     } 
 ); 
 

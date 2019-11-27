@@ -19,6 +19,18 @@ with qw(
     HPC::Sched::Iterator
 ); 
 
+has 'submit_cmd' => ( 
+    is       => 'ro', 
+    isa      => Str, 
+    init_arg => undef,
+); 
+
+has 'submit_dir' => ( 
+    is       => 'ro', 
+    isa      => Str, 
+    init_arg => undef,
+); 
+
 has 'script' => ( 
     is       => 'rw', 
     isa      => Str, 
@@ -36,6 +48,12 @@ sub write ($self, $file) {
          ->write_env
          ->write_cmd; 
 
+    return $self
+} 
+
+sub run ($self) {
+    system $self->submit_cmd, $self->script; 
+    
     return $self
 } 
 

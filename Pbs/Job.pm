@@ -14,6 +14,14 @@ with qw(
      HPC::Sched::Job 
      HPC::Pbs::Resource ); 
 
+has '+submit_cmd' => (
+    default => 'qsub'
+); 
+
+# has '+submit_dir' => (
+    # default => $ENV{PBS_O_WORKDIR}
+# ); 
+
 has '+name' => (
     isa     => Name, 
     coerce  => 1, 
@@ -68,14 +76,14 @@ has '+mpiprocs' => (
 has '+omp' => (
     trigger   => sub ($self, @) { 
         $self->_reset_resource; 
-        $self->mvapich2->nprocs($self->select*$self->get_mpiprocs)->omp($self->omp) if $self->_has_mvapich2; 
+        $self->mvapich2->nprocs($self->select*$self->mpiprocs)->omp($self->omp) if $self->_has_mvapich2; 
         $self->openmpi->omp($self->omp)                                             if $self->_has_openmpi;  
     }
 );
 
-# has '+cmd' => ( 
-    # default => sub { ['cd $PBS_O_WORKDIR'] }
-# ); 
+has '+cmd' => ( 
+    default => sub { ['cd $PBS_O_WORKDIR'] }
+); 
 
 has '+openmpi' => ( 
     trigger   => sub ($self, @) { 
@@ -101,12 +109,6 @@ sub write_resource ($self) {
 
     return $self
 }
-
-sub run ($self) { 
-    system 'qsub', $self->script; 
-
-    return $self
-} 
 
 __PACKAGE__->meta->make_immutable;
 

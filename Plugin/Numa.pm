@@ -7,12 +7,16 @@ use feature 'signatures';
 no warnings 'experimental::signatures'; 
 
 has 'numa' => (
-    is       => 'rw', 
-    isa      => Numa,
-    init_arg => undef,
-    traits   => ['Chained'],
-    coerce   => 1, 
-    trigger  => sub ($self, @) { $self->queue('flat') } 
+    is        => 'rw', 
+    isa       => Numa,
+    init_arg  => undef,
+    traits    => ['Chained'],
+    predicate => '_has_numa',
+    coerce    => 1, 
+    trigger   => sub ($self, @) { 
+        $self->_add_plugin('numa'); 
+        $self->queue('flat') 
+    } 
 ); 
 
 1

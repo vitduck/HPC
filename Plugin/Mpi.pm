@@ -15,7 +15,10 @@ has 'impi' => (
     predicate => '_has_impi', 
     writer    => '_load_impi',
     clearer   => '_unload_impi', 
-    coerce    => 1 
+    coerce    => 1, 
+    trigger   => sub ($self, @) { 
+        $self->_add_plugin('impi'); 
+    } 
 ); 
 
 has 'openmpi' => (
@@ -26,6 +29,9 @@ has 'openmpi' => (
     writer    => '_load_openmpi',
     clearer   => '_unload_openmpi', 
     coerce    => 1, 
+    trigger   => sub ($self, @) { 
+        $self->_add_plugin('openmpi'); 
+    } 
 ); 
 
 has 'mvapich2' => (
@@ -36,6 +42,9 @@ has 'mvapich2' => (
     writer    => '_load_mvapich2',
     clearer   => '_unload_mvapich2', 
     coerce    => 1, 
+    trigger   => sub ($self, @) { 
+        $self->_add_plugin('mvapich2')
+    } 
 ); 
 
 sub _has_mpi ($self) {

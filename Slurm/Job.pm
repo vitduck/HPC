@@ -16,6 +16,14 @@ with qw(
     HPC::Slurm::Resource
     HPC::Slurm::Srun ); 
 
+has '+submit_cmd' => (
+    default => 'sbatch'
+); 
+
+# has '+submit_dir' => (
+    # default => $ENV{SLURM_SUBMIT_DIR}
+# ); 
+
 has '+name' => ( 
     isa     => Name, 
     coerce  => 1, 
@@ -113,12 +121,6 @@ sub write_resource ($self) {
 
     return $self
 }
-
-sub run ($self) { 
-    system 'sbatch', $self->script; 
-
-    return $self; 
-} 
 
 __PACKAGE__->meta->make_immutable;
 

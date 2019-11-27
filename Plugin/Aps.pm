@@ -5,11 +5,12 @@ use HPC::Types::Sched::Plugin 'Aps';
 use HPC::Profile::Aps; 
 
 has 'aps' => ( 
-    is       => 'rw', 
-    isa      => Aps,
-    init_arg => undef, 
-    coerce   => 1, 
-    traits   => ['Chained'],
+    is        => 'rw', 
+    isa       => Aps,
+    init_arg  => undef, 
+    coerce    => 1, 
+    traits    => ['Chained'],
+    predicate => '_has_aps',
 ); 
 
 1

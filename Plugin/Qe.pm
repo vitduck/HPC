@@ -7,12 +7,16 @@ use feature 'signatures';
 no warnings 'experimental::signatures'; 
 
 has 'qe' => (
-    is       => 'rw', 
-    isa      => Qe,
-    init_arg => undef, 
-    traits   => ['Chained'],
-    coerce   => 1, 
-    trigger  => sub ($self, $app, @) { $self->account('qe') }
+    is        => 'rw', 
+    isa       => Qe,
+    init_arg  => undef, 
+    traits    => ['Chained'],
+    predicate => '_has_qe', 
+    coerce    => 1, 
+    trigger   => sub ($self, $app, @) { 
+        $self->account('qe'); 
+        $self->_add_plugin('qe')
+    }
 ); 
 
 1

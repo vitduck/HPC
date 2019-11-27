@@ -11,8 +11,12 @@ has 'lammps' => (
     isa       => Lammps, 
     init_arg  => undef,
     traits    => ['Chained'],
+    predicate => '_has_lammps',
     coerce    => 1, 
-    trigger  => sub ($self, $app, @) { $self->account('lammps') }
+    trigger  => sub ($self, $app, @) { 
+        $self->account('lammps'); 
+        $self->_add_plugin('lammps')
+    }
 ); 
 
 1

@@ -1,6 +1,7 @@
 package HPC::App::Vasp;  
 
 use Moose; 
+use MooseX::Types::Moose 'Str'; 
 use MooseX::Aliases;
 use MooseX::XSAccessor; 
 use MooseX::Attribute::Chained; 
@@ -26,17 +27,15 @@ has '+io_write' => (
     default => 'INCAR'
 ); 
 
+has 'template' => ( 
+    is     => 'rw', 
+    isa    => Str, 
+    traits => ['Chained']
+); 
+
 sub _opts {
     return qw()
 }
-
-# sub BUILD ($self,@) { 
-    # # cache INCAR file
-    # $self->io_read('INCAR'); 
-    # $self->incar;  
-
-    # $self->_close_io_read
-# } 
 
 __PACKAGE__->meta->make_immutable;
 

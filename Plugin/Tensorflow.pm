@@ -11,8 +11,12 @@ has 'tensorflow' => (
     isa       => Tensorflow,
     init_arg  => undef, 
     traits    => ['Chained'],
+    predicate => '_has_tensorflow',
     coerce    => 1,  
-    trigger  => sub ($self, $app, @) { $self->account('tf') }
+    trigger  => sub ($self, $app, @) { 
+        $self->account('tf'); 
+        $self->_add_plugin('tf')
+    }
 ); 
 
 1
