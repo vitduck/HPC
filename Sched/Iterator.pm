@@ -74,10 +74,10 @@ sub iterate($self, $scan_list) {
         $self->mkdir($dir);  
 
         # copy VASP input
-        # if ($self->_has_vasp) { 
-            # my $template = $self->vasp->template; 
-            # $self->copy("$template/{INCAR,KPOINTS,POSCAR,POTCAR}" => $dir)
-        # }
+        if ($self->_has_vasp) { 
+            my $template = $self->vasp->template; 
+            $self->copy("$template/{INCAR,KPOINTS,POSCAR,POTCAR}" => $dir)
+        }
 
         $self->chdir($dir) 
              ->add([

@@ -18,12 +18,8 @@ has incar => (
         has   => 'exists',
         get   => 'get', 
         set   => 'set', 
-        unset => 'delete'
-    }, 
-    trigger  => sub ($self, $incar, @) {
-        $self->_write_incar; 
-        $self->_close_io_write; 
-    } 
+        unset => 'delete' }, 
+    trigger  => sub ($self, $incar, @) { $self->_write_incar }
 );
 
 has 'kpar' => (
@@ -99,6 +95,8 @@ sub _write_incar ($self) {
             $self->get($param)
         ); 
     }
+
+    $self->_close_io_write; 
 }
 
 1

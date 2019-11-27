@@ -19,18 +19,26 @@ with qw(
 
 has '+io_read' => (
     lazy    => 1, 
-    default => 'INCAR'
+    default => sub ($self) { 
+        $self->_has_template ? join('/', $self->template, 'INCAR') : 'INCAR' 
+    } 
 ); 
 
 has '+io_write' => (
     lazy    => 1, 
-    default => 'INCAR'
+    default   => sub ($self) { 
+        $self->_has_template ? join('/', $self->template, 'INCAR') : 'INCAR' 
+    } 
+
 ); 
 
 has 'template' => ( 
-    is     => 'rw', 
-    isa    => Str, 
-    traits => ['Chained']
+    is        => 'rw', 
+    isa       => Str, 
+    traits    => ['Chained'], 
+    predicate => '_has_template', 
+    lazy      => 1, 
+    default   => './template'
 ); 
 
 sub _opts {
