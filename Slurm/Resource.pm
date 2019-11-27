@@ -10,17 +10,25 @@ has 'ntasks' => (
     is        => 'rw', 
     isa       => Tasks,
     init_arg  => undef,
+    traits    => ['Chained'],
     predicate => '_has_ntasks', 
     clearer   => '_clear_ntasks', 
+    lazy      => 1, 
     coerce    => 1, 
-    default   => 1 
+    default   => sub ($self) { 
+        my $select   = $1 if $self->select   =~ /(\d+)$/; 
+        my $mpiprocs = $1 if $self->mpiprocs =~ /(\d+)$/; 
+        
+        return $select*$mpiprocs;
+    } 
 ); 
 
 has 'ngpus' => ( 
-    is        => 'ro', 
+    is        => 'rw', 
     isa       => Ngpus,
     predicate => '_has_ngpus', 
     coerce    => 1, 
+    lazy      => 1, 
     default   => 1 
 ); 
 

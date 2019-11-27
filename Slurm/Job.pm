@@ -46,30 +46,18 @@ has '+select' => (
     # alias   => 'nodes',
     isa     => Nodes,
     coerce  => 1, 
-    trigger => sub ($self, $select, @) { 
-        my $mpiprocs; 
-
-        $select   = $1 if $self->select   =~ /(\d+)/; 
-        $mpiprocs = $1 if $self->mpiprocs =~ /(\d+)/; 
-
-        $self->_clear_ntasks;  
-        $self->ntasks($select*$mpiprocs)
-    } 
+    trigger => sub ($self, @) { 
+        $self->_clear_ntasks; 
+    }
 );
 
 has '+mpiprocs' => ( 
     # alias  => 'ntasks_per_node',  
     isa    => Tasks_per_Node, 
     coerce => 1, 
-    trigger => sub ($self, $mpiprocs, @) { 
-        my $select; 
-
-        $select   = $1 if $self->select   =~ /(\d+)/; 
-        $mpiprocs = $1 if $self->mpiprocs =~ /(\d+)/; 
-
-        $self->_clear_ntasks;  
-        $self->ntasks($select*$mpiprocs)
-    } 
+    trigger => sub ($self, @) { 
+        $self->_clear_ntasks; 
+    }
 );
 
 has '+omp' => ( 
@@ -112,6 +100,7 @@ before 'write' => sub ($self, @) {
 }; 
 
 sub write_resource ($self) {
+    $self->ntasks; 
     $self->printf("%s\n\n", $self->shell);
 
     for (qw(name queue select ntasks omp walltime stderr stdout ngpus account)) {
