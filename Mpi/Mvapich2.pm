@@ -24,7 +24,6 @@ has '+omp' => (
             OMP_NUM_THREADS         => $omp,  
             MV2_THREADS_PER_PROCESS => $omp, 
             MV2_ENABLE_AFFINITY     => 1,
-            MV2_CPU_BINDING_POLICY  => 'hybrid'
         ); 
     }
 ); 

@@ -42,7 +42,7 @@ has 'iterator' => (
     } 
 ); 
 
-sub iterate($self, $scan_list) { 
+sub iterate($self, $scan_list, $structure='nested') { 
     my @lists;  
     my @iterators = ([]);
 
@@ -57,12 +57,17 @@ sub iterate($self, $scan_list) {
         my (@links, @cmds); 
         
         for my $link ( $chain->@* ) { 
-            push @links, $self->_set_link($link)
+            push @links, $self->_set_link($link, $structure)
         } 
         
         # join fragment to form full path
-        $dir      = join('/',@links); 
-        $root_dir = join('/', map '..', 0..@links-1); 
+        if ( $structure eq 'flat' ) { 
+            $dir      = join('-', @links); 
+            $root_dir = '../'; 
+        } else { 
+            $dir      = join('/',@links); 
+            $root_dir = join('/', map '..', 0..@links-1); 
+        }
 
         # add to iterator list
         $self->_add_iterator($dir); 
@@ -90,7 +95,7 @@ sub iterate($self, $scan_list) {
     return $self
 }
 
-sub _set_link ($self, $link) { 
+sub _set_link ($self, $link, $structure='nested') { 
     my $mpi; 
     my @sub_dirs; 
 
@@ -112,10 +117,16 @@ sub _set_link ($self, $link) {
                 } 
             } 
         }
-        push @sub_dirs, join('_', $setter, $value)
+        push @sub_dirs, 
+            $structure eq 'flat' 
+                ? uc(substr($setter, 0, 1)).$value
+                : join('_', $setter, $value)
     } 
 
-    return join('-', @sub_dirs)
+    return 
+        $structure eq 'flat'
+            ? join('-', @sub_dirs)
+            : join('-', @sub_dirs)
 } 
 
 sub _distribute_list ($self, $key, $val) {

@@ -30,7 +30,7 @@ sub cmd {
     my @opts = ();
 
     # flatten cmd options
-    for ($self->_get_opts) {
+    for ($self->_opts) {
         my $has = "_has_$_";
 
         if ($self->$has) {

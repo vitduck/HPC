@@ -94,6 +94,7 @@ has '+openmpi' => (
 has '+mvapich2' => ( 
     trigger   => sub ($self, @) {
         $self->mvapich2->nprocs($self->select*$self->mpiprocs);
+        $self->mvapich2->omp($self->omp) if $self->_has_omp; 
     }
 ); 
 
