@@ -13,6 +13,7 @@ has '+name' => (
 ); 
 
 has '+arg' => ( 
+    is   => 'ro',
     lazy => 1
 ); 
 

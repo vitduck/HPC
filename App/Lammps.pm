@@ -3,9 +3,9 @@ package HPC::App::Lammps;
 use Moose; 
 use MooseX::Aliases;
 use MooseX::Attribute::Chained; 
-use MooseX::StrictConstructor;
 use MooseX::Types::Moose 'ArrayRef'; 
 use MooseX::XSAccessor; 
+
 use HPC::App::Lammps::Opt; 
 use HPC::App::Lammps::Omp; 
 use HPC::App::Lammps::Gpu; 
@@ -14,13 +14,14 @@ use HPC::App::Lammps::Kokkos;
 use HPC::Types::App::Lammps qw(
     Suffix Kokkos_Thr Inp Log Var Pkg 
     Pkg_Opt Pkg_Omp Pkg_Gpu Pkg_Intel Pkg_Kokkos ); 
-use namespace::autoclean; 
+
 use feature 'signatures'; 
+use namespace::autoclean; 
 no warnings 'experimental::signatures'; 
 
 with qw(
     HPC::Debug::Dump
-    HPC::Plugin::Cmd ); 
+    HPC::Plugin::Cmd); 
 
 has 'suffix' => (
     is        => 'rw',
@@ -102,31 +103,7 @@ has omp => (
     coerce    => 1, 
     lazy      => 1, 
     default   => sub { {} }, 
-    trigger   => sub ($self, @) { $self->suffix('omp') }
-); 
-
-has gpu => (
-    is        => 'rw',
-    isa       => Pkg_Gpu,
-    traits    => ['Chained'], 
-    predicate => '_has_gpu',
-    clearer   => 'unset_gpu', 
-    lazy      => 1, 
-    coerce    => 1, 
-    default   => sub { {} }, 
-    trigger   => sub ($self, @) { $self->suffix('gpu') }, 
-); 
-
-has intel => ( 
-    is        => 'rw',
-    isa       => Pkg_Intel,
-    traits    => ['Chained'], 
-    predicate => '_has_intel',
-    clearer   => 'unset_intel',
-    coerce    => 1, 
-    lazy      => 1, 
-    default   => sub {{}}, 
-    trigger   => sub ($self, @) { $self->suffix('intel') }, 
+    trigger   => sub ($self, @) { $self->suffix('omp') } 
 ); 
 
 has kokkos => ( 
@@ -138,21 +115,47 @@ has kokkos => (
     coerce    => 1, 
     lazy      => 1, 
     default   => sub {{}}, 
-    trigger   => sub ($self, @) { $self->suffix('kk')->kokkos_thr(1) }
+    trigger   => sub ($self, @) { $self->suffix('kk')->kokkos_thr(1) } 
 ); 
 
-after qr/^unset_(opt|omp|gpu|intel|kokkos)/ => sub ($self) { 
+has intel => ( 
+    is        => 'rw',
+    isa       => Pkg_Intel,
+    traits    => ['Chained'], 
+    predicate => '_has_intel',
+    clearer   => 'unset_intel',
+    coerce    => 1, 
+    lazy      => 1, 
+    default   => sub {{}}, 
+    trigger   => sub ($self, @args) { $self->suffix('intel') }
+); 
+
+has gpu => (
+    is        => 'rw',
+    isa       => Pkg_Gpu,
+    traits    => ['Chained'], 
+    predicate => '_has_gpu',
+    clearer   => 'unset_gpu', 
+    lazy      => 1, 
+    coerce    => 1, 
+    default   => sub { {} }, 
+    trigger   => sub ($self, @) { $self->suffix('gpu') } 
+); 
+
+after qr/^unset_(opt|omp|gpu|intel|kokkos)/ => sub ($self, @) { 
     $self->_unset_suffix; 
     $self->_unset_kokkos_thr; 
     $self->_unset_pkg; 
 }; 
 
 around 'cmd' => sub ($cmd, $self, @) { 
-    for my $pkg (qw(omp gpu intel kokkos)) { 
+    for my $pkg ( qw(omp gpu intel kokkos) ) { 
         my $has = "_has_$pkg"; 
 
-        $self->pkg($self->$pkg->pkg_opt) if $self->$has
-    } 
+        if ( $self->$has ) { 
+            $self->pkg($self->$pkg->pkg_opt) 
+        }
+    }
 
     return $self->$cmd; 
 }; 

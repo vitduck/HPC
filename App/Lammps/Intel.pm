@@ -13,7 +13,7 @@ has '+name' => (
 ); 
 
 has '+arg' => ( 
-    writer => 'set_nphi'
+    writer => 'nphi'
 ); 
 
 has 'mode' => ( 

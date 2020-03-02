@@ -14,7 +14,7 @@ has '+name' => (
 ); 
 
 has '+arg' => ( 
-    writer => 'set_nthreads'
+    writer => 'nthreads'
 ); 
 
 has 'neigh' => (
