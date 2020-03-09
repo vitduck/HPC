@@ -29,7 +29,7 @@ has 'dlb' => (
     traits    => ['Chained'], 
     predicate => '_has_dlb',
     coerce    => 1,
-    default   => 'auto',
+    default   => 'no',
 );
 
 has 'ddorder' => (

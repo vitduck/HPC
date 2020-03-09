@@ -23,6 +23,11 @@ with qw(
     HPC::Debug::Dump
     HPC::Plugin::Cmd); 
 
+has '+bin' => ( 
+    lazy      => 1, 
+    default   => 'lmp_mpi'
+); 
+
 has 'suffix' => (
     is        => 'rw',
     isa       => Suffix,

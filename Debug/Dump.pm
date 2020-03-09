@@ -5,7 +5,7 @@ use Data::Printer {
     class => {     
         internals    => 1,  
         parents      => 0, 
-        expand       => 'all', 
+        expand       => 1, 
         show_methods => 'none' 
     },
     scalar_quotes => '' 
@@ -14,8 +14,8 @@ use Data::Printer {
 use feature qw(signatures); 
 no warnings qw(experimental::signatures);
 
-sub dump ($self) { 
-    p $self; 
+sub dump ($self, $level=1) { 
+    p ($self, class => { expand => $level }); 
 
     return $self
 } 

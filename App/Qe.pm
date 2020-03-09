@@ -12,6 +12,11 @@ with qw(
     HPC::Debug::Dump
     HPC::Plugin::Cmd ); 
 
+has '+bin' => ( 
+    lazy      => 1, 
+    default   => 'pw.x'
+); 
+
 has inp => (
     alias     => 'in',
     is        => 'rw',
