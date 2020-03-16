@@ -18,7 +18,13 @@ coerce Module,
         # example: knl/intel
         my @presets = split /\//, $_; 
 
-        return [ map { ref $jason->{$_} eq ref [] ? $jason->{$_}->@* : $jason->{$_} } @presets ] 
+        return [ 
+            map {
+                ref $jason->{$_} eq ref [] 
+                    ? $jason->{$_}->@* 
+                    : $jason->{$_} 
+            } @presets 
+        ]
     };  
 
 1

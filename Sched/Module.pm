@@ -4,6 +4,7 @@ use Moose::Role;
 use MooseX::Types::Moose qw(ArrayRef Str);
 use HPC::Types::Sched::Src qw(Src_Mkl Src_Mpi); 
 use HPC::Types::Sched::Module 'Module'; 
+use Array::Diff; 
 use feature 'signatures';  
 no warnings 'experimental::signatures'; ;
 
@@ -20,11 +21,17 @@ has 'module' => (
         _index_of_module => 'first_index', 
     }, 
     trigger => sub ($self, $new, $old) { 
-        # for old MPI environment 
-        $self->_unload_mpi_module($_) for $old->@*;
+        my $diff = Array::Diff->diff($old, $new); 
 
-        # for new MPI environment
-        $self->_load_mpi_module  ($_) for $new->@*; 
+        # load mpi modules
+        for my $module ( $diff->added->@* ) { 
+            $self->_load_mpi_module($module)
+        } 
+
+        # unload mpi modules
+        for my $module ($diff->deleted->@*) { 
+            $self->_unload_mpi_module($module)
+        } 
     }
 ); 
 
@@ -63,7 +70,6 @@ sub load ($self, @modules) {
 
         if ($index == -1) { 
             $self->_add_module($module);  
-            $self->_load_mpi_module($module); 
         } 
     }
 
@@ -77,7 +83,6 @@ sub unload ($self, @modules) {
         
         if ($index != -1) { 
             $self->_remove_module($index); 
-            $self->_unload_mpi_module($module)
         }
     }
 
@@ -95,24 +100,28 @@ sub _load_mpi_module($self, $module) {
     my $load_mpi; 
 
     unless ($self->_has_mpi) { 
-        if    ( $module =~ /impi/     ) { $load_mpi = '_load_impi'     } 
+        if    ( $module =~ /impi/     ) { $load_mpi = '_load_impi'     }
         elsif ( $module =~ /openmpi/  ) { $load_mpi = '_load_openmpi'  }
         elsif ( $module =~ /mvapich2/ ) { $load_mpi = '_load_mvapich2' } 
     } 
 
-    $self->$load_mpi($module) if $load_mpi;  
+    if ($load_mpi) { 
+        $self->$load_mpi($module)
+    }
 } 
 
 sub _unload_mpi_module($self, $module) { 
     my $unload_mpi; 
 
     if ($self->_has_mpi) { 
-        if    ( $module =~ /impi/     ) { $unload_mpi = '_unload_impi'     } 
-        elsif ( $module =~ /openmpi/  ) { $unload_mpi = '_unload_openmpi'  }
+        if    ( $module =~ /impi/     ) { $unload_mpi = '_unload_impi'     }
+        elsif ( $module =~ /openmpi/  ) { $unload_mpi = '_unload_openmpi'  } 
         elsif ( $module =~ /mvapich2/ ) { $unload_mpi = '_unload_mvapich2' } 
     } 
-    
-    $self->$unload_mpi if $unload_mpi
+
+    if ($unload_mpi) { 
+        $self->$unload_mpi
+    }
 } 
 
 sub write_module ($self) { 

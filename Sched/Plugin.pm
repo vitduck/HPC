@@ -12,7 +12,8 @@ with qw(
     HPC::Plugin::Numa
     HPC::Plugin::Qe HPC::Plugin::Vasp
     HPC::Plugin::Lammps HPC::Plugin::Gromacs
-    HPC::Plugin::Tensorflow ); 
+    HPC::Plugin::Tensorflow 
+    HPC::Plugin::Iterator); 
 
 has 'plugin' => ( 
     is       => 'rw', 
@@ -22,8 +23,8 @@ has 'plugin' => (
     lazy     => 1, 
     default  => sub {[]},  
     handles  => { 
-        _add_plugin  => 'push', 
-        _list_plugin => 'elements'
+        _add_plugin => 'push', 
+        list_plugin => 'elements'
     } 
 );
 

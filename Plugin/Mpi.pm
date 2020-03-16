@@ -16,9 +16,9 @@ has 'impi' => (
     writer    => '_load_impi',
     clearer   => '_unload_impi', 
     coerce    => 1, 
- #    trigger   => sub ($self, @) { 
-        # $self->_add_plugin('impi'); 
-    # } 
+    trigger   => sub ( $self, @ ) { 
+        $self->_add_plugin('impi'); 
+    } 
 ); 
 
 has 'openmpi' => (
@@ -29,9 +29,11 @@ has 'openmpi' => (
     writer    => '_load_openmpi',
     clearer   => '_unload_openmpi', 
     coerce    => 1, 
-    # trigger   => sub ($self, @) { 
-        # $self->_add_plugin('openmpi'); 
-    # } 
+    trigger   => sub ($self, @) { 
+        $self->_add_plugin('openmpi'); 
+
+        $self->openmpi->omp($self->omp)
+    } 
 ); 
 
 has 'mvapich2' => (
@@ -42,9 +44,16 @@ has 'mvapich2' => (
     writer    => '_load_mvapich2',
     clearer   => '_unload_mvapich2', 
     coerce    => 1, 
-   #  trigger   => sub ($self, @) { 
-        # $self->_add_plugin('mvapich2')
-    # } 
+    trigger   => sub ($self, @) { 
+        $self->_add_plugin('mvapich2'); 
+
+        $self->mvapich2->nprocs($self->select*$self->mpiprocs);
+
+        if ( $self->_has_omp ) {
+            $self->mvapich2->omp($self->omp)
+        }
+
+    } 
 ); 
 
 sub _has_mpi ($self) {

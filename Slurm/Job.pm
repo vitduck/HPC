@@ -20,30 +20,23 @@ has '+submit_cmd' => (
     default => 'sbatch'
 ); 
 
-# has '+submit_dir' => (
-    # default => $ENV{SLURM_SUBMIT_DIR}
-# ); 
-
 has '+name' => ( 
     isa     => Name, 
     coerce  => 1, 
 ); 
 
 has '+account' => ( 
-    # alias   => 'comment',
     isa     => Comment,
     coerce  => 1, 
 ); 
 
 has '+queue' => ( 
-    # alias   => 'partition',
     isa     => Partition, 
     coerce  => 1, 
     default => 'normal'
 ); 
 
 has '+select' => ( 
-    # alias   => 'nodes',
     isa     => Nodes,
     coerce  => 1, 
     trigger => sub ($self, @) { 
@@ -52,7 +45,6 @@ has '+select' => (
 );
 
 has '+mpiprocs' => ( 
-    # alias  => 'ntasks_per_node',  
     isa    => Tasks_per_Node, 
     coerce => 1, 
     trigger => sub ($self, @) { 
@@ -61,27 +53,23 @@ has '+mpiprocs' => (
 );
 
 has '+omp' => ( 
-    # alias  => 'cpus_per_task', 
     isa    => Cpus_per_Task, 
     coerce => 1
 ); 
 
 has '+stderr' => ( 
-    # alias   => 'error',
     isa     => Error, 
     coerce  => 1, 
     default => '%s_%j.err'
 ); 
 
 has '+stdout' => ( 
-    # alias   => 'output',
     isa     => Output, 
     coerce  => 1, 
     default => '%s_%j.out'
 ); 
 
 has '+walltime' => ( 
-    # alias   => 'time',
     isa     => Time, 
     coerce  => 1, 
     default => '24:00:00'
@@ -103,7 +91,7 @@ sub write_resource ($self) {
     $self->ntasks; 
     $self->printf("%s\n\n", $self->shell);
 
-    for (qw(name queue select ntasks omp walltime stderr stdout ngpus account)) {
+    for (qw(name queue select mpiprocs omp ngpus stderr stdout walltime account)) {
         my $has = "_has_$_";
         $self->printf("%s\n", $self->$_) if $self->$has;
     }

@@ -26,6 +26,7 @@ has 'ntasks' => (
 has 'ngpus' => ( 
     is        => 'rw', 
     isa       => Ngpus,
+    traits    => ['Chained'],
     predicate => '_has_ngpus', 
     coerce    => 1, 
     lazy      => 1, 

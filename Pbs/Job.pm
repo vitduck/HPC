@@ -3,8 +3,8 @@ package HPC::Pbs::Job;
 use Moose;
 use MooseX::Attribute::Chained; 
 use MooseX::StrictConstructor; 
-use MooseX::Types::Moose qw(Str Int);
 use MooseX::XSAccessor; 
+use MooseX::Types::Moose qw(Str Int);
 use HPC::Types::Sched::Pbs qw(Account Name Queue Stdout Stderr Walltime); 
 use namespace::autoclean;
 use feature 'signatures';
@@ -17,10 +17,6 @@ with qw(
 has '+submit_cmd' => (
     default => 'qsub'
 ); 
-
-# has '+submit_dir' => (
-    # default => $ENV{PBS_O_WORKDIR}
-# ); 
 
 has '+name' => (
     isa     => Name, 
@@ -54,48 +50,44 @@ has '+walltime' => (
     default => '48:00:00'
 ); 
 
-has '+select' => ( 
+has '+select' => (
     trigger => sub ($self, @) {
         $self->_reset_resource;
-        $self->mvapich2->nprocs($self->select*$self->mpiprocs) if $self->_has_mvapich2;
+
+        if ( $self->_has_mvapich2 ) { 
+            $self->mvapich2->nprocs($self->select*$self->mpiprocs) 
+        }
     }
 ); 
 
 has '+ncpus' => ( 
     trigger => sub ($self,@) { 
         $self->_reset_resource; 
-        $self->mvapich2->nprocs($self->select*$self->mpiprocs) if $self->_has_mvapich2
+
+        if ( $self->_has_mvapich2 ) { 
+            $self->mvapich2->nprocs($self->select*$self->mpiprocs) 
+        }
     }
 ); 
 
 has '+mpiprocs' => (
     lazy      => 1,
-    default   => sub ($self, @) { $self->ncpus } 
+    default   => sub ($self, @) { 
+        $self->_has_omp ? $self->ncpus / $self->omp : $self->ncpus 
+    } 
 );
 
 has '+omp' => (
     trigger   => sub ($self, @) { 
         $self->_reset_resource; 
-        $self->mvapich2->nprocs($self->select*$self->mpiprocs)->omp($self->omp) if $self->_has_mvapich2; 
-        $self->openmpi->omp($self->omp)                                             if $self->_has_openmpi;  
+
+        if ( $self->_has_mvapich2 ) { $self->mvapich2->omp($self->omp) } 
+        if ( $self->_has_openmpi  ) { $self->openmpi->omp ($self->omp) }                                         
     }
 );
 
 has '+cmd' => ( 
     default => sub { ['cd $PBS_O_WORKDIR'] }
-); 
-
-has '+openmpi' => ( 
-    trigger   => sub ($self, @) { 
-        $self->openmpi->omp($self->omp) if $self->_has_omp 
-    }
-); 
-
-has '+mvapich2' => ( 
-    trigger   => sub ($self, @) {
-        $self->mvapich2->nprocs($self->select*$self->mpiprocs);
-        $self->mvapich2->omp($self->omp) if $self->_has_omp; 
-    }
 ); 
 
 sub write_resource ($self) {

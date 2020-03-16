@@ -16,16 +16,9 @@ with qw(
     HPC::Sched::Cmd 
     HPC::Sched::Plugin
     HPC::Sched::Sys
-    HPC::Sched::Iterator
 ); 
 
 has 'submit_cmd' => ( 
-    is       => 'ro', 
-    isa      => Str, 
-    init_arg => undef,
-); 
-
-has 'submit_dir' => ( 
     is       => 'ro', 
     isa      => Str, 
     init_arg => undef,
@@ -38,7 +31,9 @@ has 'script' => (
     traits   => [ 'Chained' ],
     lazy     => 1, 
     default  => 'run.sh', 
-    trigger  => sub ($self, $file, @) { $self->io_write($file) } 
+    trigger  => sub ($self, $file, @) { 
+        $self->io_write($file) 
+    } 
 ); 
 
 sub write ($self, $file) { 

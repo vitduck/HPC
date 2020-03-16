@@ -1,6 +1,7 @@
 package HPC::Sched::Resource; 
 
 use Moose::Role; 
+use MooseX::Aliases;  
 use MooseX::Types::Moose qw(Str Int); 
 use feature 'signatures';  
 no warnings 'experimental::signatures'; 
@@ -16,6 +17,7 @@ has 'shell' => (
 ); 
 
 has 'name' => ( 
+    alias     => 'job-name',
     is        => 'rw', 
     traits    => ['Chained'],
     predicate => '_has_name',
@@ -23,6 +25,7 @@ has 'name' => (
 ); 
 
 has 'account' => ( 
+    alias     => 'comment',
     is        => 'rw', 
     traits    => ['Chained'],
     predicate => '_has_account',
@@ -30,6 +33,7 @@ has 'account' => (
 ); 
 
 has 'queue' => ( 
+    alias     => 'partition',
     is        => 'rw', 
     traits    => ['Chained'],
     predicate => '_has_queue',
@@ -37,18 +41,21 @@ has 'queue' => (
 
 
 has 'stderr' => ( 
+    alias     => 'error',
     is        => 'rw', 
     traits    => ['Chained'],
     predicate => '_has_stderr',
 ); 
 
 has 'stdout' => ( 
+    alias     => 'output',
     is        => 'rw', 
     traits    => ['Chained'],
     predicate => '_has_stdout',
 ); 
 
 has 'walltime' => (
+    alias     => 'time',
     is        => 'rw',
     traits    => ['Chained'],
     predicate => '_has_walltime',
@@ -56,6 +63,7 @@ has 'walltime' => (
 );
 
 has 'select' => (
+    alias     => 'nodes',
     is        => 'rw',
     isa       => Int,
     traits    => ['Chained'],
@@ -64,6 +72,7 @@ has 'select' => (
 ); 
 
 has 'mpiprocs' => (
+    alias     => 'ntasks-per-node',
     is        => 'rw',
     isa       => Int,
     traits    => ['Chained'],
@@ -72,12 +81,11 @@ has 'mpiprocs' => (
 );
 
 has 'omp' => (
+    alias     => 'cpus-per-task',
     is        => 'rw',
     isa       => Int,
     traits    => ['Chained'],
     predicate => '_has_omp',
-    lazy      => 1, 
-    default   => 1,
 ); 
 
 1
