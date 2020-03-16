@@ -90,6 +90,19 @@ has '+cmd' => (
     default => sub { ['cd $PBS_O_WORKDIR'] }
 ); 
 
+# mpirun_rsh -np ...
+has '+mvapich2' => ( 
+    trigger => sub ($self, @) { 
+        $self->_add_plugin('mvapich2'); 
+    
+        $self->mvapich2->nprocs($self->select*$self->mpiprocs);
+
+        if ( $self->_has_omp ) {
+            $self->mvapich2->omp($self->omp)
+        }
+    } 
+); 
+
 sub write_resource ($self) {
     $self->printf("%s\n\n", $self->shell);
 

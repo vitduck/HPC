@@ -3,6 +3,7 @@ package HPC::Mpi::Mvapich2;
 use Moose; 
 use MooseX::XSAccessor; 
 use MooseX::Attribute::Chained; 
+use MooseX::Types::Moose 'Int'; 
 use HPC::Types::Mpi::Mvapich2 'Pin'; 
 use namespace::autoclean; 
 use feature 'signatures';
@@ -18,6 +19,7 @@ has '+hostfile' => (
     lazy => 0 
 ); 
 
+# assume no hyper-threading
 has '+omp' => ( 
     trigger => sub ($self, $omp, @) { 
         $self->set_env( 
@@ -49,6 +51,30 @@ has '+eagersize' => (
     trigger => sub ($self, $size, @) { 
         $self->set_env( MV2_SMP_EAGERSIZE => $size )
     }
+); 
+
+has 'rdma' => ( 
+    is       => 'rw',
+    isa      => Int, 
+    init_arg => undef,
+    traits   => [ 'Chained' ], 
+    lazy     => 1, 
+    default  => 0,
+    trigger  => sub ($self,@) { 
+        $self->set_env(MV2_USE_GPUDIRECT_RDMA => $self->rdma)
+    } 
+); 
+
+has 'gdrcopy' => ( 
+    is       => 'rw',
+    isa      => Int, 
+    init_arg => undef,
+    traits   => [ 'Chained' ],
+    lazy     => 1, 
+    default  => 0,
+    trigger  => sub ($self,@) { 
+        $self->set_env(MV2_USE_GDRCOPY => $self->gdrcopy)
+    } 
 ); 
 
 sub _opts { 

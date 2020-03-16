@@ -60,19 +60,29 @@ has '+omp' => (
 has '+stderr' => ( 
     isa     => Error, 
     coerce  => 1, 
-    default => '%s_%j.err'
+    default => '%j.err'
 ); 
 
 has '+stdout' => ( 
     isa     => Output, 
     coerce  => 1, 
-    default => '%s_%j.out'
+    default => '%j.out'
 ); 
 
 has '+walltime' => ( 
     isa     => Time, 
     coerce  => 1, 
     default => '24:00:00'
+); 
+
+has '+mvapich2' => ( 
+    trigger => sub ($self, @) { 
+        $self->_add_plugin('mvapich2'); 
+
+        if ( $self->_has_omp ) {
+            $self->mvapich2->omp((split /=/, $self->omp)[-1])
+        }
+    } 
 ); 
 
 before 'write' => sub ($self, @) { 

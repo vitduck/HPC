@@ -18,7 +18,7 @@ subtype Time          , as Str, where {/^#SBATCH/ };
 subtype Error         , as Str, where {/^#SBATCH/ };
 subtype Output        , as Str, where {/^#SBATCH/ };
 
-coerce Name           , from Str, via { "#SBATCH --jobname=$_"         };
+coerce Name           , from Str, via { "#SBATCH --job-name=$_"        };
 coerce Partition      , from Str, via { "#SBATCH --partition=$_"       }; 
 coerce Comment        , from Str, via { "#SBATCH --comment=$_"         }; 
 coerce Nodes          , from Str, via { "#SBATCH --nodes=$_"           }; 

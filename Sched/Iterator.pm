@@ -1,164 +1,208 @@
 package HPC::Sched::Iterator; 
 
-use Moose::Role; 
-use MooseX::Types::Moose qw(HashRef ArrayRef); 
-use File::Basename;
-use File::Spec;
-use List::Util 'first'; 
-use Storable 'dclone';
-
+use Moose; 
+use MooseX::Attribute::Chained; 
+use MooseX::XSAccessor; 
+use MooseX::Types::Moose qw(Str ArrayRef); 
+use Set::CrossProduct; 
 use feature 'signatures';  
 no warnings 'experimental::signatures'; 
 
-has params => ( 
-    is       => 'ro', 
-    isa      => HashRef, 
-    init_arg => undef, 
-    traits   => ['Hash'],
-    default  => sub {{ 
-        job        => [qw(select ncpus ngpus mpiprocs omp)],
-        numa       => [qw(membind preferred)],
-        mpi        => [qw(pin eagersize)], 
-        vasp       => [qw(ncore nsim kpar npar)], 
-        qe         => [qw(nimage npools nband ntg ndiag)], 
-        gromacs    => [qw(dorder npme nt ntmpi ntomp)],  
-        tensorflow => [qw(num_inter_threads num_intra_threads)]}}, 
-    handles  => {
-        _get_param  => 'get', 
-        _list_param => 'keys'}
-); 
+has dir => ( 
+    is      => 'rw', 
+    isa     => Str, 
+    lazy    => 1, 
+    default => 'nested'
+);  
 
-has 'iterator' => ( 
-    is       => 'ro', 
-    isa      => ArrayRef, 
-    init_arg => undef, 
+has iterator => ( 
+    is       => 'rw', 
+    isa      => ArrayRef,  
     traits   => ['Array'],
-    predicate => '_has_iterator',
-    lazy     => 1, 
-    default  => sub {[]}, 
-    handles  => { 
-        _add_iterator  => 'push', 
-        _list_iterator => 'elements'
-    } 
+    handles  => { list_iterator => 'elements'}
 ); 
 
-sub iterate($self, $scan_list, $structure='nested') { 
-    my @lists;  
-    my @iterators = ([]);
+around BUILDARGS => sub ($method, $class, $ref) {
+    my ($scan, $set, $cross, $iterator); 
 
-    # flatten the list
-    while (my ($key, $val) = splice $scan_list->@*, 0, 2) { 
-        @lists     = $self->_distribute_list($key, $val); 
-        @iterators = $self->_merge_list(\@iterators, \@lists); 
+    # @scan: ordered of set 
+    # %set:  for Set::CrosspProduct
+    while ( my ($atr, $val) = splice $ref->@*, 0, 2 ) { 
+        $set->{$atr} = $val;  
+        push $scan->@*, $atr; 
+    }
+
+    # iterator: ArrayRef[HashRef]
+    if ( keys $set->%* == 1 ) { 
+        my ($atr, $val) = $set->%*;  
+        $cross = [map { {$atr => $_} } $val->@*]; 
+    } else { 
+        $cross = Set::CrossProduct->new($set)
+                                  ->combinations
+    } 
+   
+    # convert HashRef to ordered ArrayRef 
+    for my $product ($cross->@*) { 
+        my @orders; 
+
+        for my $atr ($scan->@*) { 
+            push @orders, [$atr, $product->{$atr}]
+        }
+
+        push $iterator->@*, [@orders]
     } 
 
-    for my $chain (@iterators) { 
-        my ($dir, $root_dir); 
-        my (@links, @cmds); 
+    $class->$method( iterator => $iterator )
+};  
+
+# default  => sub {{ 
+        # job        => [qw(select ncpus ngpus mpiprocs omp)],
+        # numa       => [qw(membind preferred)],
+        # mpi        => [qw(pin eagersize)], 
+        # vasp       => [qw(ncore nsim kpar npar)], 
+        # qe         => [qw(nimage npools nband ntg ndiag)], 
+        # gromacs    => [qw(dorder npme nt ntmpi ntomp)],  
+        # tensorflow => [qw(num_inter_threads num_intra_threads)]}}, 
+
+# has 'iterator' => ( 
+    # is       => 'ro', 
+    # isa      => ArrayRef, 
+    # init_arg => undef, 
+    # traits   => ['Array'],
+    # predicate => '_has_iterator',
+    # lazy     => 1, 
+    # default  => sub {[]}, 
+    # handles  => { 
+        # _add_iterator  => 'push', 
+        # _list_iterator => 'elements'
+    # } 
+# ); 
+
+# sub iterate($self, $param, $structure='nested') { 
+    # my $iterator = Set::CrossProduct->new($param); 
+
+    # p $iterator->combinations; 
+# } 
+
+# sub iterate($self, $scan_list, $structure='nested') { 
+    # my @chains;  
+    # my @iterators = ([]);
+
+    # # flatten the list
+    # while (my ($key, $val) = splice $scan_list->@*, 0, 2) { 
+        # @chains    = $self->_make_chain($key, $val); 
+        # @iterators = $self->_join_chain(\@iterators, \@chains); 
+    # } 
+
+    # for my $chain (@iterators) { 
+        # my ($dir, $root_dir); 
+        # my (@links, @cmds); 
         
-        for my $link ( $chain->@* ) { 
-            push @links, $self->_set_link($link, $structure)
-        } 
+        # for my $link ( $chain->@* ) { 
+            # push @links, $self->_set_link($link, $structure)
+        # } 
         
-        # join fragment to form full path
-        if ( $structure eq 'flat' ) { 
-            $dir      = join('-', @links); 
-            $root_dir = '../'; 
-        } else { 
-            $dir      = join('/',@links); 
-            $root_dir = join('/', map '..', 0..@links-1); 
-        }
+        # # join fragment to form full path
+        # if ( $structure eq 'flat' ) { 
+            # $dir      = join('-', @links); 
+            # $root_dir = '../'; 
+        # } else { 
+            # $dir      = join('/',@links); 
+            # $root_dir = join('/', map '..', 0..@links-1); 
+        # }
 
-        # add to iterator list
-        $self->_add_iterator($dir); 
+        # # add to iterator list
+        # $self->_add_iterator($dir); 
 
-        # plugin's commands 
-        $self->reset_cmd; 
+        # # plugin's commands 
+        # $self->reset_cmd; 
 
-        # mkdir sub directories 
-        $self->mkdir($dir);  
+        # # mkdir sub directories 
+        # $self->mkdir($dir);  
 
-        # copy VASP input
-        if ($self->_has_vasp) { 
-            my $template = $self->vasp->template; 
-            $self->copy("$template/{INCAR,KPOINTS,POSCAR,POTCAR}" => $dir)
-        }
+        # # copy VASP input
+        # if ($self->_has_vasp) { 
+            # my $template = $self->vasp->template; 
+            # $self->copy("$template/{INCAR,KPOINTS,POSCAR,POTCAR}" => $dir) if $template; 
+        # }
 
-        $self->chdir($dir) 
-             ->add([
-                $self->mpirun, 
-                map $self->$_->cmd, $self->_list_plugin]) 
-             ->write('run.sh')
-             ->chdir($root_dir)
-    }
+        # $self->chdir($dir) 
+             # ->add([
+                # $self->mpirun, 
+                # map $self->$_->cmd, $self->_list_plugin]) 
+             # ->write('run.sh')
+             # ->chdir($root_dir)
+    # }
 
-    return $self
-}
+    # return $self
+# }
 
-sub _set_link ($self, $link, $structure='nested') { 
-    my $mpi; 
-    my @sub_dirs; 
+# sub _set_link ($self, $link, $structure='nested') { 
+    # my $mpi; 
+    # my @sub_dirs; 
 
-    while (my ($setter, $value) = splice $link->@*, 0, 2) { 
-        for my $param ($self->_list_param) { 
-            if ( grep $setter eq $_,  $self->_get_param($param)->@* ) { 
-                # pbs/slm
-                if ($param eq 'job') { 
-                    $self->$setter($value) 
-                # mpi 
-                } elsif ($param eq 'mpi') { 
-                    $mpi = $self->_get_mpi; 
-                    $self->$mpi->$setter($value) ; 
-                    # show binding while scanning
-                    $self->$mpi->debug(4)
-                # app
-                } else  { 
-                    $self->$param->$setter($value) 
-                } 
-            } 
-        }
-        push @sub_dirs, 
-            $structure eq 'flat' 
-                ? uc(substr($setter, 0, 1)).$value
-                : join('_', $setter, $value)
-    } 
+    # while (my ($setter, $value) = splice $link->@*, 0, 2) { 
+        # for my $param ($self->_list_param) { 
+            # if ( grep $setter eq $_,  $self->_get_param($param)->@* ) { 
+                # # pbs/slm
+                # if ($param eq 'job') { 
+                    # $self->$setter($value) 
+                # # mpi 
+                # } elsif ($param eq 'mpi') { 
+                    # $mpi = $self->_get_mpi; 
+                    # $self->$mpi->$setter($value) ; 
+                    # # enable binding while scanning
+                    # $self->$mpi->debug(4) if $setter eq 'pin'
+                # # app
+                # } else  { 
+                    # $self->$param->$setter($value) 
+                # } 
+            # } 
+        # }
+        # push @sub_dirs, 
+            # $structure eq 'flat' 
+                # ? uc(substr($setter, 0, 1)).$value
+                # : join('_', $setter, $value)
+    # } 
 
-    return 
-        $structure eq 'flat'
-            ? join('-', @sub_dirs)
-            : join('-', @sub_dirs)
-} 
+    # return join('-', @sub_dirs)
+# } 
 
-sub _distribute_list ($self, $key, $val) {
-    my @dists;
+# sub _make_chain ($self, $key, $val) {
+    # my @chains; 
 
-    my @attrs = split /\//, $key;
-    my @vals  = map [ split /\//, $_ ], $val->@*;
+    # my @attrs = split /\//, $key;
+    # my @vals  = map [ split /\//, $_ ], $val->@*;
 
-    for my $i (0..$#vals) {
-        my @chains;
-        for my $j (0..$#attrs) {
-            push @chains, $attrs[$j], $vals[$i][$j]
-        }
-        push @dists, [@chains]
-    }
+    # for my $i (0..$#vals) {
+        # my @links;
 
-    return @dists
-}
+        # for my $j (0..$#attrs) {
+            # push @links, $attrs[$j], $vals[$i][$j]
+        # }
 
-sub _merge_list ($self, $l1, $l2) { 
-    my @merged;
+        # push @chains, [ @links ]
+    # }
 
-    for my $i (0 .. $l1->$#*) {
-        for my $j (0 .. $l2->$#*) {
-            # use dclone for deep copy
-            my @chains = dclone($l1->[$i])->@*;
-            push @chains, dclone($l2->[$j]);
-            push @merged, [@chains]
-        }
-    }
+    # return @chains 
+# }
 
-    return @merged
-}
+# sub _join_chain ($self, $c1, $c2) { 
+    # my @join_chains; 
+
+    # for my $i (0 .. $c1->$#*) {
+        # for my $j (0 .. $c2->$#*) {
+            # # use dclone for deep copy
+            # my @chains = dclone($c1->[$i])->@*;
+
+            # push @chains, dclone($c2->[$j]);
+            # push @join_chains, [ @chains ]
+        # }
+    # }
+
+    # return @join_chains 
+# }
+
+__PACKAGE__->meta->make_immutable;
 
 1

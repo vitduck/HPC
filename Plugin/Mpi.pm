@@ -46,13 +46,6 @@ has 'mvapich2' => (
     coerce    => 1, 
     trigger   => sub ($self, @) { 
         $self->_add_plugin('mvapich2'); 
-
-        $self->mvapich2->nprocs($self->select*$self->mpiprocs);
-
-        if ( $self->_has_omp ) {
-            $self->mvapich2->omp($self->omp)
-        }
-
     } 
 ); 
 

@@ -30,7 +30,7 @@ has 'ngpus' => (
     predicate => '_has_ngpus', 
     coerce    => 1, 
     lazy      => 1, 
-    default   => 1 
+    default   => 1, 
 ); 
 
 1

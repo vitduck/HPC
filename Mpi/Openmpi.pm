@@ -13,7 +13,7 @@ with 'HPC::Mpi::Base';
 
 has '+omp' => ( 
     trigger => sub ($self, $omp, @) { 
-        $self->map("numa:pe=$omp")
+        if ( $omp ) { $self->map("numa:pe=$omp") }
     } 
 ); 
 
@@ -21,7 +21,7 @@ has '+debug' => (
     trigger  => sub ($self, $debug, @) {
         if    ( $debug == 0 ) { $self->_reset_report && $self->unset_mca('mpi_show_mca_params')  }  
         elsif ( $debug == 4 ) { $self->report(1)                                                 } 
-        elsif ( $debug == 5 ) { $self->debug(4) && $self->set_mca(mpi_show_mca_params => 'all') }
+        elsif ( $debug == 5 ) { $self->debug(4) && $self->set_mca(mpi_show_mca_params => 'all')  }
 
     }
 );
