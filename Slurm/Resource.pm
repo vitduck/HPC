@@ -2,7 +2,7 @@ package HPC::Slurm::Resource;
 
 use Moose::Role;
 use MooseX::Types::Moose qw(Str Int);
-use HPC::Types::Sched::Slurm qw(Tasks Ngpus); 
+use HPC::Types::Sched::Slurm qw(Tasks Ngpus Mem); 
 use feature 'signatures';
 no warnings 'experimental::signatures';
 
@@ -31,6 +31,16 @@ has 'ngpus' => (
     coerce    => 1, 
     lazy      => 1, 
     default   => 1, 
+); 
+
+has 'mem' => ( 
+    is        => 'rw', 
+    isa       => Mem, 
+    predicate => '_has_mem', 
+    traits    => ['Chained'],
+    coerce    => 1, 
+    lazy      => 1, 
+    default   => '96G'
 ); 
 
 1

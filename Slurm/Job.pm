@@ -60,13 +60,13 @@ has '+omp' => (
 has '+stderr' => ( 
     isa     => Error, 
     coerce  => 1, 
-    default => '%j.err'
+    default => '%j.stderr'
 ); 
 
 has '+stdout' => ( 
     isa     => Output, 
     coerce  => 1, 
-    default => '%j.out'
+    default => '%j.stdout'
 ); 
 
 has '+walltime' => ( 
@@ -101,7 +101,7 @@ sub write_resource ($self) {
     $self->ntasks; 
     $self->printf("%s\n\n", $self->shell);
 
-    for (qw(name queue select mpiprocs omp ngpus stderr stdout walltime account)) {
+    for (qw(name queue select mpiprocs omp mem ngpus stderr stdout walltime account)) {
         my $has = "_has_$_";
         $self->printf("%s\n", $self->$_) if $self->$has;
     }
