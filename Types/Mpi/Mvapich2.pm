@@ -5,7 +5,7 @@ use MooseX::Types::Moose qw(Str Int ArrayRef HashRef);
 use MooseX::Types -declare => [qw(Omp Env Pin)]; 
 
 subtype Omp, as Str ,     where { /^OMP_NUM_THREADS/ }; 
-subtype Pin, as Str,      where { /\d\:|bunch|scatter/ }; 
+subtype Pin, as Str,      where { /\d\:|bunch|scatter|none/ }; 
 subtype Env, as ArrayRef; 
 
 coerce Omp, from Int,     via { 'OMP_NUM_THREADS='.$_ };  

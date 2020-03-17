@@ -25,7 +25,6 @@ has '+omp' => (
         $self->set_env( 
             OMP_NUM_THREADS         => $omp,  
             MV2_THREADS_PER_PROCESS => $omp, 
-            MV2_ENABLE_AFFINITY     => 1,
         ); 
     }
 ); 
@@ -33,8 +32,9 @@ has '+omp' => (
 has '+debug' => ( 
     trigger  => sub ($self, $debug, @) {
         if    ( $debug == 0 ) { $self->unset_env('MV2_SHOW_ENV_INFO', 'MV2_SHOW_CPU_BINDING') } 
-        elsif ( $debug == 4 ) { $self->set_env(MV2_SHOW_CPU_BINDING  => 1)                    } 
-        elsif ( $debug == 5 ) { $self->debug(4) && $self->set_env(MV2_SHOW_ENV_INFO => 2)     } 
+        elsif ( $debug == 4 ) { $self->set_env(MV2_SHOW_CPU_BINDING  => 1) } 
+        elsif ( $debug == 5 ) { $self->debug(4); 
+                                $self->set_env(MV2_SHOW_ENV_INFO => 2) } 
     } 
 ); 
 
@@ -42,8 +42,9 @@ has '+pin' => (
     isa     => Pin, 
     coerce  => 1, 
     trigger => sub ($self, $pin, @) { 
-        $self->set_env(MV2_ENABLE_AFFINITY    => 1);         
-        $self->set_env(MV2_CPU_BINDING_POLICY => $pin)
+        if ( $pin eq 'none' ) { $self->set_env(MV2_ENABLE_AFFINITY    => 0) } 
+        else                  { $self->set_env(MV2_ENABLE_AFFINITY    => 1, 
+                                               MV2_CPU_BINDING_POLICY => $pin) }
     } 
 ); 
 
