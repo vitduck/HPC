@@ -36,9 +36,8 @@ has 'script' => (
     } 
 ); 
 
-sub write ($self, $file) { 
-    $self->script($file) 
-         ->write_resource
+sub write ( $self ) { 
+    $self->write_resource
          ->write_module 
          ->write_env
          ->write_cmd; 
@@ -46,7 +45,7 @@ sub write ($self, $file) {
     return $self
 } 
 
-sub run ($self) {
+sub submit ( $self ) {
     system $self->submit_cmd, $self->script; 
     
     return $self

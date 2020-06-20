@@ -88,8 +88,8 @@ has '+mvapich2' => (
 before 'write' => sub ($self, @) { 
     my ($mpi, %env);  
 
-    if ($self->_has_mpi) { 
-        $mpi = $self->_get_mpi; 
+    if ($self->mpi) { 
+        $mpi = $self->mpi; 
 
         # deref MPI env hash and pass it to Slurm's env
         $self->set($self->$mpi->env->%*) if $self->$mpi->has_env 

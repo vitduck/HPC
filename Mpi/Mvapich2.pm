@@ -19,13 +19,22 @@ has '+hostfile' => (
     lazy => 0 
 ); 
 
+has '+nprocs' => ( 
+    lazy => 0 
+); 
+
 # assume no hyper-threading
 has '+omp' => ( 
     trigger => sub ($self, $omp, @) { 
-        $self->set_env( 
-            OMP_NUM_THREADS         => $omp,  
-            MV2_THREADS_PER_PROCESS => $omp, 
-        ); 
+        # default binding 
+        if ( $omp ) { 
+            $self->set_env( 
+                OMP_NUM_THREADS         => $omp,  
+                MV2_THREADS_PER_PROCESS => $omp, 
+                MV2_ENABLE_AFFINITY     => 1,
+                MV2_CPU_BINDING_POLICY  => 'bunch', 
+            ); 
+        }
     }
 ); 
 

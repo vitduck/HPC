@@ -51,70 +51,48 @@ has '+walltime' => (
 ); 
 
 has '+select' => (
-    trigger => sub ($self, @) {
-        $self->_reset_resource;
-
-        if ( $self->_has_mvapich2 ) { 
-            $self->mvapich2->nprocs($self->select*$self->mpiprocs) 
-        }
-    }
-); 
-
-has '+ncpus' => ( 
-    trigger => sub ($self,@) { 
-        $self->_reset_resource; 
-
-        if ( $self->_has_mvapich2 ) { 
-            $self->mvapich2->nprocs($self->select*$self->mpiprocs) 
-        }
-    }
+    trigger => sub ($self, @) { $self->_reset_resource } 
 ); 
 
 has '+mpiprocs' => (
     lazy      => 1,
-    default   => sub ($self, @) { 
-        $self->_has_omp ? $self->ncpus / $self->omp : $self->ncpus 
-    } 
+    default   => sub ($self, @) { $self->omp ? $self->ncpus / $self->omp : $self->ncpus } 
 );
 
 has '+omp' => (
     trigger   => sub ($self, @) { 
         $self->_reset_resource; 
+        $self->_reset_mpiprocs; 
 
-        if ( $self->_has_mvapich2 ) { $self->mvapich2->omp($self->omp) } 
-        if ( $self->_has_openmpi  ) { $self->openmpi->omp ($self->omp) }                                         
+        self->mvapich2->omp($self->omp)  if $self->_has_mvapich2; 
+        $self->openmpi->omp ($self->omp) if $self->_has_openmpi; 
     }
 );
 
-has '+cmd' => ( 
-    default => sub { ['cd $PBS_O_WORKDIR'] }
-); 
-
-# mpirun_rsh -np ...
-has '+mvapich2' => ( 
-    trigger => sub ($self, @) { 
-        $self->_add_plugin('mvapich2'); 
-    
-        $self->mvapich2->nprocs($self->select*$self->mpiprocs);
-
-        if ( $self->_has_omp ) {
-            $self->mvapich2->omp($self->omp)
-        }
+has '+impi' => (
+    trigger   => sub ( $self, @ ) { 
+        $self->mpi('impi'); 
     } 
 ); 
 
-sub write_resource ($self) {
-    $self->printf("%s\n\n", $self->shell);
+has '+openmpi' => (
+    trigger   => sub ($self, @) { 
+        $self->mpi('openmpi'); 
+        
+        $self->openmpi->omp($self->omp);   
+    } 
+); 
+  
+has '+mvapich2' => ( 
+    trigger   => sub ($self, @) { 
+        $self->mpi('mvapich2'); 
 
-    # build resource string
-    $self->resource; 
-    for (qw(export name account project queue stderr stdout resource walltime)) {
-        my $has = "_has_$_";
-        $self->printf("%s\n", $self->$_) if $self->$has;
-    }
+        $self->mvapich2->omp($self->omp)
+                       ->hostfile('$PBS_NODEFILE') 
+                       ->nprocs('$(wc -l $PBS_NODEFILE | awk \'{print $1}\')'); 
+    } 
 
-    return $self
-}
+);  
 
 __PACKAGE__->meta->make_immutable;
 

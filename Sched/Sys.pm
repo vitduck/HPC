@@ -1,6 +1,7 @@
 package HPC::Sched::Sys; 
 
 use Moose::Role; 
+use MooseX::Types::Moose 'HashRef'; 
 use File::Copy ();  
 use File::Path qw(make_path); 
 use File::Glob ':bsd_glob';  
@@ -34,6 +35,16 @@ sub move ($self, $source, $destination) {
     $source =~ /\*|\[|\{/ 
         ? map File::Copy::move($_ => $destination), bsd_glob("$source")
         :     File::Copy::move($source => $destination);  
+
+    return $self
+} 
+
+sub timing ($self) { 
+    return { time => ['-p'] }
+} 
+
+sub echo ($self, $message) { 
+    printf("%s\n", $message); 
 
     return $self
 } 

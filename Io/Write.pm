@@ -9,7 +9,8 @@ has 'io_write' => (
     init_arg => undef,
     clearer  => '_close_io_write',
     coerce   => 1, 
-    handles  => [qw(print printf)]
+    handles  => [qw(print printf)], 
+    default  => sub { shift->script }
 ); 
 
 1

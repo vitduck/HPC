@@ -42,18 +42,18 @@ has 'nprocs' => (
     predicate => '_has_nprocs', 
     coerce    => 1, 
     lazy      => 1, 
-    default   => 1 
+    default   => 1,
 );
 
 has 'hostfile' => ( 
-    is        => 'ro', 
+    is        => 'rw', 
     isa       => Hostfile, 
     traits    => ['Chained'],
     init_arg  => undef,
     predicate => '_has_hostfile', 
     coerce    => 1, 
     lazy      => 1, 
-    default   => '$PBS_NODEFILE' 
+    default   => '' 
 );
 
 has 'debug' => ( 

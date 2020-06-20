@@ -8,7 +8,7 @@ use MooseX::Types -declare => [qw(Nprocs Hostfile)];
 subtype Nprocs,   as Str, where { /^\-np/       };
 subtype Hostfile, as Str, where { /^\-hostfile/ }; 
 
-coerce Nprocs,   from Int, via { join ' ', '-np', $_       };
+coerce Nprocs,   from Str, via { join ' ', '-np', $_       };
 coerce Hostfile, from Str, via { join ' ', '-hostfile', $_ };
 
 1

@@ -14,7 +14,7 @@ subtype Diag,   as Str, where { /^\-/  };
 coerce Input,  from Str, via { '-in ' .$_ };
 coerce Output, from Str, via {   '> ' .$_ }; 
 coerce Image,  from Int, via { '-ni ' .$_ }; 
-coerce Pools,  from Int, via { '-np ' .$_ }; 
+coerce Pools,  from Int, via { '-nk ' .$_ }; 
 coerce Band,   from Int, via { '-nb ' .$_ }; 
 coerce Task,   from Int, via { '-nt ' .$_ }; 
 coerce Diag,   from Int, via { '-nd ' .$_ }; 

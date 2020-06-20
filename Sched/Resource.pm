@@ -86,6 +86,7 @@ has 'omp' => (
     isa       => Int,
     traits    => ['Chained'],
     predicate => '_has_omp',
+    default   => 0
 ); 
 
 1

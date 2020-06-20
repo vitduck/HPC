@@ -17,22 +17,42 @@ has 'cmd' => (
     lazy      => 1, 
     default   => sub {[]},
     handles   => { 
-         _add_cmd => 'push', 
-        _list_cmd => 'elements' 
+         add     => 'push', 
+        list_cmd => 'elements' 
     }
 );
 
-sub add ($self, @cmds) { 
-    for my $cmd ( @cmds ) { 
-        my $level = 0; 
+around add => sub ($add, $self, @args ) { 
+   $self->$add(@args); 
+   return $self
+}; 
 
-        $self->_add_cmd( $self->_expand_cmd(\$level, $cmd) )              if ref $cmd eq ''; 
-        $self->_add_cmd([$self->_expand_cmd(\$level, $cmd)])              if ref $cmd eq ref {}; 
-        $self->_add_cmd([map $self->_expand_cmd(\$level, $_), $cmd->@* ]) if ref $cmd eq ref []
-    }
+sub write_cmd ($self) { 
+    my $level; 
 
-    return $self; 
-}
+    for my $cmd ( $self->list_cmd ) { 
+        $self->print("\n"); 
+
+        # serial job
+        if ( ref $cmd eq 'HASH' ) { 
+            $level = 0; 
+
+            $self->_print_indented_cmd(
+                $self->_indent_cmd(\$level, $cmd) );  
+
+        # parallel job
+        } elsif ( ref $cmd eq 'ARRAY' ) { 
+            $level = 0; 
+
+            $self->_print_indented_cmd( 
+                map { $self->_indent_cmd(\$level, $_) } $cmd->@* ); 
+        
+        # single cmd
+        } else {   
+            $self->printf("%s\n", $cmd)
+        }
+    } 
+} 
 
 sub _expand_tab ($self, $level, @lines) { 
     $tabstop = 4;
@@ -40,35 +60,26 @@ sub _expand_tab ($self, $level, @lines) {
     return expand(map "\t"x($level).$_, @lines)
 }
 
-sub _expand_cmd ($self, $level, $cmd) { 
+sub _indent_cmd ($self, $level, $cmd) { 
+    # command with options 
     if (ref $cmd eq 'HASH') { 
         my ($bin, $opt) = $cmd->%*; 
 
         return ( 
             $self->_expand_tab($level->$*++, $bin),  
             $self->_expand_tab($level->$*  , $opt->@*) )
+        
+    # simple command 
     } else { 
         return 
             $self->_expand_tab($level->$*++, $cmd)
     }
 } 
 
-sub write_cmd ($self) { 
-    my $length; 
+sub _print_indented_cmd ($self, @cmds) { 
+    my $length = max(map length($_), @cmds); 
 
-    for my $cmd ($self->_list_cmd) { 
-        $self->print("\n"); 
-
-        if (ref $cmd eq '') {
-            $self->printf("%s\n", $cmd)
-        } else { 
-            $length = max(map length($_), $cmd->@*); 
-
-            $self->printf("%s\n", join(" \\\n", map sprintf("%-${length}s", $_), $cmd->@* ))
-        }
-    } 
-
-    return $self
+    $self->printf("%s\n", join(" \\\n", map sprintf("%-${length}s", $_), @cmds ))
 } 
 
 1
