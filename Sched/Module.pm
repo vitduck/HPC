@@ -2,9 +2,11 @@ package HPC::Sched::Module;
 
 use Moose::Role; 
 use MooseX::Types::Moose qw(ArrayRef Str);
-use HPC::Types::Sched::Src qw(Src_Mkl Src_Mpi); 
-use HPC::Types::Sched::Module 'Module'; 
+
 use Array::Diff; 
+
+use HPC::Types::Sched::Module 'Module'; 
+
 use feature 'signatures';  
 no warnings 'experimental::signatures'; ;
 
@@ -35,15 +37,21 @@ sub purge($self) {
 } 
 
 sub load ($self, @modules) { 
-    my $load_mpi; 
+    my $index; 
 
     for my $module ( @modules ) { 
-        my $index = $self->_index_of_module(sub {/$module/}) ; 
+        $index = 
+            ref $module eq 'ARRAY'   
+                ? $self->_index_of_module(sub {/$module->[0]/})
+                : $self->_index_of_module(sub {/$module/     });  
 
         if ($index == -1) { 
-            $self->_add_module($module);  
+            $self->_add_module(
+                ref $module eq 'ARRAY'   
+                    ? $module->[0] 
+                    : $module );  
+                
             $self->_load_mpi_module($module); 
-
         } 
     }
 
@@ -51,12 +59,20 @@ sub load ($self, @modules) {
 } 
 
 sub unload ($self, @modules) { 
+    my $index; 
 
     for my $module ( @modules ) { 
-        my $index = $self->_index_of_module(sub {/$module/}) ; 
+        my $index = 
+            ref $module eq 'ARRAY' 
+                ? $self->_index_of_module(sub {/$module->[0]/}) 
+                : $self->_index_of_module(sub {/$module/}     ); 
         
         if ($index != -1) { 
-            $self->_remove_module($index); 
+            $self->_remove_module(
+                ref $module eq 'ARRAY'   
+                    ? $module->[0] 
+                    : $module );  
+
             $self->_unload_mpi_module($module); 
         }
     }
@@ -77,8 +93,10 @@ sub write_module ($self) {
         $self->printf("\n"); 
         $self->printf("module purge\n"); 
 
-        for ($self->_list_module) { 
-            $self->printf("module load %s\n", $_)
+        for my $module ($self->_list_module) { 
+            ref $module eq 'ARRAY' 
+                ? $self->printf("module load %s\n", $module->@*)
+                : $self->printf("module load %s\n", $module    ); 
         }
     }
 
@@ -86,15 +104,25 @@ sub write_module ($self) {
 } 
 
 sub _load_mpi_module ($self, $module) { 
-    if    ( $module =~ /impi/     ) { $self->_load_impi($module)     }
-    elsif ( $module =~ /openmpi/  ) { $self->_load_openmpi($module)  }
-    elsif ( $module =~ /mvapich2/ ) { $self->_load_mvapich2($module) } 
+    my $mpi_module = ref $module eq 'ARRAY' ? $module->[0] : $module; 
+    my $mpi_type   = $1 if $mpi_module =~ /(impi|openmpi|mvapich2)/; 
+
+    if ($mpi_type) { 
+        my $loader = "_load_$mpi_type"; 
+        
+        $self->$loader($module); 
+    }
 } 
 
 sub _unload_mpi_module ($self, $module) { 
-    if    ( $module =~ /impi/     ) { $self->_unload_impi     }
-    elsif ( $module =~ /openmpi/  ) { $self->_unload_openmpi  } 
-    elsif ( $module =~ /mvapich2/ ) { $self->_unload_mvapich2 }
-} 
+    my $mpi_module = ref $module eq 'ARRAY' ? $module->[0] : $module; 
+    my $mpi_type   = $1 if $mpi_module =~ /(impi|openmpi|mvapich2)/; 
+
+    if ($mpi_type) { 
+        my $unloader = "_unload_$mpi_type"; 
+        
+        $self->$unloader 
+    }
+}
 
 1

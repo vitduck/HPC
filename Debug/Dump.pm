@@ -1,6 +1,7 @@
 package HPC::Debug::Dump; 
 
 use Moose::Role; 
+
 use Data::Printer { 
     class => {     
         internals    => 1,  

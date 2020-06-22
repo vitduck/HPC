@@ -2,6 +2,7 @@ package HPC::App::Gromacs::Output;
 
 use Moose::Role; 
 use MooseX::Attribute::Chained; 
+
 use HPC::Types::App::Gromacs qw(Verbose Deffnm Log Confout); 
 
 has 'verbose' => ( 

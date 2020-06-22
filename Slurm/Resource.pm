@@ -2,7 +2,9 @@ package HPC::Slurm::Resource;
 
 use Moose::Role;
 use MooseX::Types::Moose qw(Str Int);
+
 use HPC::Types::Sched::Slurm qw(Tasks Ngpus Mem); 
+
 use feature 'signatures';
 no warnings 'experimental::signatures';
 

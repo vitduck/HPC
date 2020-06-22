@@ -1,13 +1,22 @@
 package HPC::Sched::Sys; 
 
 use Moose::Role; 
-use MooseX::Types::Moose 'HashRef'; 
+use MooseX::Types::Moose qw(Str HashRef); 
+
+use Cwd qw(abs_path);
 use File::Copy ();  
 use File::Path qw(make_path); 
 use File::Glob ':bsd_glob';  
 
 use feature 'signatures';  
 no warnings 'experimental::signatures'; 
+
+has 'root' => ( 
+    is       => 'ro', 
+    isa      => Str, 
+    init_arg => undef,
+    default  => sub ( $self ) { abs_path('.') }
+); 
 
 sub mkdir ($self, @dirs) { 
     make_path($_) for @dirs; 

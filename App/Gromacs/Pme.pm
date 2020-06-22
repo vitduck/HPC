@@ -2,6 +2,7 @@ package HPC::App::Gromacs::Pme;
 
 use Moose::Role; 
 use MooseX::Attribute::Chained; 
+
 use HPC::Types::App::Gromacs qw(Tunepme Dlb DDorder Npme); 
 
 has 'npme' => (

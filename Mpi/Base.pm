@@ -2,7 +2,9 @@ package HPC::Mpi::Base;
 
 use Moose::Role;  
 use MooseX::Types::Moose qw(Str Int ArrayRef HashRef); 
+
 use HPC::Types::Mpi::Base qw(Nprocs Hostfile); 
+
 use namespace::autoclean; 
 use feature 'signatures';
 no warnings 'experimental::signatures';
@@ -59,7 +61,6 @@ has 'hostfile' => (
 has 'debug' => ( 
     is       => 'rw', 
     isa      => Int,
-    init_arg => undef,
     traits   => ['Chained'],
     lazy     => 1, 
     default  => 0, 
@@ -68,7 +69,6 @@ has 'debug' => (
 has 'eagersize' => (
     is       => 'rw', 
     isa      => Str|Int,
-    init_arg => undef, 
     traits   => ['Chained'],
 ); 
 

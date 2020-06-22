@@ -2,6 +2,7 @@ package HPC::App::Gromacs::Thread;
 
 use Moose::Role; 
 use MooseX::Attribute::Chained; 
+
 use HPC::Types::App::Gromacs qw(Nt Ntmpi Ntomp); 
 
 has 'nt' => (

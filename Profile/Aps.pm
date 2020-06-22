@@ -5,7 +5,9 @@ use MooseX::Attribute::Chained;
 use MooseX::StrictConstructor; 
 use MooseX::Types::Moose 'Str'; 
 use MooseX::XSAccessor; 
+
 use HPC::Types::Profile::Aps qw(Type Level Report); 
+
 use namespace::autoclean; 
 
 with qw(

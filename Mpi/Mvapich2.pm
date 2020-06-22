@@ -4,7 +4,9 @@ use Moose;
 use MooseX::XSAccessor; 
 use MooseX::Attribute::Chained; 
 use MooseX::Types::Moose 'Int'; 
+
 use HPC::Types::Mpi::Mvapich2 'Pin'; 
+
 use namespace::autoclean; 
 use feature 'signatures';
 no warnings 'experimental::signatures';
@@ -26,15 +28,17 @@ has '+nprocs' => (
 # assume no hyper-threading
 has '+omp' => ( 
     trigger => sub ($self, $omp, @) { 
-        # default binding 
+        # enable affinity
         if ( $omp ) { 
             $self->set_env( 
                 OMP_NUM_THREADS         => $omp,  
                 MV2_THREADS_PER_PROCESS => $omp, 
                 MV2_ENABLE_AFFINITY     => 1,
-                MV2_CPU_BINDING_POLICY  => 'bunch', 
             ); 
         }
+
+        # enable 'bunch' by default
+        $self->pin('bunch') unless $self->_has_pin
     }
 ); 
 

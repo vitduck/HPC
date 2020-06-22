@@ -1,8 +1,9 @@
 package HPC::Sched::Path; 
 
-use Env qw(@LD_LIBRARY_PATH); 
 use Moose::Role; 
 use MooseX::Types::Moose 'ArrayRef'; 
+
+use Env qw(@LD_LIBRARY_PATH); 
 
 has '_ld_library_path' => ( 
     is       => 'rw',

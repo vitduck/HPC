@@ -4,10 +4,12 @@ use Moose;
 use MooseX::Attribute::Chained; 
 use MooseX::StrictConstructor;
 use MooseX::XSAccessor; 
-use HPC::Types::App::Tensorflow 'Cnn'; 
-use Text::Tabs; 
-use namespace::autoclean; 
 
+use Text::Tabs; 
+
+use HPC::Types::App::Tensorflow 'Cnn'; 
+
+use namespace::autoclean; 
 use feature 'signatures'; 
 no warnings 'experimental::signatures'; 
 

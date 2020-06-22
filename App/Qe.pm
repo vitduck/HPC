@@ -5,7 +5,9 @@ use MooseX::Aliases;
 use MooseX::Attribute::Chained; 
 use MooseX::StrictConstructor; 
 use MooseX::XSAccessor; 
+
 use HPC::Types::App::Qe qw(Input Output Image Pools Band Task Diag);
+
 use namespace::autoclean;
 
 with qw(

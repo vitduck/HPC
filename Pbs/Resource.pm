@@ -2,8 +2,10 @@ package HPC::Pbs::Resource;
 
 use Moose::Role;
 use MooseX::Types::Moose qw(Str Int ArrayRef);
+
 use HPC::Types::Sched::Pbs qw(Export Project Resource); 
 use Set::CrossProduct; 
+
 use feature 'signatures';
 no warnings 'experimental::signatures';
 
@@ -60,16 +62,20 @@ has 'resource' => (
         my @resources; 
 
         push @resources, $self->select;  
-        push @resources, join('=', 'ncpus'     ,  $self->ncpus );  
-        push @resources, join('=', 'mpiprocs'  , ($self->mpi ? $self->mpiprocs : 1));
-        push @resources, join('=', 'ompthreads', ($self->omp ? $self->omp      : 1)); 
+        push @resources, join('=', 'ncpus'     ,  $self->ncpus                );  
+        push @resources, join('=', 'mpiprocs'  ,  $self->mpiprocs             ); 
+        push @resources, join('=', 'ompthreads', ($self->omp ? $self->omp : 1)); 
 
          
         if ( $self->_has_host ) { 
-            return [ map join(':', $_->@*), Set::CrossProduct->new([ [ join(':', @resources)           ], 
-                                                                     [ map "host=$_", $self->get_hosts ] ])
-                                                             ->combinations
-                                                             ->@* ] 
+            return [ 
+                map join(':', $_->@*), 
+                    Set::CrossProduct->new([ 
+                                        [ join(':', @resources)           ], 
+                                        [ map "host=$_", $self->get_hosts ] ])
+                                     ->combinations
+                                     ->@* 
+            ] 
         } else {  
             return join(':', @resources) 
         }
@@ -81,6 +87,7 @@ sub write_resource ($self) {
 
     # build resource string
     $self->resource; 
+
     for (qw(export name account project queue stderr stdout resource walltime)) {
         my $has = "_has_$_";
         $self->printf("%s\n", $self->$_) if $self->$has;

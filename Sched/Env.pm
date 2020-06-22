@@ -2,6 +2,7 @@ package HPC::Sched::Env;
 
 use Moose::Role;
 use MooseX::Types::Moose 'HashRef';
+
 use feature 'signatures';
 no warnings 'experimental::signatures';
 

@@ -5,7 +5,10 @@ use MooseX::Aliases;
 use MooseX::Attribute::Chained; 
 use MooseX::StrictConstructor; 
 use MooseX::XSAccessor; 
+
 use HPC::Types::Profile::Numa qw(Membind Preferred);  
+
+use namespace::autoclean; 
 
 with qw(
     HPC::Debug::Dump  

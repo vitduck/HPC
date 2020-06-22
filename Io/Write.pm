@@ -1,6 +1,7 @@
 package HPC::Io::Write; 
 
 use Moose::Role; 
+
 use HPC::Types::Io::Fh 'FH_Write'; 
 
 has 'io_write' => ( 
@@ -10,7 +11,6 @@ has 'io_write' => (
     clearer  => '_close_io_write',
     coerce   => 1, 
     handles  => [qw(print printf)], 
-    default  => sub { shift->script }
 ); 
 
 1

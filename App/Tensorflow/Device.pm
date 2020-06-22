@@ -2,6 +2,7 @@ package HPC::App::Tensorflow::Device;
 
 use Moose::Role; 
 use MooseX::Types::Moose qw(Str Int); 
+
 use Moose::Util::TypeConstraints; 
 
 has device => (

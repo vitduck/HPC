@@ -2,6 +2,7 @@ package HPC::Sched::Job;
 
 use Moose::Role; 
 use MooseX::Types::Moose 'Str'; 
+
 use namespace::autoclean;
 use feature 'signatures';
 no warnings 'experimental::signatures';
@@ -27,16 +28,16 @@ has 'submit_cmd' => (
 has 'script' => ( 
     is       => 'rw', 
     isa      => Str, 
-    init_arg => undef, 
-    traits   => [ 'Chained' ],
+    init_arg => undef,
     lazy     => 1, 
     default  => 'run.sh', 
-    trigger  => sub ($self, $file, @) { 
-        $self->io_write($file) 
-    } 
 ); 
 
-sub write ( $self ) { 
+sub write ( $self, $file = '' ) { 
+    $file 
+        ? $self->io_write($file) 
+        : $self->io_write($self->script); 
+
     $self->write_resource
          ->write_module 
          ->write_env

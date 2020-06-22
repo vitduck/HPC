@@ -4,7 +4,9 @@ use Moose;
 use MooseX::XSAccessor; 
 use MooseX::Attribute::Chained; 
 use MooseX::Types::Moose 'HashRef'; 
+
 use HPC::Types::Mpi::Openmpi qw(Report Map Bind); 
+
 use namespace::autoclean; 
 use feature 'signatures';
 no warnings 'experimental::signatures';
@@ -13,7 +15,7 @@ with 'HPC::Mpi::Base';
 
 has '+omp' => ( 
     trigger => sub ($self, $omp, @) { 
-        # default binding
+        # enable 'bunch' by default
         if ( $omp ) { 
             $self->bind; 
             $self->map
@@ -23,7 +25,6 @@ has '+omp' => (
 
 has '+debug' => ( 
     trigger  => sub ($self, $debug, @) {
-        print "Don't watch, men\n"; 
 
         if    ( $debug == 0 ) { $self->_reset_report && $self->unset_mca('mpi_show_mca_params')  }  
         elsif ( $debug == 4 ) { $self->report(1)                                                 } 

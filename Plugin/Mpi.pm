@@ -2,20 +2,14 @@ package HPC::Plugin::Mpi;
 
 use Moose::Role; 
 use MooseX::Types::Moose qw(Str HashRef); 
+
 use HPC::Mpi::Impi;
 use HPC::Mpi::Openmpi;
 use HPC::Mpi::Mvapich2;
 use HPC::Types::Sched::Mpi qw(Impi Openmpi Mvapich2); 
+
 use feature 'signatures';  
 no warnings 'experimental::signatures'; 
-
-has 'mpi' => ( 
-    is       => 'rw', 
-    isa      => Str,
-    init_arg => undef,
-    lazy     => 1, 
-    default  => ''
-); 
 
 has 'impi' => (
     is        => 'rw', 
@@ -46,11 +40,5 @@ has 'mvapich2' => (
     clearer   => '_unload_mvapich2', 
     coerce    => 1, 
 ); 
-
-sub mpirun ($self) {
-    my $mpi = $self->mpi; 
-
-    return $self->$mpi->cmd
-}
 
 1

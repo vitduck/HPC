@@ -5,6 +5,7 @@ use MooseX::XSAccessor;
 use MooseX::Attribute::Chained; 
 use MooseX::Types::Moose qw/Int Str/; 
 use Moose::Util::TypeConstraints; 
+
 use namespace::autoclean; 
 
 with 'HPC::App::Lammps::Package'; 

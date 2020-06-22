@@ -4,6 +4,7 @@ use Moose;
 use MooseX::Attribute::Chained;
 use MooseX::StrictConstructor;
 use MooseX::XSAccessor; 
+
 use namespace::autoclean; 
 
 with qw(
