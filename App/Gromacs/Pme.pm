@@ -30,14 +30,13 @@ has 'dlb' => (
     traits    => ['Chained'], 
     predicate => '_has_dlb',
     coerce    => 1,
-    default   => 'no',
+    default   => 'auto',
 );
 
 has 'ddorder' => (
     is        => 'rw',
     isa       => DDorder,
     traits    => ['Chained'], 
-    lazy      => 1,
     predicate => '_has_ddorder',
     coerce    => 1,
     default   => 'interleave', 

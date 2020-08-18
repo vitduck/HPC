@@ -31,7 +31,7 @@ has 'resethway' => (
     predicate => '_has_resethway', 
     coerce    => 1,
     lazy      => 1, 
-    default   => 0, 
+    default   => 1, 
 ); 
 
 1 

@@ -55,8 +55,18 @@ has '+mpiprocs' => (
 );
 
 has '+omp' => ( 
-    isa    => Cpus_per_Task, 
-    coerce => 1
+    isa     => Cpus_per_Task, 
+    coerce  => 1, 
+    trigger => sub ($self, @) { 
+        my $omp_num_threads = (split /=/, $self->omp)[-1]; 
+
+        # pass OMP_NUM_THREADS to MPI 
+        $self->mvapich2->omp($omp_num_threads) if $self->_has_mvapich2; 
+        $self->openmpi->omp($omp_num_threads)  if $self->_has_openmpi; 
+
+        # pass OMP_NUN_THREADS to Gromacs cmd
+        $self->gromacs->ntomp($omp_num_threads) if $self->_has_gromacs
+    } 
 ); 
 
 has '+stderr' => ( 
@@ -77,26 +87,49 @@ has '+walltime' => (
     default => '24:00:00'
 ); 
 
+# pass OMP_NUM_THREAD to mvapich2 env list
 has '+mvapich2' => ( 
     trigger => sub ($self, @) { 
-        $self->_add_plugin('mvapich2'); 
+        my $omp_num_threads = (split /=/, $self->omp)[-1]; 
 
-        if ( $self->_has_omp ) {
-            $self->mvapich2->omp((split /=/, $self->omp)[-1])
-        }
+        $self->_add_plugin('mvapich2'); 
+        
+        # pass OMP_NUN_THREADS to MPI
+        $self->mvapich2->omp($omp_num_threads) if $self->_has_omp; 
     } 
 ); 
 
-before 'write' => sub ($self, @) { 
-    my ($mpi, %env);  
+# pass number of thread to gromacs cmd
+has '+gromacs' => ( 
+    trigger => sub ( $self, @ ) { 
+        my $omp_num_threads = (split /=/, $self->omp)[-1]; 
 
-    if ($self->mpi) { 
-        $mpi = $self->mpi; 
+        $self->account('gromacs'); 
+        $self->_add_plugin('gromacs'); 
 
-        # deref MPI env hash and pass it to Slurm's env
-        $self->set($self->$mpi->env->%*) if $self->$mpi->has_env 
+        # pass OMP_NUN_THREADS to Gromacs cmd
+        $self->gromacs->ntomp($omp_num_threads) if $self->_has_omp; 
     }
+);  
 
+# pass number of gpu to lammps/gpu package
+has '+lammps' => ( 
+    trigger => sub ( $self, @ ) { 
+        my $omp_num_threads = (split /=/, $self->omp)[-1]; 
+
+        $self->account('lammps');
+        $self->_add_plugin('lammps');
+
+        # pass OMP_NUN_THREADS to Lammps cmd
+        $self->lammps->gpu->ngpu($omp_num_threads) if $self->lammps->_has_gpu
+    }
+);  
+
+# pass MPI environments to slurm's env
+before 'write' => sub ($self, @) { 
+    if    ( $self->_has_impi     ) { $self->set($self->impi->env->%*)     } 
+    elsif ( $self->_has_openmpi  ) { $self->set($self->openmpi->env->%*)  } 
+    elsif ( $self->_has_mvapich2 ) { $self->set($self->mvapich2->env->%*) }
 }; 
 
 sub write_resource ($self) {

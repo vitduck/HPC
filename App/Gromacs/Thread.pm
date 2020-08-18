@@ -31,7 +31,6 @@ has 'ntomp' => (
     traits    => ['Chained'],
     predicate => '_has_ntomp',
     coerce    => 1,
-    lazy      => 1,
     default   => 1,
 );
 

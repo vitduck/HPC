@@ -33,6 +33,10 @@ has 'ngpus' => (
     coerce    => 1, 
     lazy      => 1, 
     default   => 1, 
+    trigger   => sub ($self, @) { 
+        # pass ngpus to Lammps/GPU package cmd
+        $self->lammps->gpu->ngpu((split /:/, $self->ngpus)[-1]) if $self->_has_lammps;  
+    } 
 ); 
 
 has 'mem' => ( 
@@ -42,7 +46,7 @@ has 'mem' => (
     traits    => ['Chained'],
     coerce    => 1, 
     lazy      => 1, 
-    default   => '96G'
+    default   => 0
 ); 
 
 1

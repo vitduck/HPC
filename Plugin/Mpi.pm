@@ -41,4 +41,10 @@ has 'mvapich2' => (
     coerce    => 1, 
 ); 
 
+sub mpirun ($self) { 
+    if    ( $self->_has_impi     ) { return $self->impi->cmd     } 
+    elsif ( $self->_has_openmpi  ) { return $self->openmpi->cmd  }  
+    elsif ( $self->_has_mvapich2 ) { return $self->mvapich2->cmd }  
+} 
+
 1

@@ -9,7 +9,8 @@ coerce Impi,
     from Str,      
         via { HPC::Mpi::Impi->new(module => $_) },
     from ArrayRef, 
-        via { HPC::Mpi::Impi->new(module => $_->[0], $_->@[1..$_->$#*]) };  
+        # via { HPC::Mpi::Impi->new(module => $_->[0], $_->@[1..$_->$#*]) };  
+        via { HPC::Mpi::Impi->new(module => $_->[0], $_->[1]->%*) };  
 
 class_type Openmpi,  
     { class => 'HPC::Mpi::Openmpi' }; 
@@ -17,7 +18,8 @@ coerce Openmpi,
     from Str,      
         via { HPC::Mpi::Openmpi->new(module => $_) },
     from ArrayRef, 
-        via { HPC::Mpi::Openmpi->new(module => $_->[0], $_->@[1..$_->$#*]) }; 
+        # via { HPC::Mpi::Openmpi->new(module => $_->[0], $_->@[1..$_->$#*]) }; 
+        via { HPC::Mpi::Openmpi->new(module => $_->[0], $_->[1]->%*) }; 
 
 class_type Mvapich2, 
     { class => 'HPC::Mpi::Mvapich2' }; 
@@ -25,6 +27,7 @@ coerce Mvapich2,
     from Str,      
         via { HPC::Mpi::Mvapich2->new(module => $_) },
     from ArrayRef, 
-        via { HPC::Mpi::Mvapich2->new(module => $_->[0], $_->@[1..$_->$#*]) }; 
+        # via { HPC::Mpi::Mvapich2->new(module => $_->[0], $_->@[1..$_->$#*]) }; 
+        via { HPC::Mpi::Mvapich2->new(module => $_->[0], $_->[1]->%*) };  
 
 1; 

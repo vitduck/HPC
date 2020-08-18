@@ -33,7 +33,7 @@ has '+pin' => (
     isa     => Pin, 
     coerce  => 1, 
     trigger => sub ($self, $pin, @) { 
-        if ($pin == 0) { 
+        if ($pin eq 'none') { 
             $self->set_env(I_MPI_PIN => 0); 
             $self->unset_env('I_MPI_PIN_PROCS_LIST');   
         } else { 

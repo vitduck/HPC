@@ -18,11 +18,6 @@ has 'lammps' => (
     trigger  => sub ($self, $app, @) { 
         $self->account('lammps'); 
         $self->_add_plugin('lammps'); 
-        
-        # pass ngpus to lammps gpu pkg command
-        if ( $self->lammps->_has_gpu and $self->ngpus =~ /gpu:(\d+)/ ) {  
-            $self->lammps->gpu->ngpu($1) 
-        }
     }
 ); 
 

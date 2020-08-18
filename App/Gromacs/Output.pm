@@ -20,7 +20,6 @@ has 'deffnm' => (
     traits    => ['Chained'], 
     predicate => '_has_deffnm',
     coerce    => 1, 
-    lazy      => 1, 
     default   => 'md'
 ); 
 

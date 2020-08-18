@@ -72,8 +72,16 @@ has '+omp' => (
         $self->_reset_resource; 
         $self->_reset_mpiprocs; 
 
+        # pass OMP_NUM_THREADS to MPI 
         $self->mvapich2->omp($self->omp) if $self->_has_mvapich2; 
         $self->openmpi->omp($self->omp)  if $self->_has_openmpi; 
+
+        # pass OMP_NUN_THREADS to Gromacs cmd
+        $self->gromacs->ntomp($self->omp) if $self->_has_gromacs; 
+
+        # pass OMP_NUM_THREADS to Lammps Intel/Omp package cmd 
+        $self->lammps->intel->omp($self->omp)    if $self->_has_lammps and $self->lammps->_has_intel; 
+        $self->lammps->omp->nthreads($self->omp) if $self->_has_lammps and $self->lammps->_has_omp; 
     }
 );
 
