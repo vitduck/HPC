@@ -14,26 +14,27 @@ has 'env' => (
     lazy     => 1, 
     default  => sub { {} }, 
     handles  => { 
-        get      => 'get',
-        set      => 'set', 
-        unset    => 'delete',
-        _has_env => 'count'
+        has_env   => 'count', 
+        list_env  => 'keys',
+        get_env   => 'get',
+        set_env   => 'set', 
+        unset_env => 'delete'
     } 
 ); 
 
 # chained delegation methods
-around [qw(set unset)] => sub ($method, $self, @args) { 
+around [qw(set_env unset_env)] => sub ($method, $self, @args) { 
     $self->$method(@args); 
 
     return $self 
 }; 
 
 sub write_env ($self) { 
-    if ($self->_has_env) { 
+    if ($self->has_env) { 
         $self->print("\n"); 
 
-        for my $env (sort keys $self->env->%*) { 
-            $self->printf("export %s\n", join('=', $env, $self->get($env)))
+        for my $env ( sort $self->list_env ) { 
+            $self->printf("export %s\n", join('=', $env, $self->get_env($env)))
         } 
     } 
 
