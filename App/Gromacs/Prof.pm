@@ -29,9 +29,10 @@ has 'resethway' => (
     isa       => Resethway, 
     traits    => ['Chained'],
     predicate => '_has_resethway', 
+    clearer   => '_unset_resethway',
     coerce    => 1,
     lazy      => 1, 
-    default   => 1, 
+    default   => 0, 
 ); 
 
 1 

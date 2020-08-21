@@ -21,7 +21,7 @@ has 'tunepme' => (
     traits    => ['Chained'], 
     predicate => '_has_tunepme',
     coerce    => 1,
-    default   => 0,
+    default   => 1,
 );
 
 has 'dlb' => (

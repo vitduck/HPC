@@ -1,9 +1,9 @@
 package HPC::Types::App::Gromacs;  
 
-use MooseX::Types::Moose qw/Str Int/; 
+use MooseX::Types::Moose qw/Undef Str Int/; 
 use MooseX::Types -declare => [ 
     qw( Verbose Tpr Deffnm Log Confout 
-        Nt Ntmpi Ntomp Npme
+        Nt Ntmpi Ntomp Npme Nb Pin
         Tunepme Dlb DDorder 
         Nsteps Resetstep Resethway
     ) 
@@ -29,7 +29,7 @@ subtype Verbose,
 
 coerce Verbose,    
     from Int, 
-    via { $_ ? '-v': '' }; 
+    via { $_ ? '-v': '-nov' }; 
 
 subtype Deffnm, 
     as Str, 
@@ -40,10 +40,10 @@ coerce Deffnm,
 
 subtype Confout,   
     as Str, 
-    where { /^\-noconfout|^$/ };  
+    where { /^\-noconfout/ };  
 coerce Confout,    
     from Int, 
-    via { $_ ? '' : '-noconfout' }; 
+    via { '-noconfout' }; 
 
 subtype Nt,        
     as Str, 
@@ -66,6 +66,13 @@ coerce Ntomp,
     from Int, 
     via { '-ntomp '.$_ }; 
 
+subtype Pin,      
+    as Str, 
+    where { /^\-pin/ };  
+coerce Pin,       
+    from Int, 
+    via { $_ ? '-pin on': '-pin off' }; 
+
 subtype Npme,      
     as Str, 
     where { /^\-npme/ };  
@@ -73,12 +80,19 @@ coerce Npme,
     from Int, 
     via { '-npme '.$_ }; 
 
+subtype Nb,      
+    as Str, 
+    where { /^\-nb/ };  
+coerce Nb,       
+    from Str, 
+    via { '-nb '.$_ }; 
+
 subtype Tunepme,   
     as Str, 
-    where { /^\-notunepme|^$/ }; 
+    where { /tunepme/ }; 
 coerce Tunepme,    
     from Int, 
-    via { $_ ? '' : '-notunepme' }; 
+    via { $_ ? '-tunepme' : '-notunepme' }; 
 
 subtype Dlb,       
     as Str,
@@ -109,10 +123,10 @@ coerce Resetstep,
     via { '-resetstep '.$_ }; 
 
 subtype Resethway, 
-    as Str, 
-    where { /^\-resethway|^$/ };  
+    as Str|Undef, 
+    where { $_ eq '-resethway' or ! defined  };  
 coerce Resethway,  
     from Int, 
-    via { $_ ? '-resethway' : '' }; 
+    via { $_ ? '-resethway' : undef  }; 
 
 1

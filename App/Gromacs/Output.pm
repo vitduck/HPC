@@ -34,7 +34,7 @@ has 'log' => (
 ); 
 
 has 'confout' => ( 
-    is        => 'rw', 
+    is        => 'ro', 
     isa       => Confout, 
     traits    => ['Chained'], 
     predicate => '_has_confout', 

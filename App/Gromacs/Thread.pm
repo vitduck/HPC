@@ -3,7 +3,7 @@ package HPC::App::Gromacs::Thread;
 use Moose::Role; 
 use MooseX::Attribute::Chained; 
 
-use HPC::Types::App::Gromacs qw(Nt Ntmpi Ntomp); 
+use HPC::Types::App::Gromacs qw(Nt Ntmpi Ntomp Pin); 
 
 has 'nt' => (
     is        => 'rw',
@@ -34,4 +34,13 @@ has 'ntomp' => (
     default   => 1,
 );
 
+has 'pin' => ( 
+    is        => 'rw',
+    isa       => Pin,
+    traits    => ['Chained'],
+    predicate => '_has_pin',
+    coerce    => 1,
+    default   => 1,
+); 
+    
 1 

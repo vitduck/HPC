@@ -15,6 +15,7 @@ with qw(
     HPC::App::Gromacs::Input
     HPC::App::Gromacs::Output
     HPC::App::Gromacs::Pme
+    HPC::App::Gromacs::Nb
     HPC::App::Gromacs::Thread
     HPC::App::Gromacs::Prof ); 
 
@@ -29,10 +30,10 @@ has 'mode' => (
 sub _opts { 
     return qw( 
         mode
-        tpr deffnm log nsteps resethway
-        dlb ddorder npme tunepme
-        confout resetstep  
-        nt ntmpi ntomp 
+        tpr deffnm log nsteps 
+        dlb ddorder npme nb tunepme
+        confout resetstep resethway 
+        pin nt ntmpi ntomp 
         verbose ) 
 }
 
