@@ -4,9 +4,6 @@ use Moose;
 use MooseX::Attribute::Chained; 
 use MooseX::StrictConstructor;
 use MooseX::XSAccessor; 
-
-use Text::Tabs; 
-
 use HPC::Types::App::Tensorflow 'Cnn'; 
 
 use namespace::autoclean; 
@@ -27,7 +24,6 @@ has '+bin' => (
 ); 
 
 sub cmd {
-    $tabstop = 4;
     my $self = shift;
     my @opts = ();
 
@@ -35,12 +31,10 @@ sub cmd {
     for ($self->_opts) {
         my $has = "_has_$_";
 
-        if ($self->$has) {
-            push @opts, "\t--".$_.'='. $self->$_
-        }
+        push @opts, '--'.$_.'='.$self->$_ if $self->$has; 
     }
 
-    return [$self->bin, expand(@opts)]
+    return { $self->bin, [@opts] } 
 }
 
 sub _opts { 

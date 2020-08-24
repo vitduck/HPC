@@ -8,7 +8,7 @@ has model => (
     isa       => Str,
     traits    => ['Chained'],
     predicate => '_has_model', 
-    default   => 'resnet50'
+    required  => 1, 
 ); 
 
 has data_format => (
@@ -16,16 +16,16 @@ has data_format => (
     isa       => Str,
     traits    => ['Chained'],
     predicate => '_has_data_format', 
+    lazy      => 1, 
     default   => 'NCHW',
 );   
 
 has batch_size => ( 
     is        => 'rw',
     isa       => Str,
-    lazy      => 1,
     traits    => ['Chained'],
     predicate => '_has_batch_size', 
-    default   => 64
+    required  => 1,
 ); 
 
 has optimizer => ( 
@@ -42,6 +42,7 @@ has tfprof_file => (
     lazy      => 1,
     traits    => ['Chained'],
     predicate => '_has_tfprof_file', 
+    lazy      => 1,
     default   => 'profile.dat'
 ); 
 

@@ -8,6 +8,7 @@ has num_inter_threads => (
     isa       => Int,
     traits    => ['Chained'],
     predicate => '_has_num_inter_threads', 
+    lazy      => 1, 
     default   => 2
 );   
 
@@ -16,6 +17,7 @@ has num_intra_threads => (
     isa       => Int,
     traits    => ['Chained'],
     predicate => '_has_num_intra_threads', 
+    lazy      => 1, 
     default   => 32
 );   
 

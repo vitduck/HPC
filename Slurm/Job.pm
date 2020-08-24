@@ -90,38 +90,44 @@ has '+walltime' => (
 # pass OMP_NUM_THREAD to mvapich2 env list
 has '+mvapich2' => ( 
     trigger => sub ($self, @) { 
-        my $omp_num_threads = (split /=/, $self->omp)[-1]; 
-
         $self->_add_plugin('mvapich2'); 
-        
-        # pass OMP_NUN_THREADS to MPI
-        $self->mvapich2->omp($omp_num_threads) if $self->_has_omp; 
+
+        if ($self->_has_omp ) { 
+            my $omp_num_threads = (split /=/, $self->omp)[-1]; 
+         
+            # pass OMP_NUN_THREADS to MPI
+            $self->mvapich2->omp($omp_num_threads) if $self->_has_omp; 
+        }
     } 
 ); 
 
 # pass number of thread to gromacs cmd
 has '+gromacs' => ( 
     trigger => sub ( $self, @ ) { 
-        my $omp_num_threads = (split /=/, $self->omp)[-1]; 
-
         $self->account('gromacs'); 
         $self->_add_plugin('gromacs'); 
 
-        # pass OMP_NUN_THREADS to Gromacs cmd
-        $self->gromacs->ntomp($omp_num_threads) if $self->_has_omp; 
+        if ($self->_has_omp ) { 
+            my $omp_num_threads = (split /=/, $self->omp)[-1]; 
+
+            # pass OMP_NUN_THREADS to Gromacs cmd
+            $self->gromacs->ntomp($omp_num_threads) if $self->_has_omp; 
+        }
     }
 );  
 
 # pass number of gpu to lammps/gpu package
 has '+lammps' => ( 
     trigger => sub ( $self, @ ) { 
-        my $omp_num_threads = (split /=/, $self->omp)[-1]; 
-
         $self->account('lammps');
         $self->_add_plugin('lammps');
 
-        # pass OMP_NUN_THREADS to Lammps cmd
-        $self->lammps->gpu->ngpu($omp_num_threads) if $self->lammps->_has_gpu
+        if ($self->_has_omp ) { 
+            my $omp_num_threads = (split /=/, $self->omp)[-1]; 
+
+            # pass OMP_NUN_THREADS to Lammps cmd
+            $self->lammps->gpu->ngpu($omp_num_threads) if $self->lammps->_has_gpu
+        }
     }
 );  
 
@@ -136,7 +142,7 @@ sub write_resource ($self) {
     $self->ntasks; 
     $self->printf("%s\n\n", $self->shell);
 
-    for (qw(name queue select mpiprocs omp mem ngpus stderr stdout walltime account)) {
+    for (qw(queue select mpiprocs omp mem ngpus name stderr stdout walltime account)) {
         my $has = "_has_$_";
         $self->printf("%s\n", $self->$_) if $self->$has;
     }

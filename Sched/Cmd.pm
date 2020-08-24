@@ -2,7 +2,6 @@ package HPC::Sched::Cmd;
 
 use Moose::Role; 
 use MooseX::Types::Moose 'ArrayRef'; 
-
 use List::Util 'max'; 
 use Text::Tabs; 
 

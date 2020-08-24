@@ -2,11 +2,10 @@ package HPC::Sched::Sys;
 
 use Moose::Role; 
 use MooseX::Types::Moose qw(Str HashRef); 
-
-use Cwd qw(abs_path);
 use File::Copy ();  
 use File::Path qw(make_path); 
 use File::Glob ':bsd_glob';  
+use Cwd qw(abs_path);
 
 use feature 'signatures';  
 no warnings 'experimental::signatures'; 

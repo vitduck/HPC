@@ -2,9 +2,7 @@ package HPC::Sched::Module;
 
 use Moose::Role; 
 use MooseX::Types::Moose qw(ArrayRef Str);
-
 use Array::Diff; 
-
 use HPC::Types::Sched::Module 'Module'; 
 
 use feature 'signatures';  

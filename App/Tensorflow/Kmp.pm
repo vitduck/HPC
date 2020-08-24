@@ -8,7 +8,8 @@ has mkl => (
     isa       => Str,
     traits    => ['Chained'],
     predicate => '_has_mkl',
-    default   => 'true'
+    lazy      => 1, 
+    default   => 'true', 
 ); 
 
 has kmp_affinity => (
@@ -16,6 +17,7 @@ has kmp_affinity => (
     isa       => Str,
     traits    => ['Chained'],
     predicate => '_has_kmp_affinity',
+    lazy      => 1 , 
     default   => 'granularity=fine,compact'
 );
 
@@ -24,6 +26,7 @@ has kmp_blocktime => (
     isa       => Int,
     traits    => ['Chained'],
     predicate => '_has_kmp_blocktime',
+    lazy      => 1 , 
     default   => 0
 );
 
@@ -32,6 +35,7 @@ has kmp_settings => (
     isa       => Int,
     traits    => ['Chained'],
     predicate => '_has_kmp_settings', 
+    lazy      => 1 , 
     default   => 0
 );   
 
