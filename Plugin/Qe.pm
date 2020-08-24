@@ -16,7 +16,7 @@ has 'qe' => (
     predicate => '_has_qe', 
     coerce    => 1, 
     trigger   => sub ($self, $app, @) { 
-        $self->account('qe'); 
+        # $self->account('qe'); 
         $self->_add_plugin('qe')
     }
 ); 

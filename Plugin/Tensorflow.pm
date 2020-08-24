@@ -16,7 +16,7 @@ has 'tensorflow' => (
     predicate => '_has_tensorflow',
     coerce    => 1,  
     trigger  => sub ($self, $app, @) { 
-        $self->account('tf'); 
+        # $self->account('tf'); 
         $self->_add_plugin('tf')
     }
 ); 

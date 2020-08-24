@@ -16,7 +16,7 @@ has 'lammps' => (
     predicate => '_has_lammps',
     coerce    => 1, 
     trigger  => sub ($self, $app, @) { 
-        $self->account('lammps'); 
+        # $self->account('lammps'); 
         $self->_add_plugin('lammps'); 
     }
 ); 

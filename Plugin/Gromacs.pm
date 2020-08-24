@@ -16,7 +16,7 @@ has 'gromacs' => (
     predicate => '_has_gromacs',
     coerce    => 1, 
     trigger  => sub ($self, $app, @) { 
-        $self->account('gromacs'); 
+        # $self->account('gromacs'); 
         $self->_add_plugin('gromacs')
     }
 ); 
