@@ -2,9 +2,7 @@ package HPC::Mpi::Base;
 
 use Moose::Role;  
 use MooseX::Types::Moose qw(Str Int ArrayRef HashRef); 
-
 use HPC::Types::Mpi::Base qw(Nprocs Hostfile); 
-
 use namespace::autoclean; 
 use feature 'signatures';
 no warnings 'experimental::signatures';
@@ -63,7 +61,7 @@ has 'debug' => (
     isa      => Int,
     traits   => ['Chained'],
     lazy     => 1, 
-    default  => 0, 
+    default  => 4, 
 ); 
 
 has 'eagersize' => (
@@ -77,16 +75,26 @@ has 'env' => (
     isa      => HashRef,
     traits   => [qw(Hash Chained)],
     init_arg => undef,
-    clearer  => 'reset_env', 
-    lazy     => 1,
     default  => sub {{}}, 
     handles  => { 
            has_env => 'count', 
           list_env => 'keys', 
            get_env => 'get', 
            set_env => 'set', 
-         unset_env => 'delete'
-    }, 
+         unset_env => 'delete' }, 
+    trigger  => sub ($self, $env, @) {  
+        $self->has_env 
+        ? $self->env_opt($env) 
+        : $self->_unset_env_opt } 
+); 
+
+has env_opt => ( 
+    is        => 'rw', 
+    init_arg  => undef,
+    predicate => '_has_env_opt',
+    clearer   => '_unset_env_opt',
+    lazy      => 1, 
+    default   => sub {{}},  
 ); 
 
 1 

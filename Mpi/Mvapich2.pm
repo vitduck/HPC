@@ -4,12 +4,10 @@ use Moose;
 use MooseX::XSAccessor; 
 use MooseX::Attribute::Chained; 
 use MooseX::Types::Moose qw(Str Int); 
-
-use HPC::Types::Mpi::Mvapich2 'Pin'; 
-
+use HPC::Types::Mpi::Mvapich2 'Env'; 
 use namespace::autoclean; 
-use feature 'signatures';
-no warnings 'experimental::signatures';
+use feature qw(signatures switch);
+no warnings qw(experimental::signatures experimental::smartmatch); 
 
 with 'HPC::Mpi::Base'; 
 
@@ -28,24 +26,23 @@ has '+nprocs' => (
 # assume no hyper-threading
 has '+omp' => ( 
     trigger => sub ($self, $omp, @) { 
-        # enable affinity
-        if ( $omp ) { 
-            $self->set_env( 
-                MV2_THREADS_PER_PROCESS => $omp, 
-                OMP_NUM_THREADS         => $omp ); 
+        $self->set_env( 
+            MV2_THREADS_PER_PROCESS => $omp,
+            OMP_NUM_THREADS         => $omp 
+        ); 
 
-            # enable 'bunch' by default
-            $self->pin
-        }
+        # use 'bunch' by default
+        $self->pin
     }
 ); 
 
 has '+debug' => ( 
     trigger  => sub ($self, $debug, @) {
-        if    ( $debug == 0 ) { $self->unset_env( 'MV2_SHOW_ENV_INFO', 'MV2_SHOW_CPU_BINDING' ) } 
-        elsif ( $debug == 4 ) { $self->set_env( MV2_SHOW_CPU_BINDING  => 1) } 
-        elsif ( $debug == 5 ) { $self->set_env( MV2_SHOW_CPU_BINDING  => 1,
-                                                MV2_SHOW_ENV_INFO     => 2 ) } 
+        for ($debug) {  
+            when (4) { $self->set_env(MV2_SHOW_ENV_INFO => 1,MV2_SHOW_CPU_BINDING => 1) } 
+            when (5) { $self->set_env(MV2_SHOW_ENV_INFO => 2,MV2_SHOW_CPU_BINDING => 1) } 
+            when (0) { $self->unset_env('MV2_SHOW_ENV_INFO', 'MV2_SHOW_CPU_BINDING')    } 
+        }
     } 
 ); 
 
@@ -54,9 +51,13 @@ has '+pin' => (
     lazy    => 1,
     default => 'bunch',
     trigger => sub ($self, $pin, @) { 
-        if ( $pin eq 'none' ) { $self->set_env( MV2_ENABLE_AFFINITY    => 0 ) }
-        else                  { $self->set_env( MV2_ENABLE_AFFINITY    => 1, 
-                                                MV2_CPU_BINDING_POLICY => $pin) }
+        for ($pin) { 
+            when ('bunch'  ) { $self->set_env(MV2_ENABLE_AFFINITY => 1, MV2_CPU_BINDING_POLICY => 'bunch'  ) } 
+            when ('scatter') { $self->set_env(MV2_ENABLE_AFFINITY => 1, MV2_CPU_BINDING_POLICY => 'scatter') } 
+            when ('none'   ) { $self->set_env(MV2_ENABLE_AFFINITY => 0); 
+                               $self->unset_env('MV2_CPU_BINDING_POLICY'); 
+                               $self->_unset_pin }
+        }
     } 
 ); 
 
@@ -66,42 +67,14 @@ has '+eagersize' => (
     }
 ); 
 
-has 'rdma' => ( 
-    is       => 'rw',
-    isa      => Int, 
-    init_arg => undef,
-    traits   => [ 'Chained' ], 
-    lazy     => 1, 
-    default  => 0,
-    trigger  => sub ($self,@) { 
-        $self->set_env(MV2_USE_GPUDIRECT_RDMA => $self->rdma)
-    } 
-); 
-
-has 'gdrcopy' => ( 
-    is       => 'rw',
-    isa      => Int, 
-    init_arg => undef,
-    traits   => [ 'Chained' ],
-    lazy     => 1, 
-    default  => 0,
-    trigger  => sub ($self,@) { 
-        $self->set_env(MV2_USE_GDRCOPY => $self->gdrcopy)
-    } 
+has '+env_opt' => ( 
+    isa       => Env, 
+    coerce    => 1,
 ); 
 
 sub _opts { 
-    return qw(nprocs hostfile)
+    return qw(nprocs hostfile env_opt)
 }; 
-
-around 'cmd' => sub ($cmd, $self) { 
-    my ($bin, $opt) = $self->$cmd->%*;  
-
-    push $opt->@*,  
-        map { $_.'='.$self->get_env($_) } sort $self->list_env if $self->has_env; 
-    
-    return { $bin => $opt }
-};  
 
 __PACKAGE__->meta->make_immutable;
 

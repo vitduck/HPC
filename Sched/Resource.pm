@@ -3,11 +3,10 @@ package HPC::Sched::Resource;
 use Moose::Role; 
 use MooseX::Aliases;  
 use MooseX::Types::Moose qw(Str Int); 
-
 use feature 'signatures';  
 no warnings 'experimental::signatures'; 
 
-requires 'write_resource'; 
+requires '_set_omp'; 
 
 has 'shell' => ( 
     is        => 'rw', 
@@ -88,7 +87,11 @@ has 'omp' => (
     traits    => ['Chained'],
     predicate => '_has_omp',
     lazy      => 1,
-    default   => 0
+    default   => 1, 
+    trigger   => sub ($self, @) { 
+        $self->_set_omp
+    }
 ); 
+
 
 1

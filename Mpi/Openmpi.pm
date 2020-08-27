@@ -4,32 +4,27 @@ use Moose;
 use MooseX::XSAccessor; 
 use MooseX::Attribute::Chained; 
 use MooseX::Types::Moose 'HashRef'; 
-
-use HPC::Types::Mpi::Openmpi qw(Report Map Bind); 
-
+use HPC::Types::Mpi::Openmpi qw(Report Map Bind Env Mca); 
 use namespace::autoclean; 
-use feature 'signatures';
-no warnings 'experimental::signatures';
+use feature qw(signatures switch);
+no warnings qw(experimental::signatures experimental::smartmatch); 
 
 with 'HPC::Mpi::Base'; 
 
 has '+omp' => ( 
-    trigger => sub ($self, $omp, @) { 
-        # enable 'bunch' by default
-        if ( $omp ) { 
-            $self->bind; 
-            $self->map
-        }
+    trigger => sub ($self, @) { 
+        $self->bind; 
+        $self->map
     } 
 ); 
 
 has '+debug' => ( 
     trigger  => sub ($self, $debug, @) {
-
-        if    ( $debug == 0 ) { $self->_reset_report && $self->unset_mca('mpi_show_mca_params')  }  
-        elsif ( $debug == 4 ) { $self->report(1)                                                 } 
-        elsif ( $debug == 5 ) { $self->debug(4) && $self->set_mca(mpi_show_mca_params => 'all')  }
-
+        for ($debug) { 
+            when (4) { $self->report(1)                                               } 
+            when (5) { $self->report(1); $self->set_mca(mpi_show_mca_params => 'all') }
+            when (0) { $self->_unset_report; $self->unset_mca('mpi_show_mca_params')  }  
+        }
     }
 );
 
@@ -43,16 +38,17 @@ has '+eagersize' => (
 ); 
 
 has '+pin' => ( 
+    lazy    => 1, 
+    default => 'none',
     trigger  => sub ($self, $pin, @) { 
-        $self->_reset_bind; 
-        $self->_reset_map; 
+        $self->_unset_bind; 
+        $self->_unset_map; 
 
         for ($pin) { 
-            if    ($pin eq 'bunch'  ) { $self->map('core')->bind('core') } 
-            elsif ($pin eq 'compact') { $self->map('numa')->bind('core') } 
-            elsif ($pin eq 'scatter') { $self->bind('core')              } 
-            elsif ($pin eq 'none'   ) { $self->bind('none')              } 
-            elsif ($pin == 0        ) { $self->bind('none')              }
+            when ('bunch'  ) { $self->map('core')->bind('core') } 
+            when ('compact') { $self->map('numa')->bind('core') } 
+            when ('scatter') { $self->bind('core')              } 
+            when ('none'   ) { $self->bind('none')              } 
         } 
     } 
 ); 
@@ -71,12 +67,16 @@ has '+map' => (
     default => 'core'
 ); 
 
+has '+env_opt' => ( 
+    isa       => Env, 
+    coerce    => 1,
+); 
+
 has 'mca' => (
     is       => 'rw',
     isa      => HashRef,
     traits   => [qw(Chained Hash)],
     init_arg => undef,
-    clearer  => 'reset_mca',
     lazy     => 1, 
     default  => sub {{}},
     handles  => { 
@@ -86,7 +86,23 @@ has 'mca' => (
           set_mca => 'set', 
         unset_mca => 'delete' 
     }, 
+    trigger  => sub ($self, $mca, @) { 
+        $self->has_mca 
+        ? $self->mca_opt($mca)
+        : $self->_unset_mca_opt
+    } 
 );
+
+has mca_opt => ( 
+    is        => 'rw', 
+    isa       => Mca, 
+    init_arg  => undef,
+    predicate => '_has_mca_opt',
+    clearer   => '_unset_mca_opt',
+    coerce    => 1,
+    lazy      => 1, 
+    default   => sub {{}},  
+); 
 
 has 'report' => ( 
     is        => 'rw', 
@@ -94,24 +110,15 @@ has 'report' => (
     init_arg  => undef, 
     traits    => ['Chained'],
     predicate => '_has_report',
-    clearer   => '_reset_report',
+    clearer   => '_unset_report',
     coerce    => 1, 
     lazy      => 1, 
     default   => 1 
 ); 
 
 sub _opts {
-    return qw(report map bind)  
+    return qw(map bind report mca_opt env_opt)  
 }; 
-
-around 'cmd' => sub ($cmd, $self) { 
-    my ($bin, $opt) = $self->$cmd->%*;  
-    
-    push $opt->@*, map { '-mca '.$_.'='.$self->get_mca($_) } sort $self->list_mca if $self->has_mca;
-    push $opt->@*, map {   '-x '.$_.'='.$self->get_env($_) } sort $self->list_env if $self->has_env;
-
-    return { $bin => $opt }
-};
 
 __PACKAGE__->meta->make_immutable;
 

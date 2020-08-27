@@ -1,8 +1,7 @@
 package HPC::Sched::Env;
 
 use Moose::Role;
-use MooseX::Types::Moose 'HashRef';
-
+use MooseX::Types::Moose qw(HashRef ArrayRef); 
 use feature 'signatures';
 no warnings 'experimental::signatures';
 
@@ -19,6 +18,23 @@ has 'env' => (
         get_env   => 'get',
         set_env   => 'set', 
         unset_env => 'delete'
+    } 
+); 
+
+has 'ld_library_path' => ( 
+    is        => 'rw',
+    isa       => ArrayRef, 
+    traits    => [qw(Array Chained)], 
+    init_arg  => undef, 
+    predicate => '_has_ld_library_path', 
+    clearer   => '_unset_ld_library_path', 
+    lazy      => 1, 
+    default   => sub {['$LD_LIRARY_PATH']}, 
+    handles   => {
+        append_ld_library_path => 'unshift', 
+          list_ld_library_path => 'elements' }, 
+    trigger   => sub ($self, $ld, @) {
+        $self->set_env(LD_LIBRARY_PATH => join(':', $ld->@*))
     } 
 ); 
 

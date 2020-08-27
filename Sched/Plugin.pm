@@ -2,7 +2,6 @@ package HPC::Sched::Plugin;
 
 use Moose::Role; 
 use MooseX::Types::Moose 'ArrayRef'; 
-
 use feature 'signatures';  
 no warnings 'experimental::signatures'; 
 

@@ -2,7 +2,6 @@ package HPC::Sched::Job;
 
 use Moose::Role; 
 use MooseX::Types::Moose 'Str'; 
-
 use namespace::autoclean;
 use feature 'signatures';
 no warnings 'experimental::signatures';
@@ -11,7 +10,6 @@ with qw(
     HPC::Debug::Dump 
     HPC::Io::Write 
     HPC::Sched::Env 
-    HPC::Sched::Path 
     HPC::Sched::Module 
     HPC::Sched::Resource 
     HPC::Sched::Cmd 
@@ -51,5 +49,18 @@ sub submit ( $self ) {
     
     return $self
 } 
+
+sub _set_omp ($self,@) {
+    # pass OMP_NUM_THREADS to MPI
+    if ( $self->_has_mvapich2 ) { $self->mvapich2->omp($self->omp) }
+    if ( $self->_has_openmpi  ) { $self->openmpi->omp($self->omp)  }
+
+    # pass OMP_NUM_THREADS to Lammps Intel/Omp package cmd
+    if ( $self->_has_lammps and $self->lammps->_has_intel ) { $self->lammps->intel->omp($self->omp)    }
+    if ( $self->_has_lammps and $self->lammps->_has_omp   ) { $self->lammps->omp->nthreads($self->omp) }
+
+    # pass OMP_NUN_THREADS to Gromacs cmd
+    if ( $self->_has_gromacs ) { $self->gromacs->ntomp($self->omp) }
+}
 
 1
