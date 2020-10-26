@@ -1,7 +1,7 @@
 package HPC::App::Vasp::Incar; 
 
 use Moose::Role; 
-use MooseX::Types::Moose  qw(Int HashRef); 
+use MooseX::Types::Moose  qw(Int Str HashRef); 
 
 use List::Util 'max'; 
 use String::Util 'trim'; 
@@ -62,7 +62,27 @@ has 'nsim' => (
     lazy      => 1,
     default   => 4, 
     trigger   => sub ($self, $nsim, @) { $self->set(NSIM => $nsim) }
-);
+); 
+
+has 'lcharg' => ( 
+    is        => 'rw',
+    isa       => Str,
+    traits    => ['Chained'],
+    predicate => '_has_lcharg',
+    lazy      => 1,
+    default   => '.FALSE.', 
+    trigger   => sub ($self, $bool, @) { $self->set(LCHARG => $bool) }
+); 
+
+has 'lwave' => ( 
+    is        => 'rw',
+    isa       => Str,
+    traits    => ['Chained'],
+    predicate =>  '_has_lwave',
+    lazy      => 1,
+    default   => '.FALSE.', 
+    trigger   => sub ($self, $bool, @) { $self->set(LWAVE => $bool) }
+); 
 
 sub _parse_incar ($self) { 
     my $num   = 0; 
@@ -81,7 +101,7 @@ sub _parse_incar ($self) {
 
 sub _write_incar ($self) { 
     my %index  = map { $_ => 0 } sort keys $self->incar->%*; 
-    my @params = grep{ $self->has($_) } qw(NSIM KPAR NPAR NCORE); 
+    my @params = grep{ $self->has($_) } qw(NSIM KPAR NPAR NCORE LWAVE LCHARG); 
 
     # sort with preferential order for @params
     @index{@params} = map 1, @params; 

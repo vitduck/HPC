@@ -1,7 +1,7 @@
 package HPC::App::Tensorflow::Threads; 
 
 use Moose::Role;  
-use MooseX::Types::Moose qw(Int); 
+use MooseX::Types::Moose 'Int'; 
 
 has num_inter_threads => (
     is        => 'rw',
@@ -16,7 +16,7 @@ has num_intra_threads => (
     is        => 'rw',
     isa       => Int,
     traits    => ['Chained'],
-    predicate => '_has_num_intra_threads', 
+    predicate => '_has_num_intra_threads',
     lazy      => 1, 
     default   => 32
 );   

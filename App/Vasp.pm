@@ -7,38 +7,36 @@ use MooseX::XSAccessor;
 use MooseX::Attribute::Chained; 
 use MooseX::StrictConstructor; 
 
+use experimental 'signatures'; 
 use namespace::autoclean;
-use feature 'signatures'; 
-no warnings 'experimental::signatures'; 
 
 with qw(
     HPC::Debug::Dump
     HPC::Io::Read
     HPC::Io::Write
     HPC::Plugin::Cmd
-    HPC::App::Vasp::Incar );
+    HPC::App::Vasp::Incar);
 
 has '+io_read' => (
     lazy    => 1, 
     default => sub ($self) { 
-        $self->_has_template ? join('/', $self->template, 'INCAR') : 'INCAR' 
+        $self->_has_input_dir ? join('/', $self->input_dir, 'INCAR') : 'INCAR' 
     } 
 ); 
 
 has '+io_write' => (
     lazy    => 1, 
     default   => sub ($self) { 
-        $self->_has_template ? join('/', $self->template, 'INCAR') : 'INCAR' 
+        $self->_has_input_dir ? join('/', $self->input_dir, 'INCAR') : 'INCAR' 
     } 
 
 ); 
 
-has 'template' => ( 
+has 'input_dir' => ( 
     is        => 'rw', 
     isa       => Str, 
     traits    => ['Chained'], 
-    predicate => '_has_template', 
-    lazy      => 1, 
+    predicate => '_has_input_dir', 
     default   => './template'
 ); 
 

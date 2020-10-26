@@ -6,9 +6,8 @@ use MooseX::StrictConstructor;
 use MooseX::XSAccessor; 
 use HPC::Types::App::Tensorflow 'Cnn'; 
 
+use experimental 'signatures'; 
 use namespace::autoclean; 
-use feature 'signatures'; 
-no warnings 'experimental::signatures'; 
 
 with qw(
     HPC::Debug::Dump
@@ -16,7 +15,7 @@ with qw(
     HPC::App::Tensorflow::Model
     HPC::App::Tensorflow::Device
     HPC::App::Tensorflow::Kmp
-    HPC::App::Tensorflow::Threads ); 
+    HPC::App::Tensorflow::Threads); 
 
 has '+bin' => ( 
     isa    => Cnn, 
@@ -39,11 +38,11 @@ sub cmd {
 
 sub _opts { 
     return qw(
-        model data_format batch_size optimizer 
+        model  batch_size optimizer 
         device horovod_device variable_update local_parameter_device sync_on_finish
         mkl kmp_affinity kmp_blocktime kmp_settings 
         num_inter_threads num_intra_threads
-        tfprof_file ); 
+        data_format data_name data_dir train_dir tfprof_file); 
 }
 
 __PACKAGE__->meta->make_immutable;

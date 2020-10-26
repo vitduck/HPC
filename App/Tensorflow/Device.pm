@@ -4,9 +4,7 @@ use Moose::Role;
 use MooseX::Types::Moose qw(Str Int); 
 use Moose::Util::TypeConstraints; 
 
-use feature qw(signatures);
-no warnings qw(experimental::signatures);
-
+use experimental 'signatures';
 
 has device => (
     is        => 'rw',
@@ -17,10 +15,7 @@ has device => (
     trigger   => sub ($self, @) { 
         $self->horovod_device($self->device); 
         $self->local_parameter_device($self->device); 
-
-        $self->device eq 'cpu' 
-        ? $self->data_format('NHWC') 
-        : $self->data_format('NCHW')
+        $self->mkl('true'); 
     } 
 );
 

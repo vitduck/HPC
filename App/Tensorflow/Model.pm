@@ -16,16 +16,38 @@ has data_format => (
     isa       => Str,
     traits    => ['Chained'],
     predicate => '_has_data_format', 
-    lazy      => 1, 
     default   => 'NCHW',
-);   
+); 
 
-has batch_size => ( 
+has 'data_name' => ( 
     is        => 'rw',
     isa       => Str,
     traits    => ['Chained'],
+    predicate => '_has_data_name', 
+    lazy      => 1, 
+    default   => 'imagenet',
+); 
+
+has 'data_dir' => ( 
+    is        => 'rw',
+    isa       => Str,
+    traits    => ['Chained'],
+    predicate => '_has_data_dir', 
+); 
+
+has 'train_dir' => ( 
+    is        => 'rw',
+    isa       => Str,
+    traits    => ['Chained'],
+    predicate => '_has_train_dir', 
+); 
+
+has batch_size => ( 
+    is        => 'rw',
+    isa       => Int,
+    traits    => ['Chained'],
     predicate => '_has_batch_size', 
-    required  => 1,
+    default   => 64
 ); 
 
 has optimizer => ( 
