@@ -3,8 +3,9 @@ package HPC::Sched::Resource;
 use Moose::Role; 
 use MooseX::Aliases;  
 use MooseX::Types::Moose qw(Str Int); 
-use feature 'signatures';  
-no warnings 'experimental::signatures'; 
+
+use namespace::autoclean; 
+use experimental 'signatures';  
 
 requires '_set_omp'; 
 
@@ -24,12 +25,12 @@ has 'name' => (
     default   => 'test' 
 ); 
 
-has 'account' => ( 
+has 'app' => ( 
     alias     => 'comment',
     is        => 'rw', 
+    required  => 1,
     traits    => ['Chained'],
-    predicate => '_has_account',
-    default   => 'etc',
+    predicate => '_has_app',
 ); 
 
 has 'queue' => ( 
@@ -38,7 +39,6 @@ has 'queue' => (
     traits    => ['Chained'],
     predicate => '_has_queue',
 ); 
-
 
 has 'stderr' => ( 
     alias     => 'error',
@@ -92,6 +92,5 @@ has 'omp' => (
         $self->_set_omp
     }
 ); 
-
 
 1

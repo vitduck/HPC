@@ -8,8 +8,8 @@ use HPC::Mpi::Openmpi;
 use HPC::Mpi::Mvapich2;
 use HPC::Types::Sched::Mpi qw(Impi Openmpi Mvapich2); 
 
-use feature 'signatures';  
-no warnings 'experimental::signatures'; 
+use experimental 'signatures';  
+use namespace::autoclean; 
 
 has 'impi' => (
     is        => 'rw', 

@@ -3,9 +3,11 @@ package HPC::Pbs::Resource;
 use Moose::Role;
 use MooseX::Types::Moose qw(Str Int ArrayRef);
 use Set::CrossProduct; 
-use HPC::Types::Sched::Pbs qw(Export Project Resource); 
-use feature 'signatures';
-no warnings 'experimental::signatures';
+
+use HPC::Types::Sched::Pbs qw(Export Project Burst_Buffer Resource); 
+
+use experimental 'signatures';
+use namespace::autoclean; 
 
 has 'export' => ( 
     is        => 'ro', 
@@ -24,6 +26,15 @@ has 'project' => (
     coerce    => 1, 
     lazy      => 1,
     default   => 'burst_buffer' 
+); 
+
+has 'burst_buffer' => ( 
+    is        => 'ro', 
+    isa       => Burst_Buffer,
+    predicate => '_has_burst_buffer',
+    coerce    => 1, 
+    lazy      => 1,
+    default   => 0 
 ); 
 
 has 'ncpus' => (
@@ -64,16 +75,14 @@ has 'resource' => (
         push @resources, join('=', 'mpiprocs'  ,  $self->mpiprocs                   ); 
         push @resources, join('=', 'ompthreads', ($self->_has_omp ? $self->omp : 1) ); 
 
-         
         if ( $self->_has_host ) { 
             return [ 
-                map join(':', $_->@*), 
+                map join(':', $_->@*),
                     Set::CrossProduct->new([ 
-                                        [ join(':', @resources)           ], 
-                                        [ map "host=$_", $self->get_hosts ] ])
-                                     ->combinations
-                                     ->@* 
-            ] 
+                        [join(':', @resources)], 
+                        [map "host=$_", $self->get_hosts]]
+                    )->combinations->@* 
+                ] 
         } else {  
             return join(':', @resources) 
         }
@@ -86,10 +95,12 @@ sub write_resource ($self) {
     # build resource string
     $self->resource; 
 
-    for (qw(export name account project queue stderr stdout resource walltime)) {
+    for (qw(export name app project queue stderr stdout resource walltime burst_buffer)) {
         my $has = "_has_$_";
         if ( $self->$has ) { $self->printf("%s\n", $self->$_) } 
     }
+
+    $self->printf("\n"); 
 
     return $self
 }

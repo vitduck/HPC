@@ -5,8 +5,7 @@ use Moose::Role;
 use HPC::Types::Sched::Plugin 'Qe'; 
 use HPC::App::Qe; 
 
-use feature 'signatures'; 
-no warnings 'experimental::signatures'; 
+use experimental 'signatures'; 
 
 has 'qe' => (
     is        => 'rw', 
@@ -16,7 +15,6 @@ has 'qe' => (
     predicate => '_has_qe', 
     coerce    => 1, 
     trigger   => sub ($self, $app, @) { 
-        # $self->account('qe'); 
         $self->_add_plugin('qe')
     }
 ); 

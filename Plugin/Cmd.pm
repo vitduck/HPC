@@ -3,8 +3,7 @@ package HPC::Plugin::Cmd;
 use Moose::Role; 
 use MooseX::Types::Moose qw/Str/; 
 
-use feature 'signatures';  
-no warnings 'experimental::signatures'; 
+use experimental 'signatures';  
 
 requires qw(_opts); 
 

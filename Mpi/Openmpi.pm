@@ -11,12 +11,12 @@ no warnings qw(experimental::signatures experimental::smartmatch);
 
 with 'HPC::Mpi::Base'; 
 
-has '+omp' => ( 
-    trigger => sub ($self, @) { 
-        $self->bind; 
-        $self->map
-    } 
-); 
+# has '+omp' => ( 
+    # trigger => sub ($self, @) { 
+        # $self->bind; 
+        # $self->map
+    # } 
+# ); 
 
 has '+debug' => ( 
     trigger  => sub ($self, $debug, @) {

@@ -5,16 +5,14 @@ use MooseX::Attribute::Chained;
 use MooseX::StrictConstructor; 
 use MooseX::XSAccessor; 
 use MooseX::Types::Moose qw(Str Int);
-use HPC::Types::Sched::Pbs qw(Account Name Queue Stdout Stderr Walltime); 
-use feature 'signatures';
-use namespace::autoclean;
+use HPC::Types::Sched::Pbs qw(App Name Queue Stdout Stderr Walltime); 
 
-no warnings 'experimental::signatures';
+use experimental 'signatures';
+use namespace::autoclean;
 
 with qw(
     HPC::Sched::Job 
-    HPC::Pbs::Resource 
-); 
+    HPC::Pbs::Resource); 
 
 has '+submit_cmd' => (
     default => 'qsub'
@@ -25,8 +23,8 @@ has '+name' => (
     coerce  => 1, 
 ); 
 
-has '+account' => ( 
-    isa     => Account, 
+has '+app' => ( 
+    isa     => App, 
     coerce  => 1, 
 ); 
 

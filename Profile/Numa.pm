@@ -8,11 +8,12 @@ use MooseX::XSAccessor;
 
 use HPC::Types::Profile::Numa qw(Membind Preferred);  
 
+use experimental 'signatures'; 
 use namespace::autoclean; 
 
 with qw(
     HPC::Debug::Dump  
-    HPC::Plugin::Cmd ); 
+    HPC::Plugin::Cmd); 
 
 has '+bin' => ( 
     default => 'numactl' 

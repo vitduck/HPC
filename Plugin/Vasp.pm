@@ -5,8 +5,8 @@ use Moose::Role;
 use HPC::Types::Sched::Plugin 'Vasp'; 
 use HPC::App::Vasp; 
 
-use feature 'signatures'; 
-no warnings 'experimental::signatures'; 
+use experimental 'signatures'; 
+use namespace::autoclean; 
 
 has 'vasp' => (
     is        => 'rw', 
@@ -16,7 +16,6 @@ has 'vasp' => (
     predicate => '_has_vasp', 
     coerce    => 1, 
     trigger   => sub ($self, $app, @) { 
-        # $self->account('vasp'); 
         $self->_add_plugin('vasp')
     }
 ); 

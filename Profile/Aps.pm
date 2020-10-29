@@ -8,6 +8,7 @@ use MooseX::XSAccessor;
 
 use HPC::Types::Profile::Aps qw(Type Level Report); 
 
+use experimental 'signatures'; 
 use namespace::autoclean; 
 
 with qw(

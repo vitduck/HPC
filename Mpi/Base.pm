@@ -3,9 +3,9 @@ package HPC::Mpi::Base;
 use Moose::Role;  
 use MooseX::Types::Moose qw(Str Int ArrayRef HashRef); 
 use HPC::Types::Mpi::Base qw(Nprocs Hostfile); 
+
 use namespace::autoclean; 
-use feature 'signatures';
-no warnings 'experimental::signatures';
+use experimental 'signatures';
 
 with qw(
     HPC::Debug::Dump 
@@ -19,12 +19,6 @@ has 'bin' => (
     traits   => ['Chained'],
     default  => 'mpirun'
 ); 
-
-has 'module' => (
-    is     => 'ro', 
-    isa    => Str,
-    traits => ['Chained'] 
-);
 
 has 'omp' => ( 
     is        => 'rw', 

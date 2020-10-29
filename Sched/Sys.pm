@@ -2,18 +2,41 @@ package HPC::Sched::Sys;
 
 use Moose::Role; 
 use MooseX::Types::Moose qw(Str HashRef); 
+
+use Cwd 'abs_path';
 use File::Copy ();  
-use File::Path qw(make_path); 
+use File::Path 'make_path'; 
 use File::Glob ':bsd_glob';  
-use Cwd qw(abs_path);
-use feature 'signatures';  
-no warnings 'experimental::signatures'; 
+
+use namespace::autoclean; 
+use experimental 'signatures'; 
 
 has 'root' => ( 
     is       => 'ro', 
     isa      => Str, 
     init_arg => undef,
     default  => sub ( $self ) { abs_path('.') }
+); 
+
+has scratch => ( 
+    is       => 'rw',    
+    isa      => Str, 
+    init_arg => undef,
+    lazy     => 1, 
+    default  => sub { shift->root },  
+    trigger  => sub ( $self, $scratch, @ ) { 
+        $self->scratch_ime( $scratch =~ s/scratch/scratch_ime/r )
+    } 
+); 
+
+has scratch_ime => (
+    is       => 'rw',    
+    isa      => Str, 
+    init_arg => undef,
+    lazy     => 1, 
+    default  => sub ( $self ) { 
+        $self->scratch =~ s/scratch/scratch_ime/r; 
+    }
 ); 
 
 sub mkdir ($self, @dirs) { 
@@ -24,6 +47,8 @@ sub mkdir ($self, @dirs) {
 
 sub chdir ($self, $dir) { 
     chdir($dir); 
+
+    $self->scratch( abs_path('.') ); 
 
     return $self
 } 

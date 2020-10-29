@@ -2,8 +2,9 @@ package HPC::Sched::Plugin;
 
 use Moose::Role; 
 use MooseX::Types::Moose 'ArrayRef'; 
-use feature 'signatures';  
-no warnings 'experimental::signatures'; 
+
+use namespace::autoclean;
+use experimental 'signatures';  
 
 with qw(
     HPC::Plugin::Mpi
@@ -11,7 +12,8 @@ with qw(
     HPC::Plugin::Numa
     HPC::Plugin::Qe HPC::Plugin::Vasp
     HPC::Plugin::Lammps HPC::Plugin::Gromacs
-    HPC::Plugin::Tensorflow ); 
+    HPC::Plugin::Tensorflow 
+); 
 
 has 'plugin' => ( 
     is       => 'rw', 

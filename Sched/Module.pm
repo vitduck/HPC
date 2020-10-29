@@ -2,124 +2,100 @@ package HPC::Sched::Module;
 
 use Moose::Role; 
 use MooseX::Types::Moose qw(ArrayRef Str);
-use Array::Diff; 
 use HPC::Types::Sched::Module 'Module'; 
-use feature 'signatures';  
-no warnings 'experimental::signatures'; ;
 
-has 'module' => (
-    is      => 'rw',
-    isa     => Module, 
-    traits  => [qw(Array Chained)], 
-    coerce  => 1, 
-    default => sub {[]}, 
-    handles => { 
-             _add_module => 'push', 
-            _list_module => 'elements',
-          _remove_module => 'delete', 
-        _index_of_module => 'first_index', 
+use namespace::autoclean; 
+use experimental 'signatures';  
+
+has module => (
+    is       => 'rw',
+    isa      => ArrayRef, 
+    init_arg => undef,
+    traits   => [qw(Array Chained)], 
+    default  => sub {[]}, 
+    handles  => { 
+        list    => 'elements',
+        load    => 'push',
+        purge   => 'clear', 
+        _delete => 'splice',
+        _index  => 'first_index',
     }, 
     trigger => sub ($self, $new, $old) { 
-        my $diff = Array::Diff->diff($old, $new); 
+        my @old_modules = $old->@*; 
+        my @new_modules = $new->@*; 
 
-        $self->_unload_mpi_module($_) for $diff->deleted->@*; 
-        $self->_load_mpi_module($_)   for $diff->added->@*; 
+        # unload old mpi module 
+        my ($mpi_lib) = grep /impi|openmpi|mvapich2/, @old_modules; 
+        if ($mpi_lib) {  
+            $self->_unload_mpi($mpi_lib) 
+        }
+
+        # load new mpi module
+        while (my ($mpi_lib, $mpi_ver) = splice @new_modules, 0, 2) {
+            if ($mpi_lib =~ /impi|openmpi|mvapich2/) { 
+                $self->_load_mpi($mpi_lib, $mpi_ver); 
+            } 
+        } 
     }
 ); 
 
-sub purge($self) { 
-    $self->unload($self->_list_module); 
+around 'load' => sub ($load, $self, @args) {  
+    $self->$load(@args); 
+    
+    return $self; 
+}; 
 
-    return $self
-} 
-
-sub load ($self, @modules) { 
-    my $index; 
-
-    for my $module ( @modules ) { 
-        $index = 
-            ref $module eq 'ARRAY'   
-                ? $self->_index_of_module(sub {/$module->[0]/})
-                : $self->_index_of_module(sub {/$module/     });  
-
-        if ($index == -1) { 
-            $self->_add_module(
-                ref $module eq 'ARRAY'   
-                    ? $module->[0] 
-                    : $module );  
-                
-            $self->_load_mpi_module($module); 
-        } 
-    }
+around 'purge' => sub ($purge, $self, @) {  
+    $self->$purge; 
 
     return $self; 
-} 
+};  
 
-sub unload ($self, @modules) { 
-    my $index; 
-
-    for my $module ( @modules ) { 
-        my $index = 
-            ref $module eq 'ARRAY' 
-                ? $self->_index_of_module(sub {/$module->[0]/}) 
-                : $self->_index_of_module(sub {/$module/}     ); 
-        
-        if ($index != -1) { 
-            $self->_remove_module(
-                ref $module eq 'ARRAY'   
-                    ? $module->[0] 
-                    : $module );  
-
-            $self->_unload_mpi_module($module); 
-        }
-    }
-
-    return $self 
-} 
-
-# emulate 'module switch'
-sub switch ($self, $old, $new) { 
-    $self->unload($old)
-         ->load($new); 
+sub unload ($self, @args) { 
+    while (my ($module, $version) = splice @args, 0, 2) { 
+        my $index = $self->_index(sub {/$module/});   
+        $self->_delete($index, 2); 
+    } 
 
     return $self
 } 
 
-sub write_module ($self) { 
-    if ($self->_list_module != 0) {
-        $self->printf("\n"); 
+sub switch ($self, $old, $old_ver, $new, $new_ver) { 
+    $self->unload($old, $old_ver) 
+         ->load  ($new, $new_ver)
+} 
+
+sub write_module ($self) {
+    my @modules = $self->list; 
+
+    if (@modules) { 
         $self->printf("module purge\n"); 
 
-        for my $module ($self->_list_module) { 
-            ref $module eq 'ARRAY' 
-                ? $self->printf("module load %s\n", $module->@*)
-                : $self->printf("module load %s\n", $module    ); 
+        while (my($module, $version) = splice @modules, 0, 2) { 
+            my $module_string = 
+                ref $version eq 'HASH' 
+                ? join '/', $module, $version->{version} 
+                : join '/', $module, $version; 
+                
+            $self->printf("module load %s\n", $module_string)        
         }
-    }
+
+        $self->printf("\n"); 
+    } 
 
     return $self
-} 
+}
 
-sub _load_mpi_module ($self, $module) { 
-    my $mpi_module = ref $module eq 'ARRAY' ? $module->[0] : $module; 
-    my $mpi_type   = $1 if $mpi_module =~ /(impi|openmpi|mvapich2)/; 
+sub _load_mpi ($self, $mpi_lib, $mpi_ver) { 
+    my $loader = "_load_$mpi_lib"; 
 
-    if ($mpi_type) { 
-        my $loader = "_load_$mpi_type"; 
-        
-        $self->$loader($module); 
-    }
-} 
+    $self->$loader($mpi_ver)
+}
 
-sub _unload_mpi_module ($self, $module) { 
-    my $mpi_module = ref $module eq 'ARRAY' ? $module->[0] : $module; 
-    my $mpi_type   = $1 if $mpi_module =~ /(impi|openmpi|mvapich2)/; 
+sub _unload_mpi ($self, $mpi_lib) { 
+    my $unloader = "_unload_$mpi_lib"; 
 
-    if ($mpi_type) { 
-        my $unloader = "_unload_$mpi_type"; 
-        
-        $self->$unloader 
-    }
+    $self->$unloader; 
 }
 
 1
