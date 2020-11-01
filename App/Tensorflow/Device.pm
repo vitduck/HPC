@@ -12,10 +12,11 @@ has device => (
     traits    => ['Chained'],
     predicate => '_has_device',
     required  => 1, 
-    trigger   => sub ($self, @) { 
-        $self->horovod_device($self->device); 
-        $self->local_parameter_device($self->device); 
-        $self->mkl('true'); 
+    trigger   => sub ($self, $device, @) { 
+        $self->horovod_device($device); 
+        $self->local_parameter_device($device); 
+
+        $self->mkl('true') if $device eq 'cpu'; 
     } 
 );
 

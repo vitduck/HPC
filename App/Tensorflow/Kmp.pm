@@ -26,6 +26,7 @@ has kmp_blocktime => (
     isa       => Int,
     traits    => ['Chained'],
     predicate => '_has_kmp_blocktime',
+    lazy      => 1, 
     default   => 0
 );
 
