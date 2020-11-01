@@ -15,9 +15,9 @@ has 'vasp' => (
     traits    => ['Chained'],
     predicate => '_has_vasp', 
     coerce    => 1, 
-    trigger   => sub ($self, $app, @) { 
-        $self->_add_plugin('vasp')
-    }
+    # trigger   => sub ($self, $app, @) { 
+        # $self->_add_plugin('vasp')
+    # }
 ); 
 
 1

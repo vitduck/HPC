@@ -14,9 +14,9 @@ has 'tensorflow' => (
     traits    => ['Chained'],
     predicate => '_has_tensorflow',
     coerce    => 1,  
-    trigger  => sub ($self, $app, @) { 
-        $self->_add_plugin('tf')
-    }
+    # trigger  => sub ($self, $app, @) { 
+        # $self->_add_plugin('tf')
+    # }
 ); 
 
 1

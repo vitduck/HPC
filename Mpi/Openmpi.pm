@@ -5,25 +5,25 @@ use MooseX::XSAccessor;
 use MooseX::Attribute::Chained; 
 use MooseX::Types::Moose 'HashRef'; 
 use HPC::Types::Mpi::Openmpi qw(Report Map Bind Env Mca); 
+
 use namespace::autoclean; 
-use feature qw(signatures switch);
-no warnings qw(experimental::signatures experimental::smartmatch); 
+use experimental qw(signatures switch);
 
 with 'HPC::Mpi::Base'; 
 
-# has '+omp' => ( 
-    # trigger => sub ($self, @) { 
-        # $self->bind; 
-        # $self->map
-    # } 
-# ); 
+has '+omp' => ( 
+    trigger => sub ($self, $omp, $=) {
+        $self->bind('core')->map('numa:pe='.$self->omp)
+    }
+);
 
 has '+debug' => ( 
     trigger  => sub ($self, $debug, @) {
         for ($debug) { 
+            when (0) { $self->_unset_report; 
+                       $self->unset_mca('mpi_show_mca_params')                        }  
             when (4) { $self->report(1)                                               } 
             when (5) { $self->report(1); $self->set_mca(mpi_show_mca_params => 'all') }
-            when (0) { $self->_unset_report; $self->unset_mca('mpi_show_mca_params')  }  
         }
     }
 );
@@ -41,14 +41,11 @@ has '+pin' => (
     lazy    => 1, 
     default => 'none',
     trigger  => sub ($self, $pin, @) { 
-        $self->_unset_bind; 
-        $self->_unset_map; 
-
         for ($pin) { 
-            when ('bunch'  ) { $self->map('core')->bind('core') } 
-            when ('compact') { $self->map('numa')->bind('core') } 
-            when ('scatter') { $self->bind('core')              } 
-            when ('none'   ) { $self->bind('none')              } 
+            when ('none'   ) { $self->bind('none')                }
+            when ('bunch'  ) { $self->bind('core')->map('core')   }
+            when ('compact') { $self->bind('core')->map('numa')   }
+            when ('scatter') { $self->bind('core')                }
         } 
     } 
 ); 
@@ -57,14 +54,14 @@ has '+bind' => (
     isa     => Bind, 
     coerce  => 1,
     lazy    => 1, 
-    default => 'core'
+    default => 'none'
 ); 
 
 has '+map' => (
     isa     => Map, 
     coerce  => 1, 
     lazy    => 1, 
-    default => 'core'
+    default => 'socket'
 ); 
 
 has '+env_opt' => ( 
@@ -117,7 +114,7 @@ has 'report' => (
 ); 
 
 sub _opts {
-    return qw(map bind report mca_opt env_opt)  
+    return qw(bind map report mca_opt env_opt)  
 }; 
 
 __PACKAGE__->meta->make_immutable;

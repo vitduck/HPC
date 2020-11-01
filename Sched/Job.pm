@@ -47,17 +47,56 @@ sub submit ($self) {
     return $self
 } 
 
-sub _set_omp ($self,@) {
-    # pass OMP_NUM_THREADS to MPI
-    $self->mvapich2->omp($self->omp) if $self->_has_mvapich2;  
-    $self->openmpi->omp($self->omp)  if $self->_has_openmpi; 
-
-    # pass OMP_NUM_THREADS to Lammps Intel/Omp package cmd
-    $self->lammps->intel->omp($self->omp)    if $self->_has_lammps and $self->lammps->_has_intel; 
-    $self->lammps->omp->nthreads($self->omp) if $self->_has_lammps and $self->lammps->_has_omp; 
-
-    # pass OMP_NUN_THREADS to Gromacs cmd
-    $self->gromacs->ntomp($self->omp) if $self->_has_gromacs; 
+sub _set_omp ($self) {
+    $self->_set_openmpi_omp 
+         ->_set_mvapich2_omp 
+         ->_set_lammps_omp
+         ->_set_gromacs_omp
 }
+
+sub _set_ngpus ($self) { 
+    $self->_set_lammps_gpu    
+} 
+
+sub _set_openmpi_omp ($self) { 
+    my $omp = $self->omp =~ s/.*(\d+)$/$1/r; 
+
+    $self->openmpi->omp($omp) if $self->_has_openmpi; 
+
+    return $self; 
+}
+
+sub _set_mvapich2_omp ($self) { 
+    my $omp = $self->omp =~ s/.*(\d+)$/$1/r; 
+
+    $self->mvapich2->omp($omp) if $self->_has_mvapich2; 
+    
+    return $self; 
+}
+
+sub _set_lammps_omp ($self) { 
+    my $omp = $self->omp =~ s/.*(\d+)$/$1/r; 
+
+    $self->lammps->intel->omp($omp)    if $self->_has_lammps and $self->lammps->_has_intel; 
+    $self->lammps->omp->nthreads($omp) if $self->_has_lammps and $self->lammps->_has_omp; 
+    
+    return $self; 
+} 
+
+sub _set_gromacs_omp ($self) { 
+    my $omp = $self->omp =~ s/.*(\d+)$/$1/r; 
+
+    $self->gromacs->ntomp($omp) if $self->_has_gromacs; 
+    
+    return $self; 
+} 
+
+sub _set_lammps_gpu ($self) { 
+    my $ngpus = $self->ngpus =~ s/.*(\d+)$/$1/r; 
+
+    $self->lammps->gpu->ngpu($ngpus) if $self->_has_lammps and $self->lammps->_has_gpu; 
+
+    return $self; 
+} 
 
 1

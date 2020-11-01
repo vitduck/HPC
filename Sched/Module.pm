@@ -19,22 +19,28 @@ has module => (
         purge   => 'clear', 
         _delete => 'splice',
         _index  => 'first_index',
+        _get    => 'get', 
     }, 
     trigger => sub ($self, $new, $old) { 
-        my @old_modules = $old->@*; 
-        my @new_modules = $new->@*; 
-
         # unload old mpi module 
-        my ($mpi_lib) = grep /impi|openmpi|mvapich2/, @old_modules; 
-        if ($mpi_lib) {  
-            $self->_unload_mpi($mpi_lib) 
+        my ($old_mpi) = grep { $_ } map { /(impi|openmpi|mvapich2)/; $1 } $old->@*; 
+        if ($old_mpi) {  
+            my $unloader = "_unload_$old_mpi"; 
+
+            $self->$unloader; 
         }
 
         # load new mpi module
-        while (my ($mpi_lib, $mpi_ver) = splice @new_modules, 0, 2) {
-            if ($mpi_lib =~ /impi|openmpi|mvapich2/) { 
-                $self->_load_mpi($mpi_lib, $mpi_ver); 
-            } 
+        my ($new_mpi) = grep { $_ } map { /(impi|openmpi|mvapich2)/; $1 } $new->@*; 
+        if ($new_mpi) {
+            my $loader    = "_load_$new_mpi";  
+            my $mpi_index = $self->_index(sub {/$new_mpi/}); 
+            my $mpi_opt   = $self->_get($mpi_index+1); 
+
+            # check for existence of hash option
+            ref $mpi_opt eq 'HASH'
+            ? $self->$loader($mpi_opt)
+            : $self->$loader({})
         } 
     }
 ); 
@@ -52,17 +58,20 @@ around 'purge' => sub ($purge, $self, @) {
 };  
 
 sub unload ($self, @args) { 
-    while (my ($module, $version) = splice @args, 0, 2) { 
+    for my $module (@args) { 
         my $index = $self->_index(sub {/$module/});   
-        $self->_delete($index, 2); 
+        
+        ref $self->_get($index+1) eq 'HASH'
+        ? $self->_delete($index, 2)
+        : $self->_delete($index, 1)
     } 
-
+    
     return $self
 } 
 
-sub switch ($self, $old, $old_ver, $new, $new_ver) { 
-    $self->unload($old, $old_ver) 
-         ->load  ($new, $new_ver)
+sub switch ($self, $old, @news) { 
+    $self->unload($old) 
+         ->load  (@news)
 } 
 
 sub write_module ($self) {
@@ -71,13 +80,10 @@ sub write_module ($self) {
     if (@modules) { 
         $self->printf("module purge\n"); 
 
-        while (my($module, $version) = splice @modules, 0, 2) { 
-            my $module_string = 
-                ref $version eq 'HASH' 
-                ? join '/', $module, $version->{version} 
-                : join '/', $module, $version; 
-                
-            $self->printf("module load %s\n", $module_string)        
+        for my $module ($self->list) {  
+            next if ref $module eq 'HASH'; 
+
+            $self->printf("module load %s\n", $module)        
         }
 
         $self->printf("\n"); 

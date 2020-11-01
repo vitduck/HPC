@@ -2,8 +2,9 @@ package HPC::Mpi::Affinity;
 
 use Moose::Role; 
 use MooseX::Types::Moose 'Str'; 
-use feature 'signatures';
-no warnings 'experimental::signatures';
+
+use namespace::autoclean; 
+use experimental 'signatures';
 
 has 'pin' => ( 
     is        => 'rw', 

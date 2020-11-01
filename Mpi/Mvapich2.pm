@@ -5,9 +5,9 @@ use MooseX::XSAccessor;
 use MooseX::Attribute::Chained; 
 use MooseX::Types::Moose qw(Str Int); 
 use HPC::Types::Mpi::Mvapich2 'Env'; 
+
 use namespace::autoclean; 
-use feature qw(signatures switch);
-no warnings qw(experimental::signatures experimental::smartmatch); 
+use experimental qw(signatures switch);
 
 with 'HPC::Mpi::Base'; 
 

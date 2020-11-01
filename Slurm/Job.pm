@@ -7,11 +7,13 @@ use MooseX::StrictConstructor;
 use MooseX::Types::Moose qw(Str Int);
 use MooseX::XSAccessor; 
 
-use HPC::Types::Sched::Slurm qw(Name Partition Nodes Cpus_per_Task Tasks_per_Node Time Error Output Comment); 
+use HPC::Types::Sched::Slurm qw(
+    Name Partition Nodes Cpus_per_Task Tasks_per_Node Ngpus
+    Time Error Output Comment
+); 
 
 use namespace::autoclean;
-use feature 'signatures';
-no warnings 'experimental::signatures';
+use experimental 'signatures';
 
 with qw(
     HPC::Sched::Job 
@@ -27,7 +29,7 @@ has '+name' => (
     coerce  => 1, 
 ); 
 
-has '+account' => ( 
+has '+app' => ( 
     isa     => Comment,
     coerce  => 1, 
 ); 
@@ -57,16 +59,11 @@ has '+mpiprocs' => (
 has '+omp' => ( 
     isa     => Cpus_per_Task, 
     coerce  => 1, 
-    trigger => sub ($self, @) { 
-        my $omp_num_threads = (split /=/, $self->omp)[-1]; 
+); 
 
-        # pass OMP_NUM_THREADS to MPI 
-        $self->mvapich2->omp($omp_num_threads) if $self->_has_mvapich2; 
-        $self->openmpi->omp($omp_num_threads)  if $self->_has_openmpi; 
-
-        # pass OMP_NUN_THREADS to Gromacs cmd
-        $self->gromacs->ntomp($omp_num_threads) if $self->_has_gromacs
-    } 
+has '+ngpus' => ( 
+   isa     => Ngpus,
+   coerce  => 1, 
 ); 
 
 has '+stderr' => ( 
@@ -87,50 +84,6 @@ has '+walltime' => (
     default => '24:00:00'
 ); 
 
-# pass OMP_NUM_THREAD to mvapich2 env list
-has '+mvapich2' => ( 
-    trigger => sub ($self, @) { 
-        $self->_add_plugin('mvapich2'); 
-
-        if ($self->_has_omp ) { 
-            my $omp_num_threads = (split /=/, $self->omp)[-1]; 
-         
-            # pass OMP_NUN_THREADS to MPI
-            $self->mvapich2->omp($omp_num_threads) if $self->_has_omp; 
-        }
-    } 
-); 
-
-# pass number of thread to gromacs cmd
-has '+gromacs' => ( 
-    trigger => sub ( $self, @ ) { 
-        $self->account('gromacs'); 
-        $self->_add_plugin('gromacs'); 
-
-        if ($self->_has_omp ) { 
-            my $omp_num_threads = (split /=/, $self->omp)[-1]; 
-
-            # pass OMP_NUN_THREADS to Gromacs cmd
-            $self->gromacs->ntomp($omp_num_threads) if $self->_has_omp; 
-        }
-    }
-);  
-
-# pass number of gpu to lammps/gpu package
-has '+lammps' => ( 
-    trigger => sub ( $self, @ ) { 
-        $self->account('lammps');
-        $self->_add_plugin('lammps');
-
-        if ($self->_has_omp ) { 
-            my $omp_num_threads = (split /=/, $self->omp)[-1]; 
-
-            # pass OMP_NUN_THREADS to Lammps cmd
-            $self->lammps->gpu->ngpu($omp_num_threads) if $self->lammps->_has_gpu
-        }
-    }
-);  
-
 # pass MPI environments to slurm's env
 before 'write' => sub ($self, @) { 
     if    ( $self->_has_impi     && $self->impi->has_env     ) { $self->set_env($self->impi->env->%*)     } 
@@ -140,12 +93,15 @@ before 'write' => sub ($self, @) {
 
 sub write_resource ($self) {
     $self->ntasks; 
+
     $self->printf("%s\n\n", $self->shell);
 
-    for (qw(queue select mpiprocs omp mem ngpus name stderr stdout walltime account)) {
+    for (qw(queue select mpiprocs omp mem ngpus name app stderr stdout walltime)) {
         my $has = "_has_$_";
         $self->printf("%s\n", $self->$_) if $self->$has;
     }
+
+    $self->print("\n"); 
 
     return $self
 }

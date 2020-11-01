@@ -95,7 +95,7 @@ sub write_resource ($self) {
     # build resource string
     $self->resource; 
 
-    for (qw(export name app project queue stderr stdout resource walltime burst_buffer)) {
+    for (qw(export queue name app stderr stdout resource walltime burst_buffer)) {
         my $has = "_has_$_";
         if ( $self->$has ) { $self->printf("%s\n", $self->$_) } 
     }

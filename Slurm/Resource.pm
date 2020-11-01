@@ -3,7 +3,7 @@ package HPC::Slurm::Resource;
 use Moose::Role;
 use MooseX::Types::Moose qw(Str Int);
 
-use HPC::Types::Sched::Slurm qw(Tasks Ngpus Mem); 
+use HPC::Types::Sched::Slurm qw(Tasks Mem); 
 
 use feature 'signatures';
 no warnings 'experimental::signatures';
@@ -22,20 +22,6 @@ has 'ntasks' => (
         my $mpiprocs = $1 if $self->mpiprocs =~ /(\d+)$/; 
         
         return $select*$mpiprocs;
-    } 
-); 
-
-has 'ngpus' => ( 
-    is        => 'rw', 
-    isa       => Ngpus,
-    traits    => ['Chained'],
-    predicate => '_has_ngpus', 
-    coerce    => 1, 
-    lazy      => 1, 
-    default   => 1, 
-    trigger   => sub ($self, @) { 
-        # pass ngpus to Lammps/GPU package cmd
-        $self->lammps->gpu->ngpu((split /:/, $self->ngpus)[-1]) if $self->_has_lammps;  
     } 
 ); 
 

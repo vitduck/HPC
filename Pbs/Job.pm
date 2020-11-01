@@ -64,20 +64,11 @@ has '+mpiprocs' => (
             : $self->ncpus } 
 );
 
-has '+openmpi' => (
-    trigger   => sub ($self, @) { 
-        if ($self->_has_omp) { $self->openmpi->omp($self->omp) } 
-    } 
-); 
-  
-has '+mvapich2' => ( 
-    trigger   => sub ($self, @) { 
-        if ($self->_has_omp) { $self->mvapich2->omp($self->omp) }
-
-        $self->mvapich2->hostfile('$PBS_NODEFILE') 
-                       ->nprocs('$(wc -l $PBS_NODEFILE | awk \'{print $1}\')'); 
-    } 
-);  
+# overwrite trigger of mvapich2 plugin
+before 'mpirun' => sub ($self) { 
+    $self->mvapich2->hostfile('$PBS_NODEFILE') 
+         ->nprocs('$(wc -l $PBS_NODEFILE | awk \'{print $1}\')'); 
+};   
 
 before _set_omp => sub ($self) {  
     $self->_reset_resource; 

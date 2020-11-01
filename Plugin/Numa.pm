@@ -15,7 +15,7 @@ has 'numa' => (
     predicate => '_has_numa',
     coerce    => 1, 
     trigger   => sub ($self, @) { 
-        $self->_add_plugin('numa'); 
+        # $self->_add_plugin('numa'); 
         $self->queue('flat') 
     } 
 ); 

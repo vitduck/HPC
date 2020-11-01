@@ -15,7 +15,7 @@ has 'gromacs' => (
     predicate => '_has_gromacs',
     coerce    => 1, 
     trigger  => sub ($self, $app, @) { 
-        $self->_add_plugin('gromacs')
+        $self->_set_gromacs_omp if $self->_has_omp; 
     }
 ); 
 

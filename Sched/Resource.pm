@@ -7,7 +7,7 @@ use MooseX::Types::Moose qw(Str Int);
 use namespace::autoclean; 
 use experimental 'signatures';  
 
-requires '_set_omp'; 
+requires qw(_set_omp _set_ngpus); 
 
 has 'shell' => ( 
     is        => 'rw', 
@@ -89,8 +89,20 @@ has 'omp' => (
     lazy      => 1,
     default   => 1, 
     trigger   => sub ($self, @) { 
-        $self->_set_omp
+        $self->_set_omp; 
     }
 ); 
+
+has 'ngpus' => (
+    is        => 'rw',
+    isa       => Int,
+    traits    => ['Chained'],
+    predicate => '_has_ngpus',
+    lazy      => 1,
+    default   => 1,
+    trigger   => sub ($self, @) { 
+        $self->_set_ngpus; 
+    }
+);
 
 1

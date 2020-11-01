@@ -8,8 +8,8 @@ use HPC::Mpi::Openmpi;
 use HPC::Mpi::Mvapich2;
 use HPC::Types::Sched::Mpi qw(Impi Openmpi Mvapich2); 
 
-use experimental 'signatures';  
 use namespace::autoclean; 
+use experimental 'signatures';  
 
 has 'impi' => (
     is        => 'rw', 
@@ -19,6 +19,8 @@ has 'impi' => (
     writer    => '_load_impi',
     clearer   => '_unload_impi', 
     coerce    => 1, 
+    lazy      => 1,
+    default   => sub {{}},
 ); 
 
 has 'openmpi' => (
@@ -29,6 +31,13 @@ has 'openmpi' => (
     writer    => '_load_openmpi',
     clearer   => '_unload_openmpi', 
     coerce    => 1, 
+    lazy      => 1,
+    default   => sub {{}},
+    trigger   => sub ($self, @) { 
+        if ($self->_has_omp) { 
+            $self->_set_openmpi_omp; 
+        }
+    } 
 ); 
 
 has 'mvapich2' => (
@@ -39,6 +48,13 @@ has 'mvapich2' => (
     writer    => '_load_mvapich2',
     clearer   => '_unload_mvapich2', 
     coerce    => 1, 
+    lazy      => 1,
+    default   => sub {{}},
+    trigger   => sub ($self, @) { 
+        if ($self->_has_omp) { 
+            $self->_set_mvapich2_omp
+        }
+    }
 ); 
 
 sub mpirun ($self) { 

@@ -14,8 +14,9 @@ has 'lammps' => (
     traits    => ['Chained'],
     predicate => '_has_lammps',
     coerce    => 1, 
-    trigger  => sub ($self, $app, @) { 
-        $self->_add_plugin('lammps'); 
+    trigger  => sub ($self, @) { 
+        $self->_set_lammps_omp if $self->_has_omp; 
+        $self->_set_lammps_gpu if $self->_has_ngpus; 
     }
 ); 
 

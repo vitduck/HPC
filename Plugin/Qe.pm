@@ -14,9 +14,9 @@ has 'qe' => (
     traits    => ['Chained'],
     predicate => '_has_qe', 
     coerce    => 1, 
-    trigger   => sub ($self, $app, @) { 
-        $self->_add_plugin('qe')
-    }
+    # trigger   => sub ($self, $app, @) { 
+        # $self->_add_plugin('qe')
+    # }
 ); 
 
 1
