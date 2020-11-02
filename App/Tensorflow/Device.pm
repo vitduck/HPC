@@ -16,7 +16,8 @@ has device => (
         $self->horovod_device($device); 
         $self->local_parameter_device($device); 
 
-        $self->mkl('true') if $device eq 'cpu'; 
+        $self->mkl('true')                  if $device eq 'cpu'; 
+        $self->use_fp16(1)->allow_growth(1) if $device eq 'gpu'; 
     } 
 );
 

@@ -14,7 +14,8 @@ with qw(
     HPC::Plugin::Cmd
     HPC::App::Tensorflow::Model
     HPC::App::Tensorflow::Device
-    HPC::App::Tensorflow::Kmp
+    HPC::App::Tensorflow::Gpu
+    HPC::App::Tensorflow::Cpu
     HPC::App::Tensorflow::Threads); 
 
 has '+bin' => ( 
@@ -30,7 +31,12 @@ sub cmd {
     for ($self->_opts) {
         my $has = "_has_$_";
 
-        push @opts, '--'.$_.'='.$self->$_ if $self->$has; 
+        if ($self->$has) { 
+            push @opts, 
+                /allow_growth|use_fp16/ 
+                ? '--'.$_
+                : '--'.$_.'='.$self->$_ 
+        }
     }
 
     return { $self->bin, [@opts] } 
@@ -38,11 +44,12 @@ sub cmd {
 
 sub _opts { 
     return qw(
-        model  batch_size optimizer 
+        model batch_size optimizer data_format  
         device horovod_device variable_update local_parameter_device sync_on_finish
+        use_fp16 allow_growth
         mkl kmp_affinity kmp_blocktime kmp_settings 
         num_inter_threads num_intra_threads
-        data_format data_name data_dir train_dir tfprof_file); 
+        data_name data_dir train_dir tfprof_file); 
 }
 
 __PACKAGE__->meta->make_immutable;

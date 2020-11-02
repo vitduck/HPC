@@ -1,4 +1,4 @@
-package HPC::App::Tensorflow::Kmp; 
+package HPC::App::Tensorflow::Cpu; 
 
 use Moose::Role; 
 use MooseX::Types::Moose qw(Str Int); 
