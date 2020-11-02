@@ -2,13 +2,29 @@ package HPC::Slurm::Resource;
 
 use Moose::Role;
 use MooseX::Types::Moose qw(Str Int);
+use HPC::Types::Sched::Slurm qw(Nodelist Exclude Tasks Mem); 
 
-use HPC::Types::Sched::Slurm qw(Tasks Mem); 
+use experimental 'signatures';
 
-use feature 'signatures';
-no warnings 'experimental::signatures';
+has nodelist => ( 
+    is        => 'rw', 
+    isa       => Nodelist,
+    traits    => ['Chained'],
+    predicate => '_has_nodelist', 
+    clearer   => '_clear_nodelist', 
+    coerce    => 1
+); 
 
-has 'ntasks' => ( 
+has exclude => ( 
+    is        => 'rw', 
+    isa       => Exclude,
+    traits    => ['Chained'],
+    predicate => '_has_exclude', 
+    clearer   => '_clear_exclude', 
+    coerce    => 1
+); 
+
+has ntasks => ( 
     is        => 'rw', 
     isa       => Tasks,
     init_arg  => undef,
@@ -25,7 +41,7 @@ has 'ntasks' => (
     } 
 ); 
 
-has 'mem' => ( 
+has mem => ( 
     is        => 'rw', 
     isa       => Mem, 
     predicate => '_has_mem', 

@@ -96,7 +96,7 @@ sub write_resource ($self) {
 
     $self->printf("%s\n\n", $self->shell);
 
-    for (qw(queue select mpiprocs omp mem ngpus name app stderr stdout walltime)) {
+    for (qw(queue select nodelist exclude mpiprocs omp mem ngpus name app stderr stdout walltime)) {
         my $has = "_has_$_";
         $self->printf("%s\n", $self->$_) if $self->$has;
     }
