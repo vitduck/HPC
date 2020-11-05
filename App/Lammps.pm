@@ -13,11 +13,11 @@ use HPC::App::Lammps::Intel;
 use HPC::App::Lammps::Kokkos; 
 use HPC::Types::App::Lammps qw(
     Suffix Kokkos_Thr Inp Log Var Pkg 
-    Pkg_Opt Pkg_Omp Pkg_Gpu Pkg_Intel Pkg_Kokkos ); 
+    Pkg_Opt Pkg_Omp Pkg_Gpu Pkg_Intel Pkg_Kokkos 
+); 
 
-use feature 'signatures'; 
 use namespace::autoclean; 
-no warnings 'experimental::signatures'; 
+use experimental 'signatures'; 
 
 with qw(
     HPC::Debug::Dump

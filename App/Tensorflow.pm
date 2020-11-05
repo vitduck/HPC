@@ -1,13 +1,15 @@
 package HPC::App::Tensorflow; 
 
 use Moose; 
-use MooseX::Attribute::Chained; 
-use MooseX::StrictConstructor;
 use MooseX::XSAccessor; 
-use HPC::Types::App::Tensorflow 'Cnn'; 
+use MooseX::StrictConstructor;
+use MooseX::Attribute::Chained; 
 
-use experimental 'signatures'; 
+use HPC::App::Nccl; 
+use HPC::Types::App::Tensorflow qw(Cnn Nccl); 
+
 use namespace::autoclean; 
+use experimental 'signatures'; 
 
 with qw(
     HPC::Debug::Dump
@@ -16,11 +18,27 @@ with qw(
     HPC::App::Tensorflow::Device
     HPC::App::Tensorflow::Gpu
     HPC::App::Tensorflow::Cpu
-    HPC::App::Tensorflow::Threads); 
+    HPC::App::Tensorflow::Threads
+); 
 
 has '+bin' => ( 
     isa    => Cnn, 
     coerce => 1 
+); 
+
+has 'nccl' => ( 
+    is        => 'rw', 
+    isa       => Nccl,
+    predicate => '_has_nccl',
+    coerce    => 1,
+    lazy      => 1, 
+    default   => sub {{}}, 
+    handles   => { 
+        _has_nccl_debug   => '_has_debug',
+        _has_nccl_p2p     => '_has_p2p',
+        _has_nccl_rdma    => '_has_rdma',
+        _has_nccl_threads => '_has_threads'
+    }
 ); 
 
 sub cmd {

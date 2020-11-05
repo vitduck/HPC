@@ -17,7 +17,8 @@ with qw(
     HPC::App::Gromacs::Pme
     HPC::App::Gromacs::Nb
     HPC::App::Gromacs::Thread
-    HPC::App::Gromacs::Prof ); 
+    HPC::App::Gromacs::Prof 
+); 
 
 has 'mode' => (  
     is        => 'rw', 
@@ -34,7 +35,8 @@ sub _opts {
         dlb ddorder npme nb tunepme
         confout resetstep resethway 
         pin nt ntmpi ntomp 
-        verbose ) 
+        verbose 
+    ) 
 }
 
 1

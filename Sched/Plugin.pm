@@ -12,7 +12,7 @@ with qw(
     HPC::Plugin::Numa
     HPC::Plugin::Qe HPC::Plugin::Vasp
     HPC::Plugin::Lammps HPC::Plugin::Gromacs
-    HPC::Plugin::Tensorflow HPC::Plugin::Nccl
+    HPC::Plugin::Tensorflow
 ); 
 
 has 'plugin' => ( 

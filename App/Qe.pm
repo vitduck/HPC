@@ -9,10 +9,9 @@ use MooseX::XSAccessor;
 use HPC::Types::App::Qe qw(Input Output Image Pools Band Task Diag);
 
 use namespace::autoclean;
+use experimental 'signatures'; 
 
-with qw(
-    HPC::Debug::Dump
-    HPC::Plugin::Cmd ); 
+with qw(HPC::Debug::Dump HPC::Plugin::Cmd); 
 
 has '+bin' => ( 
     lazy      => 1, 

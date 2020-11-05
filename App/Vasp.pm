@@ -7,15 +7,16 @@ use MooseX::XSAccessor;
 use MooseX::Attribute::Chained; 
 use MooseX::StrictConstructor; 
 
-use experimental 'signatures'; 
 use namespace::autoclean;
+use experimental 'signatures'; 
 
 with qw(
     HPC::Debug::Dump
     HPC::Io::Read
     HPC::Io::Write
     HPC::Plugin::Cmd
-    HPC::App::Vasp::Incar);
+    HPC::App::Vasp::Incar
+);
 
 has '+io_read' => (
     lazy    => 1, 
