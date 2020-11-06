@@ -21,23 +21,6 @@ has 'env' => (
         unset_env => 'delete' }
 ); 
 
-# has 'ld_library_path' => ( 
-    # is        => 'rw',
-    # isa       => ArrayRef, 
-    # traits    => [qw(Array Chained)], 
-    # init_arg  => undef, 
-    # predicate => '_has_ld_library_path', 
-    # clearer   => '_unset_ld_library_path', 
-    # lazy      => 1, 
-    # default   => sub {['$LD_LIRARY_PATH']}, 
-    # handles   => {
-        # append_ld_library_path => 'unshift', 
-          # list_ld_library_path => 'elements' }, 
-    # trigger   => sub ($self, $ld, @) {
-        # $self->set_env(LD_LIBRARY_PATH => join(':', $ld->@*))
-    # } 
-# ); 
-
 # chained delegation methods
 around [qw(set_env unset_env)] => sub ($method, $self, @args) { 
     $self->$method(@args); 
@@ -48,7 +31,14 @@ around [qw(set_env unset_env)] => sub ($method, $self, @args) {
 sub write_env ( $self ) { 
     if ($self->has_env) { 
         for my $env ( sort $self->list_env ) { 
-            $self->printf("export %s\n", join('=', $env, $self->get_env($env)))
+            # append mode 
+            if ( $env =~ /:a$/ ) { 
+                my $env0 = (split /:/, $env)[0]; 
+                
+                $self->printf("export %s\n", $env0.'='.$self->get_env($env).':'."\$$env0")
+            } else { 
+                $self->printf("export %s\n", $env.'='.$self->get_env($env))
+            }
         } 
 
         $self->print("\n"); 

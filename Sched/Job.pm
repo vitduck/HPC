@@ -14,12 +14,6 @@ with qw(
     HPC::Sched::Ime HPC::Sched::Cmd 
     HPC::Sched::Plugin  HPC::Sched::Sys );
 
-has 'submit_cmd' => ( 
-    is       => 'ro', 
-    isa      => Str, 
-    init_arg => undef,
-); 
-
 has 'script' => ( 
     is       => 'rw', 
     isa      => Str, 
@@ -38,12 +32,6 @@ sub write ($self, $file = '') {
          ->write_env
          ->write_cmd; 
 
-    return $self
-} 
-
-sub submit ($self) {
-    system $self->submit_cmd, $self->script; 
-    
     return $self
 } 
 

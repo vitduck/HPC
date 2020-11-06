@@ -34,10 +34,8 @@ has 'nccl' => (
     lazy      => 1, 
     default   => sub {{}}, 
     handles   => { 
-        _has_nccl_debug   => '_has_debug',
-        _has_nccl_p2p     => '_has_p2p',
-        _has_nccl_rdma    => '_has_rdma',
-        _has_nccl_threads => '_has_threads'
+        _list_nccl_env => 'list_env', 
+         _get_nccl_env => 'get_env'
     }
 ); 
 

@@ -78,6 +78,7 @@ has 'mpiprocs' => (
     traits    => ['Chained'],
     predicate => '_has_mpiprocs',
     clearer   => '_reset_mpiprocs', 
+    default   => 1
 );
 
 has 'omp' => (
@@ -103,6 +104,14 @@ has 'ngpus' => (
     trigger   => sub ($self, @) { 
         $self->_set_ngpus; 
     }
+);
+
+has 'burst_buffer' => (
+    is        => 'ro',
+    isa       => Int,
+    predicate => '_has_burst_buffer',
+    lazy      => 1,
+    default   => 0
 );
 
 1

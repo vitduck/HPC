@@ -7,22 +7,15 @@ use MooseX::StrictConstructor;
 use MooseX::Types::Moose qw(Str Int);
 use MooseX::XSAccessor; 
 
-use HPC::Types::Sched::Slurm qw(
-    Name Partition Nodes Cpus_per_Task Tasks_per_Node Ngpus
-    Time Error Output Comment
-); 
+use HPC::Types::Sched::Slurm qw( Name Partition Nodes Cpus_per_Task Tasks_per_Node Ngpus
+                                 Time Error Output Comment ); 
 
 use namespace::autoclean;
 use experimental 'signatures';
 
-with qw(
-    HPC::Sched::Job 
-    HPC::Slurm::Resource
-    HPC::Slurm::Srun ); 
-
-has '+submit_cmd' => (
-    default => 'sbatch'
-); 
+with qw( HPC::Sched::Job 
+         HPC::Slurm::Resource
+         HPC::Slurm::Srun ); 
 
 has '+name' => ( 
     isa     => Name, 

@@ -28,14 +28,6 @@ has 'project' => (
     default   => 'burst_buffer' 
 ); 
 
-has 'burst_buffer' => ( 
-    is        => 'ro', 
-    isa       => Burst_Buffer,
-    predicate => '_has_burst_buffer',
-    coerce    => 1, 
-    lazy      => 1,
-    default   => 0 
-); 
 
 has 'ncpus' => (
     is        => 'rw',
@@ -88,6 +80,7 @@ has 'resource' => (
         }
     }
 ); 
+
 
 sub write_resource ($self) {
     $self->printf("%s\n\n", $self->shell);

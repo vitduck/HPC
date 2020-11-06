@@ -5,18 +5,14 @@ use MooseX::Attribute::Chained;
 use MooseX::StrictConstructor; 
 use MooseX::XSAccessor; 
 use MooseX::Types::Moose qw(Str Int);
-use HPC::Types::Sched::Pbs qw(App Name Queue Stdout Stderr Walltime); 
+use HPC::Types::Sched::Pbs qw(App Name Queue Stdout Stderr Walltime Burst_Buffer);
 
-use experimental 'signatures';
 use namespace::autoclean;
+use experimental 'signatures';
 
 with qw(
     HPC::Sched::Job 
     HPC::Pbs::Resource); 
-
-has '+submit_cmd' => (
-    default => 'qsub'
-); 
 
 has '+name' => (
     isa     => Name, 
@@ -57,12 +53,17 @@ has '+select' => (
 ); 
 
 has '+mpiprocs' => (
-    lazy      => 1,
-    default   => sub ($self, @) { 
+    lazy    => 1,
+    default => sub ($self, @) { 
         $self->omp 
             ? $self->ncpus / $self->omp 
             : $self->ncpus } 
 );
+
+has '+burst_buffer' => ( 
+    isa    => Burst_Buffer,
+    coerce => 1, 
+); 
 
 # overwrite trigger of mvapich2 plugin
 before 'mpirun' => sub ($self) { 
