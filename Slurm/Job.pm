@@ -79,9 +79,11 @@ has '+walltime' => (
 
 # pass MPI environments to slurm's env
 before 'write' => sub ($self, @) { 
-    if    ( $self->_has_impi     && $self->impi->has_env     ) { $self->set_env($self->impi->env->%*)     } 
-    elsif ( $self->_has_openmpi  && $self->openmpi->has_env  ) { $self->set_env($self->openmpi->env->%*)  } 
-    elsif ( $self->_has_mvapich2 && $self->mvapich2->has_env ) { $self->set_env($self->mvapich2->env->%*) }
+    # if    ( $self->_has_impi     && $self->impi->has_env     ) { $self->set_env($self->impi->env->%*)     } 
+    # elsif ( $self->_has_openmpi  && $self->openmpi->has_env  ) { $self->set_env($self->openmpi->env->%*)  } 
+    if ( $self->_has_mvapich2 && $self->mvapich2->has_env ) { 
+        $self->set_env($self->mvapich2->env->%*) 
+    }
 }; 
 
 sub write_resource ($self) {

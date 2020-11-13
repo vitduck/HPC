@@ -25,22 +25,17 @@ has module => (
         # unload old mpi module 
         my ($old_mpi) = grep { $_ } map { /(impi|openmpi|mvapich2)/; $1 } $old->@*; 
         if ($old_mpi) {  
-            my $unloader = "_unload_$old_mpi"; 
-
-            $self->$unloader; 
+            $self->_unload_mpi($old_mpi)
         }
 
         # load new mpi module
         my ($new_mpi) = grep { $_ } map { /(impi|openmpi|mvapich2)/; $1 } $new->@*; 
         if ($new_mpi) {
-            my $loader    = "_load_$new_mpi";  
-            my $mpi_index = $self->_index(sub {/$new_mpi/}); 
-            my $mpi_opt   = $self->_get($mpi_index+1); 
+            my $index = $self->_index(sub {/$new_mpi/}); 
+            my $opt   = $self->_get($index+1); 
 
-            # check for existence of hash option
-            ref $mpi_opt eq 'HASH'
-            ? $self->$loader($mpi_opt)
-            : $self->$loader({})
+            $self->_load_mpi($new_mpi, $opt)
+
         } 
     }
 ); 
@@ -92,16 +87,18 @@ sub write_module ($self) {
     return $self
 }
 
-sub _load_mpi ($self, $mpi_lib, $mpi_ver) { 
-    my $loader = "_load_$mpi_lib"; 
+sub _load_mpi ($self, $mpi, $opt) { 
+    # check for existence of hash option
+    ref $opt eq 'HASH'
+        ? $self->$mpi($opt)
+        : $self->$mpi({})
 
-    $self->$loader($mpi_ver)
 }
 
-sub _unload_mpi ($self, $mpi_lib) { 
-    my $unloader = "_unload_$mpi_lib"; 
+sub _unload_mpi ($self, $mpi) { 
+    my $unload = "_unset_$mpi"; 
 
-    $self->$unloader; 
+    $self->$unload
 }
 
 1

@@ -47,7 +47,7 @@ sub _set_ngpus ($self) {
 } 
 
 sub _set_openmpi_omp ($self) { 
-    my $omp = $self->omp =~ s/.*(\d+)$/$1/r; 
+    my $omp = $self->omp =~ s/.+?(\d+)$/$1/r; 
 
     $self->openmpi->omp($omp) if $self->_has_openmpi; 
 
@@ -55,7 +55,7 @@ sub _set_openmpi_omp ($self) {
 }
 
 sub _set_mvapich2_omp ($self) { 
-    my $omp = $self->omp =~ s/.*(\d+)$/$1/r; 
+    my $omp = $self->omp =~ s/.+?(\d+)$/$1/r; 
 
     $self->mvapich2->omp($omp) if $self->_has_mvapich2; 
     
@@ -63,7 +63,7 @@ sub _set_mvapich2_omp ($self) {
 }
 
 sub _set_lammps_omp ($self) { 
-    my $omp = $self->omp =~ s/.*(\d+)$/$1/r; 
+    my $omp = $self->omp =~ s/.+?(\d+)$/$1/r; 
 
     $self->lammps->intel->omp($omp)    if $self->_has_lammps and $self->lammps->_has_intel; 
     $self->lammps->omp->nthreads($omp) if $self->_has_lammps and $self->lammps->_has_omp; 
@@ -72,7 +72,7 @@ sub _set_lammps_omp ($self) {
 } 
 
 sub _set_gromacs_omp ($self) { 
-    my $omp = $self->omp =~ s/.*(\d+)$/$1/r; 
+    my $omp = $self->omp =~ s/.+?(\d+)$/$1/r; 
 
     $self->gromacs->ntomp($omp) if $self->_has_gromacs; 
     
@@ -80,7 +80,7 @@ sub _set_gromacs_omp ($self) {
 } 
 
 sub _set_lammps_gpu ($self) { 
-    my $ngpus = $self->ngpus =~ s/.*(\d+)$/$1/r; 
+    my $ngpus = $self->ngpus =~ s/.+?(\d+)$/$1/r; 
 
     $self->lammps->gpu->ngpu($ngpus) if $self->_has_lammps and $self->lammps->_has_gpu; 
 

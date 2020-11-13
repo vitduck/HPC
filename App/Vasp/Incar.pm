@@ -47,17 +47,17 @@ has '_cached_incar' => (
     },  
 ); 
 
-for my $param (qw(kpar ncore npar nsim lreal lscaaware lcharge lwave lscaaware)) { 
+for my $param (qw(algo nelm nelmin ediff kpar ncore npar nsim lreal lscaaware lcharge lwave lscaaware)) { 
     has $param => (
         is        => 'rw',
         isa       => Int|Str,
         traits    => ['Chained'],
         trigger   => sub ($self, $var, @) { 
             $self->_has_incar(uc($param))
-                ? edit_file_lines { s/($param.+?=).*$/$1 \U$var/i } $self->incar
+                ? edit_file_lines { s/($param\s+=).*$/$1 $var/i } $self->incar
                 : append_file( 
                     $self->incar, 
-                    "\n".join(' = ', uc($param), uc($var))); 
+                    "\n".join(' = ', uc($param), $var)); 
         
             $self->_set_incar(uc($param) => uc($var))
         }
