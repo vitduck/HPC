@@ -14,7 +14,6 @@ has 'cmd' => (
     init_arg  => undef,
     traits    => [qw(Array Chained)],
     predicate => '_has_cmd',
-    clearer   => 'reset_cmd',
     lazy      => 1, 
     default   => sub {[]},
     handles   => { 

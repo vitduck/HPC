@@ -1,54 +1,49 @@
 package HPC::Slurm::Resource; 
 
 use Moose::Role;
-use MooseX::Types::Moose qw(Str Int);
-use HPC::Types::Sched::Slurm qw(Nodelist Exclude Tasks Mem); 
+use MooseX::Types::Moose qw(Str Int ArrayRef);
 
+use namespace::autoclean; 
 use experimental 'signatures';
 
 has nodelist => ( 
     is        => 'rw', 
-    isa       => Nodelist,
+    isa       => ArrayRef,
     traits    => ['Chained'],
     predicate => '_has_nodelist', 
     clearer   => '_clear_nodelist', 
-    coerce    => 1
+    lazy      => 1, 
+    default   => sub {[]}, 
+    trigger   => sub ($self, @) { 
+        $self->_unset_option
+    }
+
 ); 
 
 has exclude => ( 
     is        => 'rw', 
-    isa       => Exclude,
+    isa       => ArrayRef,
     traits    => ['Chained'],
     predicate => '_has_exclude', 
     clearer   => '_clear_exclude', 
-    coerce    => 1
-); 
-
-has ntasks => ( 
-    is        => 'rw', 
-    isa       => Tasks,
-    init_arg  => undef,
-    traits    => ['Chained'],
-    predicate => '_has_ntasks', 
-    clearer   => '_clear_ntasks', 
     lazy      => 1, 
-    coerce    => 1, 
-    default   => sub ($self) { 
-        my $select   = $1 if $self->select   =~ /(\d+)$/; 
-        my $mpiprocs = $1 if $self->mpiprocs =~ /(\d+)$/; 
-        
-        return $select*$mpiprocs;
-    } 
+    default   => sub {[]}, 
+    trigger   => sub ($self, @) { 
+        $self->_unset_option
+    }
 ); 
 
 has mem => ( 
     is        => 'rw', 
-    isa       => Mem, 
+    isa       => Str, 
     predicate => '_has_mem', 
     traits    => ['Chained'],
-    coerce    => 1, 
     lazy      => 1, 
-    default   => 0
+    default   => 0,
+    trigger   => sub ($self, @) { 
+        $self->_unset_option
+    }
+
 ); 
 
 1

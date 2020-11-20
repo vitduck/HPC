@@ -1,31 +1,42 @@
 package HPC::Types::Sched::Pbs; 
 
-use MooseX::Types::Moose qw(Str Bool ArrayRef); 
-use MooseX::Types -declare => [qw(
-                                   Export Project App Burst_Buffer 
-                                   Queue Name Walltime Stderr Stdout Resource)]; 
+use MooseX::Types::Moose qw(HashRef); 
+use MooseX::Types -declare => [qw(Option)]; 
 
-subtype Export,       as Str, where { /^#PBS/ }; 
-subtype Project,      as Str, where { /^#PBS/ }; 
-subtype App,      as Str, where { /^#PBS/ }; 
-subtype Burst_Buffer, as Str, where { /^#PBS/ };  
-subtype Queue,        as Str, where { /^#PBS/ }; 
-subtype Name,         as Str, where { /^#PBS/ }; 
-subtype Walltime,     as Str, where { /^#PBS/ }; 
-subtype Stdout,       as Str, where { /^#PBS/ }; 
-subtype Stderr,       as Str, where { /^#PBS/ }; 
-subtype Resource,     as Str, where { /^#PBS/ }; 
+use experimental qw(switch smartmatch); 
 
-coerce Export,       from Bool,     via { '#PBS -V'                           }; 
-coerce Project,      from Str,      via { "#PBS -P $_"                        };
-coerce App,          from Str,      via { "#PBS -A $_"                        };  
-coerce Burst_Buffer, from Bool,     via { "#PBS -P burst_buffer"              };  
-coerce Queue,        from Str,      via { "#PBS -q $_"                        }; 
-coerce Name,         from Str,      via { "#PBS -N $_"                        }; 
-coerce Walltime,     from Str,      via { "#PBS -l walltime=$_"               }; 
-coerce Stdout,       from Str,      via { "#PBS -o $_"                        }; 
-coerce Stderr,       from Str,      via { "#PBS -e $_"                        }; 
-coerce Resource,     from Str,      via { "#PBS -l select=$_"                 },
-                     from ArrayRef, via { "#PBS -l select=".join('+', $_->@*) }; 
- 
-1; 
+subtype Option, 
+    as HashRef, 
+    where { grep /^#PBS/, values $_->%* };   
+
+coerce Option, 
+    from HashRef, 
+    via { 
+        my $opt     = $_; 
+        my %pbs_opt = (); 
+
+        for my $key ( keys $opt->%*) { 
+            given ($key) { 
+                when ('export'  ) { $pbs_opt{ $key } = '#PBS -V'                 }
+                when ('project' ) { $pbs_opt{ $key } = '#PBS -P '.$opt->{ $key } }
+                when ('name'    ) { $pbs_opt{ $key } = '#PBS -N '.$opt->{ $key } }
+                when ('app'     ) { $pbs_opt{ $key } = '#PBS -A '.$opt->{ $key } }
+                when ('queue'   ) { $pbs_opt{ $key } = '#PBS -q '.$opt->{ $key } }
+                when ('stderr'  ) { $pbs_opt{ $key } = '#PBS -e '.$opt->{ $key } }
+                when ('stdour'  ) { $pbs_opt{ $key } = '#PBS -o '.$opt->{ $key } }
+                when ('walltime') { $pbs_opt{ $key } = '#PBS -l '.$opt->{ $key } }
+
+                when (/resource/) { 
+                    $pbs_opt{ $key } = '#PBS -l select='.(
+                        ref $opt->{ $key } eq 'ARRAY'   
+                            ? join('+', $opt->{ $key }->@*) 
+                            : $opt->{ $key } 
+                    ) 
+                }
+            } 
+        } 
+
+        return { %pbs_opt }
+    }; 
+
+1

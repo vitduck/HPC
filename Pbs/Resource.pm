@@ -4,30 +4,28 @@ use Moose::Role;
 use MooseX::Types::Moose qw(Str Int ArrayRef);
 use Set::CrossProduct; 
 
-use HPC::Types::Sched::Pbs qw(Export Project Burst_Buffer Resource); 
-
 use experimental 'signatures';
 use namespace::autoclean; 
 
-has 'export' => ( 
+has 'export' => (
     is        => 'ro', 
-    isa       =>  Export,
+    isa       => Int,
     init_arg  => undef,
     predicate => '_has_export', 
-    coerce    => 1, 
     default   => 1 
-); 
+);
 
 has 'project' => ( 
     is        => 'ro', 
-    isa       => Project,
+    isa       => Str,
     init_arg  => undef,
     predicate => '_has_project',
-    coerce    => 1, 
     lazy      => 1,
-    default   => 'burst_buffer' 
+    default   => 'burst_buffer', 
+    trigger   => sub ($self, @) { 
+        $self->_unset_option
+    } 
 ); 
-
 
 has 'ncpus' => (
     is        => 'rw',
@@ -35,6 +33,10 @@ has 'ncpus' => (
     traits    => ['Chained'],
     predicate => '_has_ncpus',
     default   => 64,
+    trigger   => sub ($self, @) { 
+        $self->_unset_option; 
+        $self->_unset_resource; 
+    }
 );
 
 has 'host' => ( 
@@ -46,18 +48,18 @@ has 'host' => (
         get_hosts   => 'elements',
         count_hosts => 'count' }, 
     trigger   => sub ($self, @) { 
-        $self->_reset_resource;  
+        $self->_unset_option; 
+        $self->_unset_resource;  
     }
 ); 
 
 has 'resource' => ( 
     is        => 'rw', 
-    isa       => Resource,
+    isa       => Str|ArrayRef,
     init_arg  => undef,
     traits    => ['Chained'],
     predicate => '_has_resource',
-    clearer   => '_reset_resource',
-    coerce    => 1,
+    clearer   => '_unset_resource',
     lazy      => 1, 
     default   => sub ($self) { 
         my @resources; 
@@ -78,24 +80,7 @@ has 'resource' => (
         } else {  
             return join(':', @resources) 
         }
-    }
-); 
-
-
-sub write_resource ($self) {
-    $self->printf("%s\n\n", $self->shell);
-
-    # build resource string
-    $self->resource; 
-
-    for (qw(export queue name app stderr stdout resource walltime burst_buffer)) {
-        my $has = "_has_$_";
-        if ( $self->$has ) { $self->printf("%s\n", $self->$_) } 
-    }
-
-    $self->printf("\n"); 
-
-    return $self
-}
+    }, 
+);
 
 1

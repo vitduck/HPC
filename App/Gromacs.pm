@@ -14,8 +14,10 @@ with qw(
     HPC::Plugin::Cmd
     HPC::App::Gromacs::Input
     HPC::App::Gromacs::Output
+    HPC::App::Gromacs::Dd
     HPC::App::Gromacs::Pme
-    HPC::App::Gromacs::Nb
+    HPC::App::Gromacs::Tasks
+    HPC::App::Gromacs::Gpu
     HPC::App::Gromacs::Thread
     HPC::App::Gromacs::Prof 
 ); 
@@ -35,7 +37,7 @@ sub _opts {
         dlb ddorder npme nb tunepme
         confout resetstep resethway 
         pin nt ntmpi ntomp 
-        verbose 
+        verbose pme bonded 
     ) 
 }
 

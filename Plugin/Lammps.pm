@@ -15,8 +15,25 @@ has 'lammps' => (
     predicate => '_has_lammps',
     coerce    => 1, 
     trigger  => sub ($self, @) { 
-        $self->_set_lammps_omp if $self->_has_omp; 
-        $self->_set_lammps_gpu if $self->_has_ngpus; 
+
+        if ( $self->_has_omp ) { 
+            if ( $self->lammps->_has_omp    ) { $self->lammps->omp->nthreads($self->omp) }
+            if ( $self->lammps->_has_intel  ) { $self->lammps->intel->omp($self->omp)    } 
+            
+            # affinity for kokkos package
+            if ( $self->lammps->_has_kokkos and $self->omp > 1 ) { 
+                $self->lammps->kokkos_thr($self->omp); 
+                $self->set_env( 
+                    OMP_PROC_BIND => 'spread',  
+                    OMP_PLACES    => 'threads' ); 
+            }
+        }
+
+        if ( $self->_has_ngpus ) { 
+            if ( $self->lammps->_has_gpu ) { 
+                $self->lammps->gpu->ngpu($self->ngpus)
+            }
+        }
     }
 ); 
 

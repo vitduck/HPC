@@ -31,21 +31,19 @@ has 'omp' => (
 
 has 'nprocs' => (
     is        => 'rw', 
-    isa       => Nprocs, 
+    isa       => Int, 
     traits   => ['Chained'],
     predicate => '_has_nprocs', 
-    coerce    => 1, 
     lazy      => 1, 
     default   => 1,
 );
 
 has 'hostfile' => ( 
     is        => 'rw', 
-    isa       => Hostfile, 
+    isa       => Str, 
     traits    => ['Chained'],
     init_arg  => undef,
     predicate => '_has_hostfile', 
-    coerce    => 1, 
     lazy      => 1, 
     default   => '' 
 );
@@ -75,11 +73,13 @@ has 'env' => (
           list_env => 'keys', 
            get_env => 'get', 
            set_env => 'set', 
-         unset_env => 'delete' }, 
+         unset_env => 'delete' 
+    }, 
     trigger  => sub ($self, $env, @) {  
         $self->has_env 
-        ? $self->env_opt($env) 
-        : $self->_unset_env_opt } 
+            ? $self->env_opt($env) 
+            : $self->_unset_env_opt 
+    } 
 ); 
 
 has env_opt => ( 

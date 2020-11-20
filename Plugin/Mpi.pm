@@ -15,6 +15,7 @@ has 'impi' => (
     is        => 'rw', 
     isa       => Impi, 
     init_arg  => undef, 
+    traits    => ['Chained'],
     predicate => '_has_impi', 
     clearer   => '_unset_impi', 
     coerce    => 1, 
@@ -33,9 +34,8 @@ has 'openmpi' => (
     lazy      => 1,
     default   => sub {{}},
     trigger   => sub ($self, @) { 
-        if ($self->_has_omp) { 
-            $self->_set_openmpi_omp; 
-        }
+        $self->openmpi->nprocs($self->nprocs); 
+        $self->openmpi->omp($self->omp) if $self->_has_omp;  
     } 
 ); 
 
@@ -43,16 +43,15 @@ has 'mvapich2' => (
     is        => 'rw', 
     isa       => Mvapich2, 
     init_arg  => undef, 
+    traits    => ['Chained'],
     predicate => '_has_mvapich2',
     clearer   => '_unset_mvapich2', 
     coerce    => 1, 
     lazy      => 1,
     default   => sub {{}},
     trigger   => sub ($self, @) { 
-        if ($self->_has_omp) { 
-            $self->_set_mvapich2_omp
-        }
-    }
+        $self->mvapich2->omp($self->omp) if $self->_has_omp;  
+    } 
 ); 
 
 sub mpirun ($self) { 

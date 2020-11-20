@@ -40,7 +40,7 @@ has 'neigh_thread' => (
     isa       => enum([qw/off on/]), 
     traits    => ['Chained'],
     predicate => '_has_neigh_thread', 
-    default   => 'on',
+    default   => 'off',
 ); 
 
 has 'newton' => ( 
@@ -89,11 +89,12 @@ has 'comm_reverse' => (
     predicate => '_has_comm_reverse', 
 ); 
 
-has 'gpu_direct' => ( 
+has 'cuda_aware' => ( 
     is        => 'rw', 
     isa       => enum([qw/off on/]), 
     traits    => ['Chained'],
-    predicate => '_has_gpu_direct', 
+    predicate => '_has_cuda_aware', 
+    default   => 'on'
 ); 
 
 around 'pkg_opt' => sub { 

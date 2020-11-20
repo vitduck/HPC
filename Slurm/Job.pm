@@ -4,101 +4,36 @@ use Moose;
 use MooseX::Aliases; 
 use MooseX::Attribute::Chained; 
 use MooseX::StrictConstructor; 
-use MooseX::Types::Moose qw(Str Int);
 use MooseX::XSAccessor; 
 
-use HPC::Types::Sched::Slurm qw( Name Partition Nodes Cpus_per_Task Tasks_per_Node Ngpus
-                                 Time Error Output Comment ); 
+use HPC::Types::Sched::Slurm 'Option';
 
 use namespace::autoclean;
 use experimental 'signatures';
 
-with qw( HPC::Sched::Job 
-         HPC::Slurm::Resource
-         HPC::Slurm::Srun ); 
+with qw(HPC::Sched::Job HPC::Slurm::Resource HPC::Slurm::Srun);  
 
-has '+name' => ( 
-    isa     => Name, 
-    coerce  => 1, 
-); 
-
-has '+app' => ( 
-    isa     => Comment,
-    coerce  => 1, 
-); 
-
-has '+queue' => ( 
-    isa     => Partition, 
-    coerce  => 1, 
-    default => 'normal'
-); 
-
-has '+select' => ( 
-    isa     => Nodes,
-    coerce  => 1, 
-    trigger => sub ($self, @) { 
-        $self->_clear_ntasks; 
-    }
+has '+_option' => (
+    isa      => Option,
+    coerce   => 1,
 );
-
-has '+mpiprocs' => ( 
-    isa    => Tasks_per_Node, 
-    coerce => 1, 
-    trigger => sub ($self, @) { 
-        $self->_clear_ntasks; 
-    }
-);
-
-has '+omp' => ( 
-    isa     => Cpus_per_Task, 
-    coerce  => 1, 
-); 
-
-has '+ngpus' => ( 
-   isa     => Ngpus,
-   coerce  => 1, 
-); 
 
 has '+stderr' => ( 
-    isa     => Error, 
-    coerce  => 1, 
     default => '%j.stderr'
 ); 
 
 has '+stdout' => ( 
-    isa     => Output, 
-    coerce  => 1, 
     default => '%j.stdout'
 ); 
 
-has '+walltime' => ( 
-    isa     => Time, 
-    coerce  => 1, 
-    default => '24:00:00'
-); 
+after 'mvapich2' => sub {  
+    my $self = shift; 
 
-# pass MPI environments to slurm's env
-before 'write' => sub ($self, @) { 
-    # if    ( $self->_has_impi     && $self->impi->has_env     ) { $self->set_env($self->impi->env->%*)     } 
-    # elsif ( $self->_has_openmpi  && $self->openmpi->has_env  ) { $self->set_env($self->openmpi->env->%*)  } 
-    if ( $self->_has_mvapich2 && $self->mvapich2->has_env ) { 
-        $self->set_env($self->mvapich2->env->%*) 
-    }
+    $self->mvapich2->hostfile('$SLURM_JOB_NODELIST')->nprocs('$SLURM_NPROCS') if @_;  
 }; 
 
-sub write_resource ($self) {
-    $self->ntasks; 
-
-    $self->printf("%s\n\n", $self->shell);
-
-    for (qw(queue select nodelist exclude mpiprocs omp mem ngpus name app stderr stdout walltime)) {
-        my $has = "_has_$_";
-        $self->printf("%s\n", $self->$_) if $self->$has;
-    }
-
-    $self->print("\n"); 
-
-    return $self
+sub _sched_options ($self) { 
+    return  qw(app queue name select mpiprocs omp mem ngpus stderr stdout walltime nodelist exclude) 
 }
 
 __PACKAGE__->meta->make_immutable;

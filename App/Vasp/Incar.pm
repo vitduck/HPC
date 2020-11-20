@@ -18,8 +18,8 @@ has gpu => (
     default => 0, 
     trigger => sub ($self, $gpu, $=) { 
         $self->ncore(1)
-             ->lreal('AUTO') 
-             ->lscaaware('.false.')
+             ->lreal('Auto') 
+             ->lscaaware('.FALSE.')
     } 
 ); 
 

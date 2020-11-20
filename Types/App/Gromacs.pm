@@ -4,8 +4,9 @@ use MooseX::Types::Moose qw/Undef Str Int/;
 use MooseX::Types -declare => [ 
     qw( Verbose Tpr Deffnm Log Confout 
         Nt Ntmpi Ntomp Npme Nb Pin
-        Tunepme Dlb DDorder 
+        Tunepme Dlb Ddorder 
         Nsteps Resetstep Resethway
+        Nb Bonded Pme Update
     ) 
 ]; 
 
@@ -101,10 +102,10 @@ coerce Dlb,
     from Str, 
     via { '-dlb '.$_ }; 
 
-subtype DDorder,   
+subtype Ddorder,   
     as Str, 
     where { /^\-ddorder/ };  
-coerce DDorder,    
+coerce Ddorder,    
     from Str, 
     via { '-ddorder '.$_ }; 
 
@@ -127,6 +128,16 @@ subtype Resethway,
     where { $_ eq '-resethway' or ! defined  };  
 coerce Resethway,  
     from Int, 
-    via { $_ ? '-resethway' : undef  }; 
+    via { $_ ? '-resethway' : undef  };  
+
+
+subtype Pme,   as Str, where { /^-/ };  
+coerce  Pme, from Str, via   { "-pme $_" }; 
+
+subtype Bonded,   as Str, where { /^-/ };  
+coerce  Bonded, from Str, via  { "-bonded $_" }; 
+
+subtype Update,   as Str, where { /^-/ };  
+coerce  Update, from Str, via  { "-update $_" }; 
 
 1

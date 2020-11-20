@@ -15,7 +15,15 @@ has 'gromacs' => (
     predicate => '_has_gromacs',
     coerce    => 1, 
     trigger  => sub ($self, $app, @) { 
-        $self->_set_gromacs_omp if $self->_has_omp; 
+        if ( $self->_has_omp ) { $self->_set_gromacs_omp }
+
+        if ( $self->gromacs->_has_gpudirect ) { 
+            $self->set_env( 
+                GMX_GPU_DD_COMMS             => 'true', 
+                GMX_GPU_PME_PP_COMMS         => 'true', 
+                GMX_FORCE_UPDATE_DEFAULT_GPU => 'true'
+            )
+        } 
     }
 ); 
 

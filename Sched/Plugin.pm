@@ -15,17 +15,4 @@ with qw(
     HPC::Plugin::Tensorflow
 ); 
 
-has 'plugin' => ( 
-    is       => 'rw', 
-    isa      => ArrayRef, 
-    init_arg => undef,
-    traits   => [qw(Array Chained)], 
-    lazy     => 1, 
-    default  => sub {[]},  
-    handles  => { 
-        _add_plugin => 'push', 
-        list_plugin => 'elements'
-    } 
-);
-
 1 

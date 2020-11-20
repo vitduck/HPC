@@ -11,6 +11,12 @@ use experimental qw(signatures switch);
 
 with 'HPC::Mpi::Base'; 
 
+has '+nprocs' => ( 
+    trigger => sub ($self, @) { 
+        $self->pin($self->pin) if $self->_has_pin; 
+    } 
+); 
+
 has '+omp' => ( 
     trigger => sub ($self, $omp, $=) {
         $self->bind('core')->map('numa:pe='.$self->omp)
@@ -19,11 +25,17 @@ has '+omp' => (
 
 has '+debug' => ( 
     trigger  => sub ($self, $debug, @) {
-        for ($debug) { 
-            when (0) { $self->_unset_report; 
-                       $self->unset_mca('mpi_show_mca_params')                        }  
-            when (4) { $self->report(1)                                               } 
-            when (5) { $self->report(1); $self->set_mca(mpi_show_mca_params => 'all') }
+        given ($debug) { 
+            when (0) { 
+                $self->_unset_report; 
+                $self->unset_mca('mpi_show_mca_params') }  
+
+            when (4) { 
+                $self->report(1) }                     
+
+            when (5) { 
+                $self->report(1); 
+                $self->set_mca(mpi_show_mca_params => 'all') } 
         }
     }
 );
@@ -41,11 +53,24 @@ has '+pin' => (
     lazy    => 1, 
     default => 'none',
     trigger  => sub ($self, $pin, @) { 
-        for ($pin) { 
-            when ('none'   ) { $self->bind('none')                }
-            when ('bunch'  ) { $self->bind('core')->map('core')   }
-            when ('compact') { $self->bind('core')->map('numa')   }
-            when ('scatter') { $self->bind('core')                }
+        given ($pin) { 
+            when ('none') { 
+                $self->bind('none')->_unset_map  } 
+
+            when ('bunch'  ) { 
+                $self->bind('core')->map('core') }
+
+            when ('compact') { 
+                $self->bind('core')->map('numa') }
+
+            when ('default') { 
+                $self->_unset_bind;
+                $self->_unset_map } 
+            
+            when ('scatter') { 
+                $self->nprocs > 2 
+                    ? $self->bind('core')->_unset_map
+                    : $self->bind('core')->map('numa') }
         } 
     } 
 ); 
